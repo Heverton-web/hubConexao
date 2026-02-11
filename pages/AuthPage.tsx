@@ -96,7 +96,7 @@ export const AuthPage: React.FC = () => {
   );
 
   const renderForm = () => (
-    <div className={`w-full max-w-md bg-surface/60 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20 relative overflow-hidden group ${invitedRole ? 'bg-white/90' : ''}`}>
+    <div className={`w-full max-w-md bg-surface/60 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-transparent relative overflow-hidden group ${invitedRole ? 'bg-white/90' : ''}`}>
         
         {/* Glow Effect inside card */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl group-hover:bg-accent/30 transition-colors duration-500"></div>
@@ -130,13 +130,13 @@ export const AuthPage: React.FC = () => {
           {!isLogin && (
             <div className="group">
               <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-muted group-focus-within:text-accent transition-colors">Nome Completo</label>
-              <input type="text" required className="w-full p-3 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={name} onChange={e => setName(e.target.value)} />
+              <input type="text" required className="w-full p-3 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={name} onChange={e => setName(e.target.value)} />
             </div>
           )}
 
           <div className="group">
             <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-muted group-focus-within:text-accent transition-colors">Email</label>
-            <input type="email" required className="w-full p-3 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="email" required className="w-full p-3 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
 
           <div className="group">
@@ -145,7 +145,7 @@ export const AuthPage: React.FC = () => {
               <input 
                 type={showPassword ? "text" : "password"} 
                 required 
-                className="w-full p-3 pr-10 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" 
+                className="w-full p-3 pr-10 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
               />
@@ -164,14 +164,14 @@ export const AuthPage: React.FC = () => {
             <>
               <div className="group">
                 <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-muted group-focus-within:text-accent transition-colors">WhatsApp</label>
-                <input type="tel" required className="w-full p-3 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
+                <input type="tel" required className="w-full p-3 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
               </div>
               
               <div className="grid grid-cols-1 gap-5">
                  {!invitedRole && (
                     <div className="group">
                       <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-muted group-focus-within:text-accent transition-colors">Tipo de Perfil</label>
-                      <select className="w-full p-3 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={role} onChange={e => setRole(e.target.value)}>
+                      <select className="w-full p-3 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={role} onChange={e => setRole(e.target.value)}>
                         <option value="client">Cliente</option>
                         <option value="distributor">Distribuidor</option>
                         <option value="consultant">Consultor</option>
@@ -180,7 +180,7 @@ export const AuthPage: React.FC = () => {
                  )}
                  <div className="group">
                     <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-muted group-focus-within:text-accent transition-colors">CRO (Opcional)</label>
-                    <input type="text" className="w-full p-3 rounded-xl border border-border/50 bg-page/50 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={cro} onChange={e => setCro(e.target.value)} />
+                    <input type="text" className="w-full p-3 rounded-xl border border-border/50 bg-gray-50 dark:bg-black/20 text-main focus:bg-surface focus:ring-2 focus:ring-accent/50 focus:border-transparent outline-none transition-all shadow-inner" value={cro} onChange={e => setCro(e.target.value)} />
                  </div>
               </div>
             </>

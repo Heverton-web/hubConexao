@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Material, UserProfile, Role, SystemConfig, UserStatus, AccessLog, Language } from '../types';
+import { Material, UserProfile, Role, SystemConfig, UserStatus, AccessLog, Language, Collection, CollectionItem, UserProgress } from '../types';
 
 // --- MOCK DATA STORE (OFFLINE MODE) ---
 let isMockMode = false;
@@ -20,8 +20,8 @@ let localMaterials: Material[] = [
         active: true,
         createdAt: new Date().toISOString(),
         assets: {
-            'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-            'en-us': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+            'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' },
+            'en-us': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' }
         }
     },
     {
@@ -32,7 +32,7 @@ let localMaterials: Material[] = [
         active: true,
         createdAt: new Date().toISOString(),
         assets: {
-            'pt-br': { url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ' }, // Tech demo video
+            'pt-br': { url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ', status: 'published' }, // Tech demo video
         }
     },
     {
@@ -43,19 +43,64 @@ let localMaterials: Material[] = [
         active: true,
         createdAt: new Date().toISOString(),
         assets: {
-            'pt-br': { url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000' }
+            'pt-br': { url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000', status: 'published' }
         }
     }
+];
+
+// Mock Collections (Trilhas)
+let localCollections: Collection[] = [
+    {
+        id: 'col-1',
+        title: { 'pt-br': 'Onboarding de Distribuidores', 'en-us': 'Distributor Onboarding' },
+        description: { 'pt-br': 'Tudo o que você precisa para começar a vender.', 'en-us': 'Everything you need to start selling.' },
+        allowedRoles: ['distributor'],
+        active: true,
+        createdAt: new Date().toISOString()
+    }
+];
+
+let localCollectionItems: CollectionItem[] = [
+    { id: 'ci-1', collectionId: 'col-1', materialId: 'mat-2', orderIndex: 1 }, // Video inst.
+    { id: 'ci-2', collectionId: 'col-1', materialId: 'mat-1', orderIndex: 2 }, // Catalogo
+    { id: 'ci-3', collectionId: 'col-1', materialId: 'mat-3', orderIndex: 3 }  // Tabela
+];
+
+let localUserProgress: UserProgress[] = [
+    { userId: 'mock-distrib', materialId: 'mat-2', status: 'completed', completedAt: new Date().toISOString() }
 ];
 
 let localLogs: AccessLog[] = [
     { id: 'log-1', materialId: 'mat-1', materialTitle: 'Catálogo 2024', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date().toISOString() }
 ];
 
+// Paleta "Slate" (Mais sofisticada e azulada que o Zinc)
 let localConfig: SystemConfig = {
     appName: 'Hub Conexão (Mock)',
-    themeLight: { background: '#f8fafc', surface: '#ffffff', textMain: '#0f172a', textMuted: '#64748b', border: '#e2e8f0', accent: '#3b82f6', success: '#22c55e', warning: '#eab308', error: '#ef4444' },
-    themeDark: { background: '#0b1120', surface: '#1e293b', textMain: '#f8fafc', textMuted: '#94a3b8', border: '#334155', accent: '#60a5fa', success: '#4ade80', warning: '#facc15', error: '#f87171' }
+    // Light: Mantém base limpa
+    themeLight: { 
+        background: '#f8fafc', // Slate 50
+        surface: '#ffffff', 
+        textMain: '#0f172a', // Slate 900
+        textMuted: '#64748b', // Slate 500
+        border: '#e2e8f0', // Slate 200
+        accent: '#3b82f6', // Blue 500
+        success: '#10b981', 
+        warning: '#f59e0b', 
+        error: '#ef4444' 
+    },
+    // Dark: Borderless Concept
+    themeDark: { 
+        background: '#0f172a', // Slate 900 (Um pouco mais claro que preto total)
+        surface: '#1e293b',    // Slate 800 (Contraste suficiente para não precisar de borda)
+        textMain: '#f8fafc',   // Slate 50
+        textMuted: '#94a3b8',  // Slate 400
+        border: 'transparent', // TOTALMENTE TRANSPARENTE
+        accent: '#6366f1',     // Indigo 500
+        success: '#22c55e', 
+        warning: '#eab308', 
+        error: '#ef4444' 
+    }
 };
 
 // Helper para converter snake_case do banco para camelCase do frontend
@@ -223,8 +268,6 @@ export const mockDb = {
         if (idx !== -1) localUsers.splice(idx, 1);
         return;
     }
-    // Nota: No Supabase, deletar da tabela 'auth.users' requer a Service Role Key (backend).
-    // Aqui deletamos apenas o perfil público. O ideal é usar uma Edge Function para deletar o Auth User também.
     const { error } = await supabase
       .from('profiles')
       .delete()
@@ -318,6 +361,50 @@ export const mockDb = {
     if (error) throw error;
   },
 
+  // --- COLLECTIONS & PROGRESS (Fase 1 - Novos Métodos) ---
+  
+  getCollections: async (role: Role): Promise<Collection[]> => {
+      if (isMockMode) {
+          if (role === 'super_admin') return [...localCollections];
+          return localCollections.filter(c => c.active && c.allowedRoles.includes(role));
+      }
+      // Placeholder implementation for real DB
+      return [];
+  },
+
+  getCollectionItems: async (collectionId: string): Promise<CollectionItem[]> => {
+      if (isMockMode) {
+          return localCollectionItems.filter(i => i.collectionId === collectionId).sort((a,b) => a.orderIndex - b.orderIndex);
+      }
+      return [];
+  },
+
+  getUserProgress: async (userId: string): Promise<UserProgress[]> => {
+      if (isMockMode) {
+          return localUserProgress.filter(p => p.userId === userId);
+      }
+      return [];
+  },
+
+  updateUserProgress: async (userId: string, materialId: string, status: 'completed'): Promise<void> => {
+      if (isMockMode) {
+          const existing = localUserProgress.find(p => p.userId === userId && p.materialId === materialId);
+          if(existing) {
+              existing.status = status;
+              existing.completedAt = new Date().toISOString();
+          } else {
+              localUserProgress.push({
+                  userId,
+                  materialId,
+                  status,
+                  completedAt: new Date().toISOString()
+              });
+          }
+          return;
+      }
+      // Real DB implementation would go here
+  },
+
   // --- ANALYTICS ---
   logAccess: async (materialId: string, userId: string, language: Language): Promise<void> => {
     if (isMockMode) {
@@ -333,6 +420,10 @@ export const mockDb = {
             language,
             timestamp: new Date().toISOString()
         });
+        
+        // Auto-complete progress when viewing (Gamification hook)
+        await mockDb.updateUserProgress(userId, materialId, 'completed');
+        
         return;
     }
 
@@ -349,9 +440,6 @@ export const mockDb = {
 
   getAccessLogs: async (): Promise<AccessLog[]> => {
     if (isMockMode) return [...localLogs];
-
-    // Join manual ou View no banco seria melhor, mas vamos buscar e mapear
-    // Precisamos buscar logs e fazer join com materials e profiles para ter os nomes
     
     const { data: logs, error } = await supabase
       .from('access_logs')
@@ -369,7 +457,6 @@ export const mockDb = {
     if (error) throw error;
 
     return logs.map((log: any) => {
-        // Safe access to joined data
         const matTitle = log.materials?.title?.['pt-br'] || log.materials?.title?.['en-us'] || 'Material Excluído';
         const userName = log.profiles?.name || 'Usuário Removido';
         const userRole = log.profiles?.role || 'client';
@@ -387,8 +474,7 @@ export const mockDb = {
     });
   },
 
-  // Métodos legacy mantidos para não quebrar contrato do AuthContext antigo,
-  // mas agora lançam erro ou redirecionam, pois o AuthContext novo cuidará disso.
+  // Métodos legacy
   login: async () => { throw new Error("Use supabase.auth.signInWithPassword"); },
   register: async () => { throw new Error("Use supabase.auth.signUp"); }
 };

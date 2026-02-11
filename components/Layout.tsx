@@ -15,9 +15,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     <div className="min-h-screen flex flex-col transition-colors duration-200 relative">
       
       {/* Floating Glass Header */}
-      <header className="sticky top-0 z-40 w-full px-4 pt-4 pointer-events-none">
+      {/* Removemos border-border e shadow-black/5 para um look mais clean em dark mode */}
+      <header className="sticky top-0 z-30 w-full px-4 pt-4 pointer-events-none">
         <div className="container mx-auto">
-            <div className="bg-surface/70 backdrop-blur-xl border border-white/10 shadow-lg shadow-black/5 rounded-2xl p-4 flex justify-between items-center pointer-events-auto transition-all duration-300 hover:shadow-xl hover:bg-surface/80 hover:border-white/20">
+            <div className="bg-surface/80 backdrop-blur-xl shadow-lg rounded-2xl p-4 flex justify-between items-center pointer-events-auto transition-all duration-300 hover:shadow-xl hover:bg-surface/90">
             <div className="flex items-center space-x-3">
                 {config.logoUrl ? (
                 <img src={config.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
@@ -30,8 +31,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </div>
 
             <div className="flex items-center gap-4">
-                {/* Language Selector */}
-                <div className="hidden md:flex items-center gap-1 bg-page/50 rounded-full px-3 py-1.5 border border-border/50 hover:border-accent/50 transition-colors">
+                {/* Language Selector - Borderless */}
+                <div className="hidden md:flex items-center gap-1 bg-page/50 rounded-full px-3 py-1.5 hover:bg-page transition-colors">
                 <Globe size={14} className="text-muted" />
                 <select
                     value={language}
@@ -53,7 +54,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </button>
 
                 {/* User Info & Logout */}
-                <div className="flex items-center gap-3 pl-4 border-l border-border/50">
+                <div className="flex items-center gap-3 pl-4">
                 <div className="text-right hidden md:block leading-tight">
                     <p className="text-sm font-bold text-main">{user?.name}</p>
                     <p className="text-[10px] uppercase tracking-wide text-muted font-semibold">{t(`role.${user?.role}`)}</p>

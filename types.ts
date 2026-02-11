@@ -3,6 +3,7 @@ export type Role = 'client' | 'distributor' | 'consultant' | 'super_admin';
 export type Language = 'pt-br' | 'en-us' | 'es-es';
 export type MaterialType = 'image' | 'pdf' | 'video';
 export type UserStatus = 'pending' | 'active' | 'inactive' | 'rejected';
+export type TranslationStatus = 'draft' | 'review' | 'published';
 
 export interface UserProfile {
   id: string;
@@ -22,6 +23,7 @@ export interface UserProfile {
 export interface MaterialAsset {
   url: string;
   subtitleUrl?: string;
+  status: TranslationStatus;
 }
 
 export interface Material {
@@ -33,6 +35,34 @@ export interface Material {
   active: boolean;
   createdAt: string;
 }
+
+// --- Novas Interfaces para Trilhas e Progresso (Fase 1) ---
+
+export interface Collection {
+  id: string;
+  title: Partial<Record<Language, string>>;
+  description?: Partial<Record<Language, string>>;
+  coverImage?: string;
+  allowedRoles: Role[];
+  active: boolean;
+  createdAt: string;
+}
+
+export interface CollectionItem {
+  id: string;
+  collectionId: string;
+  materialId: string;
+  orderIndex: number;
+}
+
+export interface UserProgress {
+  userId: string;
+  materialId: string;
+  status: 'started' | 'completed';
+  completedAt: string;
+}
+
+// ---------------------------------------------------------
 
 export interface AccessLog {
   id: string;

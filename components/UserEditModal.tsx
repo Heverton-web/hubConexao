@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile, Role, UserStatus, MaterialType } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Save, FileText, Image as ImageIcon, Video, User } from 'lucide-react';
@@ -42,12 +43,12 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
     );
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] border border-border overflow-hidden">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
+      <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface">
+        <div className="px-6 py-4 flex justify-between items-center bg-surface">
           <div>
             <h3 className="font-bold text-lg text-main flex items-center gap-2">
                 <User className="text-accent" size={20} />
@@ -70,10 +71,10 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
                     <select 
                         value={status} 
                         onChange={e => setStatus(e.target.value as UserStatus)}
-                        className={`w-full p-2.5 rounded-lg border border-border outline-none font-medium
+                        className={`w-full p-2.5 rounded-lg outline-none font-medium
                             ${status === 'active' ? 'bg-green-500/10 text-green-600' : 
                               status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
-                              status === 'rejected' ? 'bg-red-500/10 text-red-600' : 'bg-page text-muted'}
+                              status === 'rejected' ? 'bg-red-500/10 text-red-600' : 'bg-gray-50 dark:bg-black/20 text-muted'}
                         `}
                     >
                         <option value="active">{t('user.status.active')}</option>
@@ -87,7 +88,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
                     <select 
                         value={role} 
                         onChange={e => setRole(e.target.value as Role)}
-                        className="w-full p-2.5 rounded-lg border border-border bg-page text-main outline-none"
+                        className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none"
                     >
                         <option value="client">{t('role.client')}</option>
                         <option value="distributor">{t('role.distributor')}</option>
@@ -98,31 +99,31 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
             </div>
 
             {/* Personal Info */}
-            <div className="space-y-4 pt-4 border-t border-border">
+            <div className="space-y-4 pt-4 border-t border-border/20">
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-medium text-muted mb-1">Nome Completo</label>
-                        <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full p-2.5 rounded-lg border border-border bg-page text-main outline-none focus:border-accent" />
+                        <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-muted mb-1">CRO (Opcional)</label>
-                        <input type="text" value={cro} onChange={e => setCro(e.target.value)} className="w-full p-2.5 rounded-lg border border-border bg-page text-main outline-none focus:border-accent" />
+                        <input type="text" value={cro} onChange={e => setCro(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-medium text-muted mb-1">E-mail</label>
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2.5 rounded-lg border border-border bg-page text-main outline-none focus:border-accent" />
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-muted mb-1">WhatsApp</label>
-                        <input type="tel" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} className="w-full p-2.5 rounded-lg border border-border bg-page text-main outline-none focus:border-accent" />
+                        <input type="tel" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
                     </div>
                 </div>
             </div>
 
             {/* Granular Permissions */}
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border/20">
                 <label className="block text-xs font-bold text-main mb-2 uppercase tracking-wide">{t('user.access.types')}</label>
                 <p className="text-xs text-muted mb-3">{t('user.access.hint')}</p>
                 
@@ -132,10 +133,10 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
                             key={type}
                             type="button"
                             onClick={() => toggleType(type)}
-                            className={`flex-1 p-3 rounded-lg border flex flex-col items-center gap-2 transition-all
+                            className={`flex-1 p-3 rounded-lg flex flex-col items-center gap-2 transition-all
                                 ${allowedTypes.includes(type) 
-                                    ? 'bg-accent/10 border-accent text-accent' 
-                                    : 'bg-page border-border text-muted opacity-60 hover:opacity-100'}
+                                    ? 'bg-accent/10 text-accent' 
+                                    : 'bg-page text-muted opacity-60 hover:opacity-100'}
                             `}
                         >
                             {type === 'pdf' && <FileText size={20} />}
@@ -150,7 +151,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
         </form>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border bg-page flex justify-end gap-3">
+        <div className="p-4 bg-page flex justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <button onClick={onClose} type="button" className="px-5 py-2.5 rounded-lg text-muted hover:bg-muted/10 font-medium">{t('cancel')}</button>
           <button onClick={handleSubmit} className="px-6 py-2.5 rounded-lg bg-accent text-white hover:opacity-90 font-medium flex items-center gap-2 shadow-lg shadow-accent/20">
             <Save size={18} />
@@ -158,6 +159,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

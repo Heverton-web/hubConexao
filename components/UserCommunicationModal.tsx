@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Mail, MessageCircle, Send, Paperclip } from 'lucide-react';
@@ -75,9 +76,9 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl flex flex-col border border-border overflow-hidden">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
+      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl flex flex-col border border-border overflow-hidden animate-slide-up">
         
         {/* Header */}
         <div className="p-4 border-b border-border flex justify-between items-center bg-surface">
@@ -118,7 +119,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subject')}</label>
                 <input 
                   type="text" required 
-                  className="w-full p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none"
+                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                   value={subject} onChange={e => setSubject(e.target.value)}
                 />
               </div>
@@ -126,7 +127,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subtitle')}</label>
                 <input 
                   type="text" 
-                  className="w-full p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none"
+                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                   value={subtitle} onChange={e => setSubtitle(e.target.value)}
                 />
               </div>
@@ -153,7 +154,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
             <textarea 
               required
               rows={5}
-              className="w-full p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none resize-none"
+              className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none resize-none"
               value={body} onChange={e => setBody(e.target.value)}
             />
           </div>
@@ -166,7 +167,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
                <input 
                   type="text" required={mode === 'whatsapp' && waType === 'file'}
                   placeholder="https://..."
-                  className="w-full p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none font-mono text-xs"
+                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none font-mono text-xs"
                   value={fileUrl} onChange={e => setFileUrl(e.target.value)}
                 />
             </div>
@@ -190,6 +191,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

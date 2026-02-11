@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Material, Language, MaterialType, Role, MaterialAsset } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Save, FileText, Image as ImageIcon, Video, Check, Globe, Users, Shield, Link as LinkIcon, Youtube, AlertCircle, Play } from 'lucide-react';
@@ -18,10 +19,10 @@ const TypeCard = ({ value, icon: Icon, label, currentType, onSelect }: TypeCardP
     type="button"
     onClick={() => onSelect(value)}
     className={`
-      relative flex-1 flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200
+      relative flex-1 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200
       ${currentType === value 
-        ? 'border-accent bg-accent/5 text-accent shadow-sm' 
-        : 'border-border bg-surface text-muted hover:border-muted'}
+        ? 'bg-accent/5 text-accent shadow-sm ring-2 ring-accent' 
+        : 'bg-surface text-muted hover:bg-page hover:text-main'}
     `}
   >
     <Icon size={24} className="mb-2" />
@@ -45,7 +46,7 @@ const VideoPreview = ({ url }: { url: string }) => {
   
   const youtubeMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
   if (youtubeMatch && youtubeMatch[1]) {
-     embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+     embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0&modestbranding=1`;
   } else if (cleanUrl.includes('drive.google.com')) {
       const driveIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (driveIdMatch && driveIdMatch[1]) {
@@ -54,7 +55,7 @@ const VideoPreview = ({ url }: { url: string }) => {
   } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
       // Direct file
       return (
-        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg border border-border">
+        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg">
              <video src={cleanUrl} controls className="w-full h-full object-contain" />
         </div>
       );
@@ -62,7 +63,7 @@ const VideoPreview = ({ url }: { url: string }) => {
 
   if (embedUrl) {
       return (
-        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg border border-border group">
+        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg group">
              <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Preview" />
              <div className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md pointer-events-none">
                 Preview
@@ -72,7 +73,7 @@ const VideoPreview = ({ url }: { url: string }) => {
   }
 
   return (
-    <div className="mt-4 rounded-xl bg-page border border-dashed border-border p-4 flex items-center justify-center text-muted gap-2 text-sm">
+    <div className="mt-4 rounded-xl bg-page p-4 flex items-center justify-center text-muted gap-2 text-sm">
         <AlertCircle size={16} />
         Não foi possível gerar preview para este link, mas ele será salvo.
     </div>
@@ -131,14 +132,14 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
     }
 
     setAssets(prev => {
-      const current = prev[lang] || { url: '' };
+      const current = prev[lang] || { url: '', status: 'published' };
       return { ...prev, [lang]: { ...current, url: finalValue } };
     });
   };
 
   const handleSubtitleChange = (lang: Language, value: string) => {
     setAssets(prev => {
-      const current = prev[lang] || { url: '' };
+      const current = prev[lang] || { url: '', status: 'published' };
       return { ...prev, [lang]: { ...current, subtitleUrl: value } };
     });
   };
@@ -165,7 +166,8 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
             hasAtLeastOneValidVersion = true;
             cleanedAssets[lang] = {
                 url: url,
-                subtitleUrl: assets[lang]?.subtitleUrl?.trim()
+                subtitleUrl: assets[lang]?.subtitleUrl?.trim(),
+                status: assets[lang]?.status || 'published'
             };
             cleanedTitles[lang] = title;
         }
@@ -204,12 +206,12 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
     return t('url.placeholder.pdf');
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
-      <div className="bg-surface rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-border">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all animate-fade-in" style={{ zIndex: 9999 }}>
+      <div className="bg-surface rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface z-10 shrink-0">
+        <div className="px-6 py-4 flex justify-between items-center bg-surface z-10 shrink-0">
           <div>
             <h3 className="font-bold text-xl text-main">
               {initialData ? t('edit.material') : t('add.material')}
@@ -223,7 +225,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
 
         {/* Error Banner */}
         {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 px-6 py-3 border-b border-red-100 dark:border-red-900/30 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-medium">
+            <div className="bg-red-50 dark:bg-red-900/20 px-6 py-3 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-medium">
                 <AlertCircle size={16} />
                 {error}
             </div>
@@ -232,7 +234,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col md:flex-row min-h-0">
           
           {/* Left Column: Global Settings */}
-          <div className="w-full md:w-1/3 bg-page p-6 border-r border-border overflow-y-auto">
+          <div className="w-full md:w-1/3 bg-page p-6 overflow-y-auto">
             <div className="space-y-6">
               
               {/* Type Selection */}
@@ -257,10 +259,10 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                       type="button"
                       onClick={() => toggleRole(role)}
                       className={`
-                        w-full flex items-center justify-between p-3 rounded-lg border transition-all text-sm
+                        w-full flex items-center justify-between p-3 rounded-lg transition-all text-sm
                         ${allowedRoles.includes(role) 
-                          ? 'bg-surface border-accent text-accent shadow-sm ring-1 ring-accent' 
-                          : 'bg-surface border-border text-muted/80 hover:text-main hover:border-muted'}
+                          ? 'bg-surface text-accent shadow-sm ring-1 ring-accent' 
+                          : 'bg-surface text-muted/80 hover:text-main hover:bg-white/50'}
                       `}
                     >
                       <span className="font-medium">{t(`role.${role}`)}</span>
@@ -278,10 +280,10 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                 <div 
                   onClick={() => setActive(!active)}
                   className={`
-                    cursor-pointer p-4 rounded-xl border flex items-center justify-between transition-colors
+                    cursor-pointer p-4 rounded-xl flex items-center justify-between transition-colors
                     ${active 
-                      ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400' 
-                      : 'bg-surface border-border text-muted'}
+                      ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
+                      : 'bg-surface text-muted'}
                   `}
                 >
                   <span className="font-medium">{active ? t('active') : t('inactive')}</span>
@@ -297,7 +299,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
           <div className="flex-1 flex flex-col bg-surface min-h-0">
             
             {/* Language Tabs */}
-            <div className="flex border-b border-border px-6 pt-4 gap-6 overflow-x-auto shrink-0">
+            <div className="flex px-6 pt-4 gap-6 overflow-x-auto shrink-0">
               {languages.map(lang => {
                 const isCompleted = hasContent(lang);
                 const label = lang === 'pt-br' ? 'Português' : lang === 'en-us' ? 'English' : 'Español';
@@ -339,7 +341,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     <input 
                       type="text" 
                       placeholder={`Ex: Catálogo 2024 (${activeTab})`}
-                      className="w-full p-3 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
+                      className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent outline-none transition-all shadow-sm"
                       value={titles[activeTab] || ''}
                       onChange={e => handleTitleChange(activeTab, e.target.value)}
                     />
@@ -347,7 +349,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
 
                   <div className="relative">
                      <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="w-full border-t border-border"></div>
+                      <div className="w-full border-t border-border/20"></div>
                     </div>
                     <div className="relative flex justify-center">
                       <span className="px-2 bg-page/30 text-xs text-muted uppercase tracking-wider font-semibold">
@@ -360,7 +362,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     <span className="text-sm font-semibold text-main mb-1.5 flex items-center justify-between">
                        <span>URL <span className="text-red-500">*</span></span>
                        {type === 'video' && (
-                           <span className="text-[10px] font-normal bg-accent/10 text-accent px-2 py-0.5 rounded border border-accent/20">
+                           <span className="text-[10px] font-normal bg-accent/10 text-accent px-2 py-0.5 rounded">
                                Aceita Embed Codes e Links
                            </span>
                        )}
@@ -369,7 +371,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                         <input 
                           type="text" 
                           placeholder={getUrlPlaceholder()}
-                          className="w-full p-3 pl-10 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
+                          className="w-full p-3 pl-10 rounded-lg bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent outline-none transition-all font-mono text-sm shadow-sm"
                           value={assets[activeTab]?.url || ''}
                           onChange={(e) => handleUrlPasteOrChange(activeTab, e.target.value)}
                         />
@@ -392,7 +394,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                       <input 
                         type="text" 
                         placeholder="https://exemplo.com/legenda.vtt"
-                        className="w-full p-3 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
+                        className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent outline-none transition-all font-mono text-sm shadow-sm"
                         value={assets[activeTab]?.subtitleUrl || ''}
                         onChange={(e) => handleSubtitleChange(activeTab, e.target.value)}
                       />
@@ -403,7 +405,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0 z-20">
+            <div className="p-4 bg-surface flex justify-end gap-3 shrink-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
               <button 
                 type="button"
                 onClick={onClose}
@@ -423,6 +425,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Material, Language } from '../types';
 import { X, ShieldAlert, ExternalLink, RefreshCw, PlayCircle, Youtube } from 'lucide-react';
 
@@ -73,9 +74,10 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
   // Recalcula config quando a URL ou o modo forçado mudam
   const embedConfig = useMemo(() => getEmbedConfig(asset.url), [asset.url]);
 
-  return (
+  return createPortal(
     <div 
-      className="fixed inset-0 z-[100] bg-black flex flex-col animate-fade-in select-none"
+      className="fixed inset-0 bg-black flex flex-col animate-fade-in select-none"
+      style={{ zIndex: 9999 }}
       onContextMenu={handleContextMenu}
     >
       
@@ -90,15 +92,15 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
             {/* BADGES ESPECÍFICOS POR PROVEDOR */}
             
             {embedConfig.provider === 'YouTube' && (
-                <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded backdrop-blur-md uppercase font-bold border border-red-500/30 shadow-lg flex items-center gap-1">
+                <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded backdrop-blur-md uppercase font-bold border border-red-500/30 dark:border-transparent shadow-lg flex items-center gap-1">
                     <Youtube size={12} fill="currentColor" /> YouTube
                 </span>
             )}
 
             {embedConfig.provider === 'Google Drive' && (
                <>
-                <div className="flex bg-blue-900/40 backdrop-blur-md rounded border border-blue-500/30 overflow-hidden">
-                    <span className="text-[10px] text-blue-200 px-2 py-1 border-r border-blue-500/30 flex items-center gap-1">
+                <div className="flex bg-blue-900/40 backdrop-blur-md rounded border border-blue-500/30 dark:border-transparent overflow-hidden">
+                    <span className="text-[10px] text-blue-200 px-2 py-1 border-r border-blue-500/30 dark:border-transparent flex items-center gap-1">
                         DRIVE
                     </span>
                     <button 
@@ -115,7 +117,7 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
                     href={asset.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[10px] bg-white/10 hover:bg-white/20 text-white border border-white/20 px-2 py-1 rounded backdrop-blur-md transition-colors cursor-pointer"
+                    className="flex items-center gap-1 text-[10px] bg-white/10 hover:bg-white/20 text-white border border-white/20 dark:border-transparent px-2 py-1 rounded backdrop-blur-md transition-colors cursor-pointer"
                 >
                     <ExternalLink size={10} /> Abrir Externamente
                 </a>
@@ -126,7 +128,7 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
 
         <button 
           onClick={onClose} 
-          className="pointer-events-auto p-2 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 shrink-0 ml-4"
+          className="pointer-events-auto p-2 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 dark:border-transparent shrink-0 ml-4"
         >
           <X size={24} />
         </button>
@@ -237,6 +239,7 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
         })()}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

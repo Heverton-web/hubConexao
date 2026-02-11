@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { AlertTriangle } from 'lucide-react';
 
@@ -15,9 +16,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, title, messa
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface rounded-xl w-full max-w-md shadow-2xl border border-border overflow-hidden animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 10000 }}>
+      <div className="bg-surface rounded-xl w-full max-w-md shadow-2xl border border-border overflow-hidden animate-slide-up">
         <div className="p-6 flex flex-col items-center text-center">
           <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4 text-red-600 dark:text-red-400">
             <AlertTriangle size={24} />
@@ -41,6 +42,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, title, messa
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { mockDb } from '../lib/mockDb';
 import { Material, Language, ColorScheme, UserProfile, Role, UserStatus, MaterialType, AccessLog } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -28,7 +29,7 @@ const ColorInput = ({ label, value, onChange, hint }: { label: string, value: st
         type="text" 
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 p-2 rounded-lg border border-border bg-page text-sm text-main font-mono uppercase"
+        className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm text-main font-mono uppercase focus:ring-2 focus:ring-accent outline-none"
       />
     </div>
     <p className="text-[10px] text-muted">{hint}</p>
@@ -37,7 +38,7 @@ const ColorInput = ({ label, value, onChange, hint }: { label: string, value: st
 
 const ThemeEditorSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="space-y-3 mb-6">
-      <h4 className="text-xs font-bold uppercase text-muted tracking-wider border-b border-border pb-2">{title}</h4>
+      <h4 className="text-xs font-bold uppercase text-muted tracking-wider pb-2">{title}</h4>
       <div className="grid grid-cols-2 gap-4">
           {children}
       </div>
@@ -46,15 +47,15 @@ const ThemeEditorSection = ({ title, children }: { title: string, children: Reac
 
 const LivePreview = ({ themeName, scheme }: { themeName: string, scheme: ColorScheme }) => (
   <div 
-    className="rounded-xl overflow-hidden shadow-lg border relative transition-all duration-300"
-    style={{ backgroundColor: scheme.background, borderColor: scheme.border }}
+    className="rounded-xl overflow-hidden shadow-lg relative transition-all duration-300"
+    style={{ backgroundColor: scheme.background }}
   >
     <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/20 text-white text-[10px] font-bold uppercase backdrop-blur-sm z-10">
       Preview {themeName}
     </div>
     
     {/* Fake Header */}
-    <div className="p-3 flex items-center justify-between border-b" style={{ backgroundColor: scheme.surface, borderColor: scheme.border }}>
+    <div className="p-3 flex items-center justify-between shadow-sm" style={{ backgroundColor: scheme.surface }}>
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] text-white font-bold" style={{ backgroundColor: scheme.accent }}>A</div>
         <div className="h-2 w-16 rounded opacity-80" style={{ backgroundColor: scheme.textMain }}></div>
@@ -64,12 +65,12 @@ const LivePreview = ({ themeName, scheme }: { themeName: string, scheme: ColorSc
     {/* Fake Content */}
     <div className="p-4 space-y-3">
        <div className="flex gap-2 mb-2">
-           <div className="h-4 px-2 rounded-full text-[10px] flex items-center border font-bold" style={{ borderColor: scheme.success, color: scheme.success, backgroundColor: scheme.success + '20' }}>Ativo</div>
-           <div className="h-4 px-2 rounded-full text-[10px] flex items-center border font-bold" style={{ borderColor: scheme.warning, color: scheme.warning, backgroundColor: scheme.warning + '20' }}>Pendente</div>
+           <div className="h-4 px-2 rounded-full text-[10px] flex items-center font-bold" style={{ color: scheme.success, backgroundColor: scheme.success + '20' }}>Ativo</div>
+           <div className="h-4 px-2 rounded-full text-[10px] flex items-center font-bold" style={{ color: scheme.warning, backgroundColor: scheme.warning + '20' }}>Pendente</div>
        </div>
 
        {/* Fake Card */}
-       <div className="p-3 rounded-lg border" style={{ backgroundColor: scheme.surface, borderColor: scheme.border }}>
+       <div className="p-3 rounded-lg shadow-sm" style={{ backgroundColor: scheme.surface }}>
          <div className="flex gap-3 mb-2">
            <div className="w-8 h-8 rounded opacity-10" style={{ backgroundColor: scheme.textMain }}></div>
            <div className="flex-1 space-y-1">
@@ -89,10 +90,10 @@ const LivePreview = ({ themeName, scheme }: { themeName: string, scheme: ColorSc
 // --- Analytics Modal ---
 
 const AnalyticsDetailModal = ({ material, logs, onClose, lang }: { material: Material, logs: AccessLog[], onClose: () => void, lang: Language }) => {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] border border-border overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface">
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
+            <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
+                <div className="px-6 py-4 flex justify-between items-center bg-surface shadow-sm z-10">
                     <div>
                         <h3 className="font-bold text-lg text-main">Histórico de Acesso</h3>
                         <p className="text-xs text-muted max-w-md truncate">{material.title[lang] || material.title['pt-br']}</p>
@@ -109,7 +110,7 @@ const AnalyticsDetailModal = ({ material, logs, onClose, lang }: { material: Mat
                         </div>
                     ) : (
                         <table className="w-full text-left">
-                            <thead className="bg-page text-xs uppercase text-muted font-semibold sticky top-0 border-b border-border">
+                            <thead className="bg-page text-xs uppercase text-muted font-semibold sticky top-0">
                                 <tr>
                                     <th className="p-4">Usuário</th>
                                     <th className="p-4">Perfil</th>
@@ -117,17 +118,17 @@ const AnalyticsDetailModal = ({ material, logs, onClose, lang }: { material: Mat
                                     <th className="p-4 text-right">Data/Hora</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border text-sm">
+                            <tbody className="text-sm">
                                 {logs.map(log => (
                                     <tr key={log.id} className="hover:bg-page transition-colors text-main">
                                         <td className="p-4 font-medium">{log.userName}</td>
                                         <td className="p-4">
-                                            <span className="text-[10px] uppercase font-bold bg-page border border-border px-2 py-1 rounded text-muted">
+                                            <span className="text-[10px] uppercase font-bold bg-page px-2 py-1 rounded text-muted">
                                                 {log.userRole}
                                             </span>
                                         </td>
                                         <td className="p-4">
-                                            <span className="text-[10px] uppercase font-bold bg-accent/10 text-accent border border-accent/20 px-2 py-1 rounded">
+                                            <span className="text-[10px] uppercase font-bold bg-accent/10 text-accent px-2 py-1 rounded">
                                                 {log.language}
                                             </span>
                                         </td>
@@ -141,7 +142,8 @@ const AnalyticsDetailModal = ({ material, logs, onClose, lang }: { material: Mat
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -449,13 +451,13 @@ export const Admin: React.FC = () => {
     <div className="space-y-6">
       
       {/* Header with Tabs */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4">
         <div>
           <h2 className="text-2xl font-bold text-main">{t('admin.title')}</h2>
           <p className="text-sm text-muted">Gerencie materiais, usuários e a aparência da plataforma.</p>
         </div>
         
-        <div className="flex bg-page rounded-lg p-1 border border-border">
+        <div className="flex bg-page rounded-lg p-1">
           {renderTabButton('materials', t('tab.materials'), ImageIcon)}
           {renderTabButton('users', t('tab.users'), Users)}
           {renderTabButton('analytics', t('tab.analytics'), BarChart2)}
@@ -468,20 +470,20 @@ export const Admin: React.FC = () => {
         <div className="animate-fade-in">
           
           {/* Filters Toolbar */}
-          <div className="bg-surface p-4 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center mb-6">
+          <div className="bg-surface p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 items-center mb-6">
              <div className="relative flex-1 w-full">
                <Search className="absolute left-3 top-2.5 text-muted" size={18} />
                <input 
                  type="text" 
                  placeholder={t('search.placeholder')} 
-                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-page border border-border text-sm outline-none focus:ring-2 focus:ring-accent text-main"
+                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none focus:ring-2 focus:ring-accent text-main"
                  value={materialSearch}
                  onChange={e => setMaterialSearch(e.target.value)}
                />
              </div>
              <div className="flex w-full md:w-auto gap-3">
                <select 
-                 className="flex-1 md:w-40 p-2 rounded-lg bg-page border border-border text-sm outline-none text-main"
+                 className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
                  value={materialTypeFilter}
                  onChange={e => setMaterialTypeFilter(e.target.value as any)}
                >
@@ -491,7 +493,7 @@ export const Admin: React.FC = () => {
                  <option value="video">{t('material.type.video')}</option>
                </select>
                <select 
-                 className="flex-1 md:w-40 p-2 rounded-lg bg-page border border-border text-sm outline-none text-main"
+                 className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
                  value={materialStatusFilter}
                  onChange={e => setMaterialStatusFilter(e.target.value as any)}
                >
@@ -509,8 +511,9 @@ export const Admin: React.FC = () => {
             </button>
           </div>
 
-          <div className="bg-surface rounded-xl shadow-sm overflow-hidden border border-border">
+          <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
+              {/* Removed divide-y and border from table for clean look */}
               <table className="w-full text-left">
                 <thead className="bg-page text-xs uppercase text-muted font-semibold">
                   <tr>
@@ -522,7 +525,7 @@ export const Admin: React.FC = () => {
                     <th className="p-4 text-right">{t('actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border text-sm">
+                <tbody className="text-sm">
                   {filteredMaterials.map(mat => {
                     const displayTitle = mat.title[language] || mat.title['pt-br'] || Object.values(mat.title)[0] || 'Untitled';
                     return (
@@ -533,7 +536,7 @@ export const Admin: React.FC = () => {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             mat.active 
                               ? 'bg-success/10 text-success' 
-                              : 'bg-page border border-border text-muted'
+                              : 'bg-page text-muted'
                           }`}>
                             {mat.active ? t('active') : t('inactive')}
                           </span>
@@ -541,7 +544,7 @@ export const Admin: React.FC = () => {
                         <td className="p-4">
                           <div className="flex -space-x-1">
                             {mat.allowedRoles.map(r => (
-                              <div key={r} className="w-6 h-6 rounded-full bg-page flex items-center justify-center text-[10px] uppercase border border-border text-muted font-bold" title={t(`role.${r}`)}>
+                              <div key={r} className="w-6 h-6 rounded-full bg-page flex items-center justify-center text-[10px] uppercase text-muted font-bold shadow-sm" title={t(`role.${r}`)}>
                                 {r[0]}
                               </div>
                             ))}
@@ -550,7 +553,7 @@ export const Admin: React.FC = () => {
                         <td className="p-4">
                           <div className="flex gap-1">
                             {Object.keys(mat.assets).map(lang => (
-                              <span key={lang} className="text-[10px] px-1.5 py-0.5 bg-accent/10 text-accent border border-accent/20 rounded uppercase font-semibold">
+                              <span key={lang} className="text-[10px] px-1.5 py-0.5 bg-accent/10 text-accent rounded uppercase font-semibold">
                                 {lang.split('-')[0]}
                               </span>
                             ))}
@@ -584,12 +587,12 @@ export const Admin: React.FC = () => {
         <div className="animate-fade-in space-y-6">
             
             {/* Filter Bar */}
-            <div className="bg-surface p-4 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center">
+            <div className="bg-surface p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex items-center gap-2 text-muted font-bold uppercase text-xs mr-auto">
                     <Filter size={16} /> Filtros de Métricas
                 </div>
                 <select 
-                    className="w-full md:w-auto p-2 rounded-lg bg-page border border-border text-sm outline-none text-main focus:ring-2 focus:ring-accent"
+                    className="w-full md:w-auto p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main focus:ring-2 focus:ring-accent"
                     value={analyticsTypeFilter}
                     onChange={e => setAnalyticsTypeFilter(e.target.value as any)}
                 >
@@ -599,7 +602,7 @@ export const Admin: React.FC = () => {
                     <option value="video">{t('material.type.video')}</option>
                 </select>
                 <select 
-                    className="w-full md:w-auto p-2 rounded-lg bg-page border border-border text-sm outline-none text-main focus:ring-2 focus:ring-accent"
+                    className="w-full md:w-auto p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main focus:ring-2 focus:ring-accent"
                     value={analyticsRoleFilter}
                     onChange={e => setAnalyticsRoleFilter(e.target.value as any)}
                 >
@@ -612,7 +615,7 @@ export const Admin: React.FC = () => {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+                <div className="bg-surface p-6 rounded-xl shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                         <Eye size={24} />
                     </div>
@@ -621,7 +624,7 @@ export const Admin: React.FC = () => {
                         <p className="text-2xl font-bold text-main">{filteredLogs.length}</p>
                     </div>
                 </div>
-                <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+                <div className="bg-surface p-6 rounded-xl shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
                         <Users size={24} />
                     </div>
@@ -630,7 +633,7 @@ export const Admin: React.FC = () => {
                         <p className="text-2xl font-bold text-main">{new Set(filteredLogs.map(l => l.userId)).size}</p>
                     </div>
                 </div>
-                <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+                <div className="bg-surface p-6 rounded-xl shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
                         <TrendingUp size={24} />
                     </div>
@@ -647,8 +650,8 @@ export const Admin: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Top 5 Materials */}
-                <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-                    <div className="px-6 py-4 border-b border-border bg-page/30 flex justify-between items-center">
+                <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-page/30 flex justify-between items-center">
                          <h3 className="font-bold text-main flex items-center gap-2">
                              <Trophy size={18} className="text-yellow-500" />
                              {t('analytics.rank.materials')}
@@ -686,8 +689,8 @@ export const Admin: React.FC = () => {
                 </div>
 
                 {/* Top 5 Active Users */}
-                <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-                     <div className="px-6 py-4 border-b border-border bg-page/30 flex justify-between items-center">
+                <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
+                     <div className="px-6 py-4 bg-page/30 flex justify-between items-center">
                          <h3 className="font-bold text-main flex items-center gap-2">
                              <Users size={18} className="text-blue-500" />
                              {t('analytics.rank.users')}
@@ -717,8 +720,8 @@ export const Admin: React.FC = () => {
             </div>
 
             {/* Metrics Table */}
-             <div className="bg-surface rounded-xl shadow-sm overflow-hidden border border-border">
-                <div className="px-6 py-4 border-b border-border">
+             <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4">
                     <h3 className="font-bold text-main">Desempenho Geral</h3>
                 </div>
                 <div className="overflow-x-auto">
@@ -733,7 +736,7 @@ export const Admin: React.FC = () => {
                         <th className="p-4 text-right">Detalhes</th>
                     </tr>
                     </thead>
-                    <tbody className="divide-y divide-border text-sm">
+                    <tbody className="text-sm">
                     {aggregatedMetrics.map(item => {
                         const mat = item.material;
                         if (!mat) return null;
@@ -751,7 +754,7 @@ export const Admin: React.FC = () => {
                             <td className="p-4 text-right">
                                 <button 
                                     onClick={() => openAnalyticsDetail(item.id)}
-                                    className="p-2 bg-page hover:bg-accent/10 text-muted hover:text-accent rounded-lg transition-colors border border-border"
+                                    className="p-2 bg-page hover:bg-accent/10 text-muted hover:text-accent rounded-lg transition-colors"
                                 >
                                     <BarChart2 size={16} />
                                 </button>
@@ -771,20 +774,20 @@ export const Admin: React.FC = () => {
         <div className="animate-fade-in space-y-6">
           
           {/* Filters Toolbar */}
-          <div className="bg-surface p-4 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center">
+          <div className="bg-surface p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
                <Search className="absolute left-3 top-2.5 text-muted" size={18} />
                <input 
                  type="text" 
                  placeholder="Buscar por nome ou email..." 
-                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-page border border-border text-sm outline-none focus:ring-2 focus:ring-accent text-main"
+                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none focus:ring-2 focus:ring-accent text-main"
                  value={userSearch}
                  onChange={e => setUserSearch(e.target.value)}
                />
             </div>
             <div className="flex w-full md:w-auto gap-3">
                <select 
-                 className="flex-1 md:w-40 p-2 rounded-lg bg-page border border-border text-sm outline-none text-main"
+                 className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
                  value={userRoleFilter}
                  onChange={e => setUserRoleFilter(e.target.value as any)}
                >
@@ -794,7 +797,7 @@ export const Admin: React.FC = () => {
                  <option value="consultant">{t('role.consultant')}</option>
                </select>
                <select 
-                 className="flex-1 md:w-40 p-2 rounded-lg bg-page border border-border text-sm outline-none text-main"
+                 className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
                  value={userStatusFilter}
                  onChange={e => setUserStatusFilter(e.target.value as any)}
                >
@@ -808,7 +811,7 @@ export const Admin: React.FC = () => {
           </div>
 
           {/* Users List */}
-          <div className="bg-surface rounded-xl shadow-sm overflow-hidden border border-border">
+          <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-page text-xs uppercase text-muted font-semibold">
@@ -821,7 +824,7 @@ export const Admin: React.FC = () => {
                     <th className="p-4 text-right">{t('actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border text-sm">
+                <tbody className="text-sm">
                   {filteredUsers.map(user => (
                     <tr key={user.id} className="hover:bg-page transition-colors text-main">
                       <td className="p-4">
@@ -835,17 +838,17 @@ export const Admin: React.FC = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                         <span className="text-xs font-bold uppercase tracking-wide bg-page border border-border px-2 py-1 rounded text-muted">
+                         <span className="text-xs font-bold uppercase tracking-wide bg-page px-2 py-1 rounded text-muted">
                            {t(`role.${user.role}`)}
                          </span>
                       </td>
                       <td className="p-4">
                         <div className="flex gap-1">
                           {(!user.allowedTypes || user.allowedTypes.length === 0) ? (
-                            <span className="text-[10px] uppercase font-bold bg-page border border-border px-2 py-1 rounded text-muted">Todos</span>
+                            <span className="text-[10px] uppercase font-bold bg-page px-2 py-1 rounded text-muted">Todos</span>
                           ) : (
                             user.allowedTypes.map(type => (
-                              <div key={type} className="p-1 rounded bg-page border border-border text-muted" title={t(`material.type.${type}`)}>
+                              <div key={type} className="p-1 rounded bg-page text-muted" title={t(`material.type.${type}`)}>
                                 {type === 'pdf' && <FileText size={14} />}
                                 {type === 'image' && <ImageIcon size={14} />}
                                 {type === 'video' && <Video size={14} />}
@@ -859,7 +862,7 @@ export const Admin: React.FC = () => {
                             user.status === 'active' ? 'bg-success/10 text-success' :
                             user.status === 'pending' ? 'bg-warning/10 text-warning' :
                             user.status === 'rejected' ? 'bg-error/10 text-error' :
-                            'bg-page border border-border text-muted'
+                            'bg-page text-muted'
                           }`}>
                             {t(`user.status.${user.status}`)}
                         </span>
@@ -913,7 +916,7 @@ export const Admin: React.FC = () => {
               
               {/* Sidebar Menu */}
               <aside className="w-full md:w-64 shrink-0">
-                 <div className="bg-surface rounded-xl p-2 border border-border shadow-sm sticky top-4">
+                 <div className="bg-surface rounded-xl p-2 shadow-sm sticky top-4">
                     <p className="px-4 py-2 text-xs font-bold uppercase text-muted tracking-wider mb-2">Opções</p>
                     {renderSettingsSidebarItem('identity', 'Identidade Visual', Type)}
                     {renderSettingsSidebarItem('integrations', 'Integrações', Webhook)}
@@ -942,7 +945,7 @@ export const Admin: React.FC = () => {
 
                  {/* Identity Section */}
                  {settingsTab === 'identity' && (
-                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border animate-fade-in">
+                    <div className="bg-surface p-6 rounded-xl shadow-sm animate-fade-in">
                       <div className="grid md:grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-medium mb-1 text-main">Nome da Aplicação</label>
@@ -950,7 +953,7 @@ export const Admin: React.FC = () => {
                             type="text" 
                             value={localConfig.appName}
                             onChange={e => setLocalConfig({...localConfig, appName: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none"
+                            className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                           />
                         </div>
                         <div>
@@ -961,9 +964,9 @@ export const Admin: React.FC = () => {
                               placeholder="https://..."
                               value={localConfig.logoUrl || ''}
                               onChange={e => setLocalConfig({...localConfig, logoUrl: e.target.value})}
-                              className="flex-1 p-2.5 rounded-lg border border-border bg-page text-main focus:ring-2 focus:ring-accent outline-none"
+                              className="flex-1 p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                             />
-                            <div className="w-10 h-10 bg-page rounded-lg flex items-center justify-center border border-border shrink-0">
+                            <div className="w-10 h-10 bg-page rounded-lg flex items-center justify-center shrink-0">
                               {localConfig.logoUrl ? <img src={localConfig.logoUrl} className="w-6 h-6 object-contain" /> : <ImageIcon size={16} className="text-muted" />}
                             </div>
                           </div>
@@ -974,17 +977,17 @@ export const Admin: React.FC = () => {
 
                  {/* Webhook Configuration */}
                  {settingsTab === 'integrations' && (
-                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border animate-fade-in">
+                    <div className="bg-surface p-6 rounded-xl shadow-sm animate-fade-in">
                       <div>
                           <label className="block text-sm font-medium mb-1 text-main">URL do Webhook (N8N)</label>
                           <div className="flex gap-2">
-                            <div className="p-3 bg-page border border-border rounded-l-lg text-muted font-bold text-xs flex items-center">POST</div>
+                            <div className="p-3 bg-page rounded-l-lg text-muted font-bold text-xs flex items-center">POST</div>
                             <input 
                               type="text" 
                               placeholder="https://n8n.seu-dominio.com/webhook/..."
                               value={localConfig.webhookUrl || ''}
                               onChange={e => setLocalConfig({...localConfig, webhookUrl: e.target.value})}
-                              className="flex-1 p-2.5 rounded-r-lg border border-border border-l-0 bg-page text-main focus:ring-2 focus:ring-accent outline-none font-mono text-sm"
+                              className="flex-1 p-2.5 rounded-r-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none font-mono text-sm"
                             />
                           </div>
                           <p className="text-xs text-muted mt-3 leading-relaxed">
@@ -997,12 +1000,12 @@ export const Admin: React.FC = () => {
 
                  {/* Theme Editor */}
                  {settingsTab === 'themes' && (
-                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border animate-fade-in">
+                    <div className="bg-surface p-6 rounded-xl shadow-sm animate-fade-in">
                       <div className="grid lg:grid-cols-2 gap-8">
                         
                         {/* Light Theme Column */}
                         <div className="space-y-6">
-                          <div className="flex items-center gap-2 text-main font-semibold border-b border-border pb-2">
+                          <div className="flex items-center gap-2 text-main font-semibold pb-2 border-b border-border/20">
                             <Sun size={18} className="text-orange-500" /> Tema Light
                           </div>
                           
@@ -1079,7 +1082,7 @@ export const Admin: React.FC = () => {
 
                         {/* Dark Theme Column */}
                         <div className="space-y-6">
-                          <div className="flex items-center gap-2 text-main font-semibold border-b border-border pb-2">
+                          <div className="flex items-center gap-2 text-main font-semibold pb-2 border-b border-border/20">
                             <Moon size={18} className="text-blue-400" /> Tema Dark
                           </div>
 
@@ -1159,23 +1162,23 @@ export const Admin: React.FC = () => {
 
                  {/* Invites Section */}
                  {settingsTab === 'invites' && (
-                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border animate-fade-in">
+                    <div className="bg-surface p-6 rounded-xl shadow-sm animate-fade-in">
                       <p className="text-sm text-muted mb-6">Compartilhe estes links para que novos usuários se cadastrem diretamente com o perfil pré-selecionado.</p>
                       <div className="grid md:grid-cols-2 gap-4">
                         {(['client', 'distributor', 'consultant'] as Role[]).map(role => {
                           const fullUrl = `${window.location.origin}/?role=${role}`;
                           return (
-                            <div key={role} className="bg-page p-4 rounded-lg border border-border flex flex-col">
+                            <div key={role} className="bg-page p-4 rounded-lg flex flex-col">
                               <span className="text-sm font-semibold text-main mb-2 capitalize">{t(`role.${role}`)}</span>
-                              <div className="mt-auto pt-2 border-t border-border/50 flex gap-2">
+                              <div className="mt-auto pt-2 flex gap-2">
                                 <input 
                                   readOnly 
                                   value={fullUrl}
-                                  className="bg-surface p-2 rounded text-xs text-muted truncate flex-1 font-mono border border-border outline-none"
+                                  className="bg-surface p-2 rounded text-xs text-muted truncate flex-1 font-mono outline-none"
                                 />
                                 <button 
                                   onClick={() => window.open(fullUrl, '_blank')}
-                                  className="p-2 rounded bg-surface border border-border hover:bg-muted/10 text-muted hover:text-main transition-colors"
+                                  className="p-2 rounded bg-surface hover:bg-muted/10 text-muted hover:text-main transition-colors"
                                   title="Visualizar (Nova Aba)"
                                 >
                                   <ExternalLink size={14} />

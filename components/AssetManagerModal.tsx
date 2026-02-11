@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Material, Language, MaterialAsset } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Save } from 'lucide-react';
@@ -51,9 +52,9 @@ export const AssetManagerModal: React.FC<AssetManagerModalProps> = ({ material, 
 
   const displayTitle = material.title[language] || material.title['pt-br'] || Object.values(material.title)[0] || 'Untitled';
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface rounded-xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] border border-muted/10">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
+      <div className="bg-surface rounded-xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] border border-muted/10 animate-slide-up">
         <div className="p-4 border-b border-muted/10 flex justify-between items-center bg-surface rounded-t-xl">
           <h3 className="font-bold text-lg text-main">{t('edit.assets.title')} <span className="text-accent">{displayTitle}</span></h3>
           <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted hover:text-main">
@@ -118,6 +119,7 @@ export const AssetManagerModal: React.FC<AssetManagerModalProps> = ({ material, 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
