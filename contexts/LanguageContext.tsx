@@ -12,7 +12,7 @@ const translations: Record<Language, Record<string, string>> = {
     'app.title': 'MaterialShare Pro',
     'auth.login': 'Entrar',
     'auth.register': 'Cadastrar',
-    'auth.hint': 'Contas Demo: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Senha: 123)',
+    'auth.hint': 'Contas Demo: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Senha: 123456)',
     
     // Landing Page Texts
     'landing.client.title': 'Bem-vindo à Área do Cliente',
@@ -77,6 +77,7 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.materials': 'Materiais',
     'tab.users': 'Usuários',
     'tab.settings': 'Configurações',
+    'tab.analytics': 'Métricas',
     'user.edit': 'Editar Usuário',
     'user.filter.all': 'Todos os Perfis',
     'user.filter.status.all': 'Todos os Status',
@@ -110,13 +111,29 @@ const translations: Record<Language, Record<string, string>> = {
     // Confirmation Modal
     'confirm.delete.title': 'Confirmar Exclusão',
     'confirm.delete.message': 'Tem certeza que deseja excluir este item? Esta ação é irreversível.',
-    'confirm.delete.confirm': 'Sim, Excluir'
+    'confirm.delete.confirm': 'Sim, Excluir',
+    // Analytics
+    'analytics.total.views': 'Total de Visualizações',
+    'analytics.unique.users': 'Usuários Únicos',
+    'analytics.top.material': 'Material Mais Acessado',
+    'analytics.col.views': 'Visualizações',
+    'analytics.col.users': 'Usuários',
+    'analytics.col.last_access': 'Último Acesso',
+    'analytics.detail.title': 'Histórico de Acesso',
+    'analytics.detail.user': 'Usuário',
+    'analytics.detail.date': 'Data/Hora',
+    'analytics.detail.lang': 'Idioma',
+    'analytics.empty': 'Nenhum acesso registrado ainda.',
+    'analytics.rank.materials': 'Top 5 Materiais',
+    'analytics.rank.users': 'Top 5 Usuários Ativos',
+    'analytics.filter.type': 'Filtrar por Tipo de Documento',
+    'analytics.filter.role': 'Filtrar por Perfil de Usuário',
   },
   'en-us': {
     'app.title': 'MaterialShare Pro',
     'auth.login': 'Login',
     'auth.register': 'Register',
-    'auth.hint': 'Demo Accounts: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Pass: 123)',
+    'auth.hint': 'Demo Accounts: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Pass: 123456)',
     // Landing Page Texts
     'landing.client.title': 'Welcome to Client Area',
     'landing.client.desc': 'Get exclusive access to all technical documentation and news about our products.',
@@ -180,6 +197,7 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.materials': 'Materials',
     'tab.users': 'Users',
     'tab.settings': 'Settings',
+    'tab.analytics': 'Analytics',
     'user.edit': 'Edit User',
     'user.filter.all': 'All Roles',
     'user.filter.status.all': 'All Statuses',
@@ -213,13 +231,29 @@ const translations: Record<Language, Record<string, string>> = {
     // Confirmation Modal
     'confirm.delete.title': 'Confirm Deletion',
     'confirm.delete.message': 'Are you sure you want to delete this item? This action cannot be undone.',
-    'confirm.delete.confirm': 'Yes, Delete'
+    'confirm.delete.confirm': 'Yes, Delete',
+    // Analytics
+    'analytics.total.views': 'Total Views',
+    'analytics.unique.users': 'Unique Users',
+    'analytics.top.material': 'Most Viewed Material',
+    'analytics.col.views': 'Views',
+    'analytics.col.users': 'Users',
+    'analytics.col.last_access': 'Last Access',
+    'analytics.detail.title': 'Access History',
+    'analytics.detail.user': 'User',
+    'analytics.detail.date': 'Date/Time',
+    'analytics.detail.lang': 'Language',
+    'analytics.empty': 'No access logs recorded yet.',
+    'analytics.rank.materials': 'Top 5 Materials',
+    'analytics.rank.users': 'Top 5 Active Users',
+    'analytics.filter.type': 'Filter by Document Type',
+    'analytics.filter.role': 'Filter by User Role',
   },
   'es-es': {
     'app.title': 'MaterialShare Pro',
     'auth.login': 'Acceso',
     'auth.register': 'Registrarse',
-    'auth.hint': 'Cuentas Demo: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Clave: 123)',
+    'auth.hint': 'Cuentas Demo: admin@demo.com, client@demo.com, distributor@demo.com, consultant@demo.com (Clave: 123456)',
     // Landing Page Texts
     'landing.client.title': 'Bienvenido al Área del Cliente',
     'landing.client.desc': 'Obtenga acceso exclusivo a toda la documentación técnica y novedades de nuestros productos.',
@@ -283,6 +317,7 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.materials': 'Materiales',
     'tab.users': 'Usuarios',
     'tab.settings': 'Configuración',
+    'tab.analytics': 'Métricas',
     'user.edit': 'Editar Usuario',
     'user.filter.all': 'Todos los Perfiles',
     'user.filter.status.all': 'Todos los Estados',
@@ -310,13 +345,29 @@ const translations: Record<Language, Record<string, string>> = {
     'comm.email.body': 'Cuerpo del Email',
     'comm.wa.type': 'Tipo de Mensaje',
     'comm.wa.text': 'Solo Texto',
-    'comm.wa.file': 'Texto + Archivo',
+    'comm.wa.file': 'Texto + Arquivo',
     'comm.wa.message': 'Mensaje',
     'comm.file.url': 'URL del Archivo/Adjunto',
     // Confirmation Modal
     'confirm.delete.title': 'Confirmar Eliminación',
     'confirm.delete.message': '¿Está seguro de que desea eliminar este elemento? Esta acción es irreversible.',
-    'confirm.delete.confirm': 'Sí, Eliminar'
+    'confirm.delete.confirm': 'Sí, Eliminar',
+    // Analytics
+    'analytics.total.views': 'Vistas Totales',
+    'analytics.unique.users': 'Usuarios Únicos',
+    'analytics.top.material': 'Material Más Visto',
+    'analytics.col.views': 'Vistas',
+    'analytics.col.users': 'Usuarios',
+    'analytics.col.last_access': 'Último Acceso',
+    'analytics.detail.title': 'Historial de Acceso',
+    'analytics.detail.user': 'Usuario',
+    'analytics.detail.date': 'Fecha/Hora',
+    'analytics.detail.lang': 'Idioma',
+    'analytics.empty': 'Aún no hay registros de acceso.',
+    'analytics.rank.materials': 'Top 5 Materiales',
+    'analytics.rank.users': 'Top 5 Usuarios Activos',
+    'analytics.filter.type': 'Filtrar por Tipo de Documento',
+    'analytics.filter.role': 'Filtrar por Perfil de Usuario',
   }
 };
 

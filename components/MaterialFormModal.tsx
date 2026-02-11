@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Material, Language, MaterialType, Role, MaterialAsset } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { X, Save, FileText, Image as ImageIcon, Video, Check, Globe, Users, Shield, Link as LinkIcon } from 'lucide-react';
+import { X, Save, FileText, Image as ImageIcon, Video, Check, Globe, Users, Shield, Link as LinkIcon, Youtube, AlertCircle, Play } from 'lucide-react';
 
-// --- Helper Component (Extracted to fix positioning and performance) ---
+// --- Helper Component (Extracted) ---
 
 interface TypeCardProps {
   value: MaterialType;
@@ -34,6 +34,51 @@ const TypeCard = ({ value, icon: Icon, label, currentType, onSelect }: TypeCardP
   </button>
 );
 
+// --- Video Preview Helper ---
+
+const VideoPreview = ({ url }: { url: string }) => {
+  if (!url) return null;
+
+  // Simple Embed extraction for preview (Logic similar to ViewerModal but simplified)
+  let embedUrl = '';
+  const cleanUrl = url.trim();
+  
+  const youtubeMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  if (youtubeMatch && youtubeMatch[1]) {
+     embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+  } else if (cleanUrl.includes('drive.google.com')) {
+      const driveIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (driveIdMatch && driveIdMatch[1]) {
+          embedUrl = `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`;
+      }
+  } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
+      // Direct file
+      return (
+        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg border border-border">
+             <video src={cleanUrl} controls className="w-full h-full object-contain" />
+        </div>
+      );
+  }
+
+  if (embedUrl) {
+      return (
+        <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg border border-border group">
+             <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Preview" />
+             <div className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md pointer-events-none">
+                Preview
+             </div>
+        </div>
+      );
+  }
+
+  return (
+    <div className="mt-4 rounded-xl bg-page border border-dashed border-border p-4 flex items-center justify-center text-muted gap-2 text-sm">
+        <AlertCircle size={16} />
+        Não foi possível gerar preview para este link, mas ele será salvo.
+    </div>
+  );
+};
+
 // --- Main Component ---
 
 interface MaterialFormModalProps {
@@ -56,6 +101,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
   
   // UI State
   const [activeTab, setActiveTab] = useState<Language>('pt-br');
+  const [error, setError] = useState<string | null>(null);
 
   // Init with data if editing
   useEffect(() => {
@@ -72,10 +118,28 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
     setTitles(prev => ({ ...prev, [lang]: value }));
   };
 
-  const handleAssetChange = (lang: Language, field: keyof MaterialAsset, value: string) => {
+  // Smart Input Handler
+  const handleUrlPasteOrChange = (lang: Language, value: string) => {
+    let finalValue = value;
+
+    // 1. Detect iframe paste and extract src
+    if (value.includes('<iframe') && value.includes('src=')) {
+        const srcMatch = value.match(/src=["'](.*?)["']/);
+        if (srcMatch && srcMatch[1]) {
+            finalValue = srcMatch[1];
+        }
+    }
+
     setAssets(prev => {
       const current = prev[lang] || { url: '' };
-      return { ...prev, [lang]: { ...current, [field]: value } };
+      return { ...prev, [lang]: { ...current, url: finalValue } };
+    });
+  };
+
+  const handleSubtitleChange = (lang: Language, value: string) => {
+    setAssets(prev => {
+      const current = prev[lang] || { url: '' };
+      return { ...prev, [lang]: { ...current, subtitleUrl: value } };
     });
   };
 
@@ -87,23 +151,39 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     const cleanedAssets: Partial<Record<Language, MaterialAsset>> = {};
-    Object.entries(assets).forEach(([key, val]) => {
-      const lang = key as Language;
-      const asset = val as MaterialAsset;
-      if (asset.url && asset.url.trim()) {
-        // Trim URLs to ensure embed detection works correctly
-        cleanedAssets[lang] = {
-          ...asset,
-          url: asset.url.trim(),
-          subtitleUrl: asset.subtitleUrl?.trim()
-        };
-      }
+    const cleanedTitles: Partial<Record<Language, string>> = {};
+    let hasAtLeastOneValidVersion = false;
+
+    languages.forEach(lang => {
+        const url = assets[lang]?.url?.trim();
+        const title = titles[lang]?.trim();
+
+        if (url && title) {
+            hasAtLeastOneValidVersion = true;
+            cleanedAssets[lang] = {
+                url: url,
+                subtitleUrl: assets[lang]?.subtitleUrl?.trim()
+            };
+            cleanedTitles[lang] = title;
+        }
     });
+
+    if (!hasAtLeastOneValidVersion) {
+        setError('Preencha o Título e a URL para pelo menos um idioma.');
+        return;
+    }
+
+    if (allowedRoles.length === 0) {
+        setError('Selecione pelo menos um perfil de acesso.');
+        return;
+    }
 
     const payload = {
       ...(initialData || {}),
-      title: titles,
+      title: cleanedTitles,
       type,
       allowedRoles,
       active,
@@ -119,7 +199,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
   };
 
   const getUrlPlaceholder = () => {
-    if (type === 'video') return t('url.placeholder.video');
+    if (type === 'video') return "Cole o link do YouTube, Drive ou MP4 aqui...";
     if (type === 'image') return t('url.placeholder.image');
     return t('url.placeholder.pdf');
   };
@@ -140,6 +220,14 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
             <X size={24} />
           </button>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 px-6 py-3 border-b border-red-100 dark:border-red-900/30 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                <AlertCircle size={16} />
+                {error}
+            </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col md:flex-row min-h-0">
           
@@ -221,7 +309,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     type="button"
                     onClick={() => setActiveTab(lang)}
                     className={`
-                      pb-4 px-1 relative font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2
+                      pb-4 px-1 relative font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 outline-none
                       ${activeTab === lang 
                         ? 'text-accent' 
                         : 'text-muted hover:text-main'}
@@ -240,17 +328,9 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 p-6 overflow-y-auto min-h-0">
-              <div className="max-w-xl mx-auto space-y-8 animate-fade-in">
+            <div className="flex-1 p-6 overflow-y-auto min-h-0 bg-page/30">
+              <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
                 
-                <div className="bg-accent/10 p-4 rounded-lg flex items-start gap-3 border border-accent/20">
-                   <Globe className="text-accent shrink-0 mt-0.5" size={18} />
-                   <p className="text-sm text-main">
-                     Você está editando a versão em <strong>{activeTab === 'pt-br' ? 'Português' : activeTab === 'en-us' ? 'Inglês' : 'Espanhol'}</strong>. 
-                     Certifique-se de preencher o título e a URL do arquivo.
-                   </p>
-                </div>
-
                 <div className="space-y-4">
                   <label className="block">
                     <span className="text-sm font-semibold text-main mb-1.5 block">
@@ -259,7 +339,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     <input 
                       type="text" 
                       placeholder={`Ex: Catálogo 2024 (${activeTab})`}
-                      className="w-full p-3 rounded-lg border border-border bg-page text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
+                      className="w-full p-3 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
                       value={titles[activeTab] || ''}
                       onChange={e => handleTitleChange(activeTab, e.target.value)}
                     />
@@ -270,41 +350,51 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                       <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center">
-                      <span className="px-2 bg-surface text-xs text-muted uppercase tracking-wider">Arquivos</span>
+                      <span className="px-2 bg-page/30 text-xs text-muted uppercase tracking-wider font-semibold">
+                         {type === 'video' ? 'Link do Vídeo' : 'Arquivo'}
+                      </span>
                     </div>
                   </div>
 
-                  <label className="block">
-                    <span className="text-sm font-semibold text-main mb-1.5 block">
-                      {t('asset.url')} <span className="text-red-500">*</span>
+                  <label className="block group">
+                    <span className="text-sm font-semibold text-main mb-1.5 flex items-center justify-between">
+                       <span>URL <span className="text-red-500">*</span></span>
+                       {type === 'video' && (
+                           <span className="text-[10px] font-normal bg-accent/10 text-accent px-2 py-0.5 rounded border border-accent/20">
+                               Aceita Embed Codes e Links
+                           </span>
+                       )}
                     </span>
                     <div className="relative">
                         <input 
                           type="text" 
                           placeholder={getUrlPlaceholder()}
-                          className="w-full p-3 pl-10 rounded-lg border border-border bg-page text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
+                          className="w-full p-3 pl-10 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
                           value={assets[activeTab]?.url || ''}
-                          onChange={(e) => handleAssetChange(activeTab, 'url', e.target.value)}
+                          onChange={(e) => handleUrlPasteOrChange(activeTab, e.target.value)}
                         />
-                        <LinkIcon className="absolute left-3 top-3 text-muted" size={18} />
-                    </div>
-                    <div className="mt-2 text-xs text-muted flex gap-2 items-start">
-                       <Globe size={12} className="mt-0.5 shrink-0" />
-                       <span className="opacity-80">{t('url.help.text')} {t('empty.url.hint')}</span>
+                        <LinkIcon className="absolute left-3 top-3 text-muted group-focus-within:text-accent transition-colors" size={18} />
                     </div>
                   </label>
 
+                  {/* VIDEO PREVIEW SECTION */}
+                  {type === 'video' && assets[activeTab]?.url && (
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                          <VideoPreview url={assets[activeTab]!.url!} />
+                      </div>
+                  )}
+
                   {type === 'video' && (
-                    <label className="block animate-fade-in">
+                    <label className="block animate-fade-in pt-2">
                       <span className="text-sm font-semibold text-main mb-1.5 block">
                         {t('asset.subtitle')} <span className="text-xs font-normal text-muted">(Opcional)</span>
                       </span>
                       <input 
                         type="text" 
                         placeholder="https://exemplo.com/legenda.vtt"
-                        className="w-full p-3 rounded-lg border border-border bg-page text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
+                        className="w-full p-3 rounded-lg border border-border bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
                         value={assets[activeTab]?.subtitleUrl || ''}
-                        onChange={(e) => handleAssetChange(activeTab, 'subtitleUrl', e.target.value)}
+                        onChange={(e) => handleSubtitleChange(activeTab, e.target.value)}
                       />
                     </label>
                   )}
@@ -313,11 +403,11 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-border bg-page flex justify-end gap-3 shrink-0">
+            <div className="p-4 border-t border-border bg-surface flex justify-end gap-3 shrink-0 z-20">
               <button 
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-lg text-muted hover:bg-muted/10 font-medium transition-colors"
+                className="px-5 py-2.5 rounded-lg text-muted hover:bg-page font-medium transition-colors"
               >
                 {t('cancel')}
               </button>

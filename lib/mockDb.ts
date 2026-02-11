@@ -1,397 +1,394 @@
-import { Material, UserProfile, Role, SystemConfig, UserStatus } from '../types';
+import { supabase } from './supabaseClient';
+import { Material, UserProfile, Role, SystemConfig, UserStatus, AccessLog, Language } from '../types';
 
-// Mock System Config
-let systemConfig: SystemConfig = {
-  appName: 'MaterialShare Pro',
-  webhookUrl: '', // Default empty
-  themeLight: {
-    background: '#f8fafc', // slate-50
-    surface: '#ffffff',    // white
-    textMain: '#0f172a',   // slate-900
-    textMuted: '#64748b',  // slate-500
-    border: '#e2e8f0',     // slate-200
-    accent: '#3b82f6',     // blue-500
-    success: '#22c55e',    // green-500
-    warning: '#eab308',    // yellow-500
-    error: '#ef4444'       // red-500
-  },
-  themeDark: {
-    background: '#0b1120', // slate-950
-    surface: '#1e293b',    // slate-800
-    textMain: '#f8fafc',   // slate-50
-    textMuted: '#94a3b8',  // slate-400
-    border: '#334155',     // slate-700
-    accent: '#60a5fa',     // blue-400
-    success: '#4ade80',    // green-400 (Mais brilhante para dark)
-    warning: '#facc15',    // yellow-400
-    error: '#f87171'       // red-400
-  }
+// --- MOCK DATA STORE (OFFLINE MODE) ---
+let isMockMode = false;
+
+const localUsers: UserProfile[] = [
+    { id: 'mock-admin', name: 'Super Admin (Mock)', email: 'admin@demo.com', role: 'super_admin', whatsapp: '11999999999', status: 'active', preferences: { theme: 'light', language: 'pt-br' } },
+    { id: 'mock-client', name: 'Cliente Exemplo', email: 'client@demo.com', role: 'client', whatsapp: '11988888888', cro: '12345', status: 'active', preferences: { theme: 'light', language: 'pt-br' } },
+    { id: 'mock-distrib', name: 'Distribuidor Parceiro', email: 'distributor@demo.com', role: 'distributor', whatsapp: '11977777777', status: 'active', preferences: { theme: 'dark', language: 'en-us' } },
+    { id: 'mock-consult', name: 'Consultor de Vendas', email: 'consultant@demo.com', role: 'consultant', whatsapp: '11966666666', status: 'pending', preferences: { theme: 'light', language: 'es-es' } },
+];
+
+let localMaterials: Material[] = [
+    {
+        id: 'mat-1',
+        title: { 'pt-br': 'Catálogo de Produtos 2024', 'en-us': 'Product Catalog 2024' },
+        type: 'pdf',
+        allowedRoles: ['client', 'distributor', 'consultant'],
+        active: true,
+        createdAt: new Date().toISOString(),
+        assets: {
+            'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+            'en-us': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+        }
+    },
+    {
+        id: 'mat-2',
+        title: { 'pt-br': 'Vídeo Institucional', 'es-es': 'Video Institucional' },
+        type: 'video',
+        allowedRoles: ['client', 'distributor', 'consultant'],
+        active: true,
+        createdAt: new Date().toISOString(),
+        assets: {
+            'pt-br': { url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ' }, // Tech demo video
+        }
+    },
+    {
+        id: 'mat-3',
+        title: { 'pt-br': 'Tabela de Preços (Confidencial)', 'en-us': 'Price List (Confidential)' },
+        type: 'image',
+        allowedRoles: ['distributor', 'super_admin'],
+        active: true,
+        createdAt: new Date().toISOString(),
+        assets: {
+            'pt-br': { url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000' }
+        }
+    }
+];
+
+let localLogs: AccessLog[] = [
+    { id: 'log-1', materialId: 'mat-1', materialTitle: 'Catálogo 2024', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date().toISOString() }
+];
+
+let localConfig: SystemConfig = {
+    appName: 'Hub Conexão (Mock)',
+    themeLight: { background: '#f8fafc', surface: '#ffffff', textMain: '#0f172a', textMuted: '#64748b', border: '#e2e8f0', accent: '#3b82f6', success: '#22c55e', warning: '#eab308', error: '#ef4444' },
+    themeDark: { background: '#0b1120', surface: '#1e293b', textMain: '#f8fafc', textMuted: '#94a3b8', border: '#334155', accent: '#60a5fa', success: '#4ade80', warning: '#facc15', error: '#f87171' }
 };
 
-// Mock Users (One for each role)
-let users: UserProfile[] = [
-  {
-    id: '1',
-    name: 'Super Admin User',
-    email: 'admin@demo.com',
-    role: 'super_admin',
-    whatsapp: '5511999999999',
-    status: 'active',
-    preferences: { theme: 'dark', language: 'pt-br' }
-  },
-  {
-    id: '2',
-    name: 'Dr. Cliente Final',
-    email: 'client@demo.com',
-    role: 'client',
-    whatsapp: '5511888888888',
-    cro: '12345/SP',
-    status: 'active',
-    preferences: { theme: 'light', language: 'pt-br' }
-  },
-  {
-    id: '3',
-    name: 'Distribuidor Global',
-    email: 'distributor@demo.com',
-    role: 'distributor',
-    whatsapp: '5511777777777',
-    status: 'pending', // Pending approval
-    preferences: { theme: 'light', language: 'es-es' }
-  },
-  {
-    id: '4',
-    name: 'Consultor de Vendas',
-    email: 'consultant@demo.com',
-    role: 'consultant',
-    whatsapp: '5511666666666',
-    status: 'inactive',
-    preferences: { theme: 'dark', language: 'en-us' }
-  }
-];
+// Helper para converter snake_case do banco para camelCase do frontend
+const mapProfileFromDb = (data: any): UserProfile => ({
+  id: data.id,
+  name: data.name,
+  email: data.email,
+  role: data.role,
+  whatsapp: data.whatsapp,
+  cro: data.cro,
+  status: data.status,
+  allowedTypes: data.allowed_types, // DB: allowed_types -> Front: allowedTypes
+  preferences: data.preferences || { theme: 'light', language: 'pt-br' }
+});
 
-// Mock Materials (Comprehensive list)
-let materials: Material[] = [
-  // --- TEST MATERIAL (GOOGLE DRIVE) ---
-  {
-    id: 'test-drive-video',
-    title: {
-      'pt-br': 'TESTE: Vídeo Google Drive',
-      'en-us': 'TEST: Google Drive Video',
-      'es-es': 'PRUEBA: Video Google Drive'
-    },
-    type: 'video',
-    allowedRoles: ['client', 'distributor', 'consultant', 'super_admin'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://drive.google.com/file/d/1PKZQcvke0GVqTu2m8y1HepIa2G-cZqfv/view?usp=sharing' },
-      'en-us': { url: 'https://drive.google.com/file/d/1PKZQcvke0GVqTu2m8y1HepIa2G-cZqfv/view?usp=sharing' },
-      'es-es': { url: 'https://drive.google.com/file/d/1PKZQcvke0GVqTu2m8y1HepIa2G-cZqfv/view?usp=sharing' }
-    }
-  },
+const mapMaterialFromDb = (data: any): Material => ({
+  id: data.id,
+  title: data.title,
+  type: data.type,
+  allowedRoles: data.allowed_roles, // DB: allowed_roles -> Front: allowedRoles
+  assets: data.assets,
+  active: data.active,
+  createdAt: data.created_at
+});
 
-  // --- UNIVERSAL MATERIALS (All Roles) ---
-  {
-    id: 'm1',
-    title: {
-      'pt-br': 'Vídeo Institucional 2024',
-      'en-us': 'Corporate Video 2024',
-      'es-es': 'Video Corporativo 2024'
-    },
-    type: 'video',
-    allowedRoles: ['client', 'distributor', 'consultant'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-      'en-us': { url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-      'es-es': { url: 'https://www.w3schools.com/html/mov_bbb.mp4' }
-    }
-  },
-  {
-    id: 'm2',
-    title: {
-      'pt-br': 'Manual de Garantia e Uso',
-      'en-us': 'Warranty and Usage Manual',
-      'es-es': 'Manual de Garantía'
-    },
-    type: 'pdf',
-    allowedRoles: ['client', 'distributor', 'consultant'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-      'en-us': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-      // Missing ES-ES intentional
-    }
-  },
-
-  // --- CLIENT FOCUSED ---
-  {
-    id: 'm3',
-    title: {
-      'pt-br': 'Catálogo de Produtos - Linha Premium',
-      'en-us': 'Product Catalog - Premium Line',
-      'es-es': 'Catálogo de Productos - Línea Premium'
-    },
-    type: 'pdf',
-    allowedRoles: ['client', 'consultant'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: '#' },
-      'en-us': { url: '#' },
-      'es-es': { url: '#' }
-    }
-  },
-  {
-    id: 'm4',
-    title: {
-      'pt-br': 'Lançamento Verão - Banner Promocional',
-      'en-us': 'Summer Launch - Promo Banner',
-      'es-es': 'Lanzamiento Verano - Banner'
-    },
-    type: 'image',
-    allowedRoles: ['client'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://via.placeholder.com/800x600/0ea5e9/ffffff?text=Verao+BR' },
-      'en-us': { url: 'https://via.placeholder.com/800x600/0ea5e9/ffffff?text=Summer+US' }
-    }
-  },
-
-  // --- DISTRIBUTOR FOCUSED ---
-  {
-    id: 'm5',
-    title: {
-      'pt-br': 'Tabela de Preços Atacado (Sigiloso)',
-      'en-us': 'Wholesale Price List (Confidential)',
-      'es-es': 'Lista de Precios Mayorista'
-    },
-    type: 'pdf',
-    allowedRoles: ['distributor'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: '#' },
-      'en-us': { url: '#' },
-      'es-es': { url: '#' }
-    }
-  },
-  {
-    id: 'm6',
-    title: {
-      'pt-br': 'Kit de Marketing para Redes Sociais',
-      'en-us': 'Social Media Marketing Kit',
-      'es-es': 'Kit de Marketing Redes Sociales'
-    },
-    type: 'image',
-    allowedRoles: ['distributor', 'consultant'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://via.placeholder.com/1080x1080/6366f1/ffffff?text=Post+Instagram' },
-      'es-es': { url: 'https://via.placeholder.com/1080x1080/6366f1/ffffff?text=Post+Instagram+ES' }
-    }
-  },
-
-  // --- CONSULTANT FOCUSED ---
-  {
-    id: 'm7',
-    title: {
-      'pt-br': 'Treinamento: Técnicas de Vendas Avançadas',
-      'en-us': 'Training: Advanced Sales Techniques',
-      'es-es': 'Entrenamiento: Ventas Avanzadas'
-    },
-    type: 'video',
-    allowedRoles: ['consultant'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://www.w3schools.com/html/mov_bbb.mp4' }
-      // Only PT-BR available
-    }
-  },
-  {
-    id: 'm8',
-    title: {
-      'pt-br': 'Script de Abordagem ao Cliente',
-      'en-us': 'Customer Approach Script',
-      'es-es': 'Guión de Aproximación al Cliente'
-    },
-    type: 'pdf',
-    allowedRoles: ['consultant', 'distributor'],
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: '#' },
-      'en-us': { url: '#' },
-      'es-es': { url: '#' }
-    }
-  },
-
-  // --- ADMIN / INACTIVE ---
-  {
-    id: 'm9',
-    title: {
-      'pt-br': 'Campanha Natal 2025 (Rascunho)',
-      'en-us': 'Christmas Campaign 2025 (Draft)',
-      'es-es': 'Campaña Navidad 2025 (Borrador)'
-    },
-    type: 'image',
-    allowedRoles: ['client', 'distributor'],
-    active: false, // Inactive
-    createdAt: new Date().toISOString(),
-    assets: {
-      'pt-br': { url: 'https://via.placeholder.com/800x400/ef4444/ffffff?text=Draft' }
-    }
-  },
-  {
-    id: 'm10',
-    title: {
-      'pt-br': 'Relatório Financeiro Interno',
-      'en-us': 'Internal Financial Report',
-      'es-es': 'Informe Financiero Interno'
-    },
-    type: 'pdf',
-    allowedRoles: ['super_admin'], // Only Admin sees this in filtering logic naturally, but explicitly setting roles
-    active: true,
-    createdAt: new Date().toISOString(),
-    assets: {
-      'en-us': { url: '#' }
-    }
-  }
-];
-
-// Simulation Methods
+// Adapter que substitui o Mock pelo Supabase Real
 export const mockDb = {
-  getSystemConfig: async () => {
-    return new Promise<SystemConfig>((resolve) => {
-      setTimeout(() => resolve({ ...systemConfig }), 200);
-    });
+  
+  enableMockMode: () => {
+      console.log("🟡 MOCK MODE ACTIVATED");
+      isMockMode = true;
   },
 
-  updateSystemConfig: async (config: SystemConfig) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        systemConfig = config;
-        resolve();
-      }, 500);
-    });
+  disableMockMode: () => {
+      isMockMode = false;
   },
 
-  login: async (email: string) => {
-    return new Promise<UserProfile | null>((resolve) => {
-      setTimeout(() => {
-        const user = users.find(u => u.email === email);
-        resolve(user || null);
-      }, 500);
-    });
+  // --- SYSTEM CONFIG ---
+  getSystemConfig: async (): Promise<SystemConfig> => {
+    if (isMockMode) return localConfig;
+
+    const { data, error } = await supabase
+      .from('system_config')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (error || !data) {
+      // Fallback seguro caso o banco esteja vazio
+      return localConfig;
+    }
+
+    return {
+      appName: data.app_name,
+      logoUrl: data.logo_url,
+      webhookUrl: data.webhook_url,
+      themeLight: data.theme_light,
+      themeDark: data.theme_dark
+    };
   },
 
-  register: async (data: Omit<UserProfile, 'id' | 'preferences' | 'status'>) => {
-    return new Promise<UserProfile>((resolve) => {
-      setTimeout(() => {
-        const newUser: UserProfile = {
-          ...data,
-          id: Math.random().toString(36).substr(2, 9),
-          status: 'pending', // Default to pending
-          preferences: { theme: 'light', language: 'pt-br' }
+  updateSystemConfig: async (config: SystemConfig): Promise<void> => {
+    if (isMockMode) {
+        localConfig = config;
+        return;
+    }
+
+    const { error } = await supabase
+      .from('system_config')
+      .update({
+        app_name: config.appName,
+        logo_url: config.logoUrl,
+        webhook_url: config.webhookUrl,
+        theme_light: config.themeLight,
+        theme_dark: config.themeDark,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+  },
+
+  // --- AUTH (Apenas métodos auxiliares, o login real é feito no AuthContext via supabase.auth) ---
+  
+  // Busca o perfil completo na tabela 'profiles'
+  getProfileByEmail: async (email: string): Promise<UserProfile | null> => {
+    if (isMockMode) return localUsers.find(u => u.email === email) || null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .single();
+    
+    if (error || !data) return null;
+    return mapProfileFromDb(data);
+  },
+
+  getProfileById: async (id: string): Promise<UserProfile | null> => {
+    if (isMockMode) return localUsers.find(u => u.id === id) || null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error || !data) return null;
+    return mapProfileFromDb(data);
+  },
+
+  // --- USERS MANAGEMENT ---
+  getUsers: async (): Promise<UserProfile[]> => {
+    if (isMockMode) return [...localUsers];
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    return (data || []).map(mapProfileFromDb);
+  },
+
+  updateUserStatus: async (userId: string, status: UserStatus): Promise<void> => {
+    if (isMockMode) {
+        const u = localUsers.find(user => user.id === userId);
+        if (u) u.status = status;
+        return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status })
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
+  updateUser: async (updatedUser: UserProfile): Promise<void> => {
+    if (isMockMode) {
+        const idx = localUsers.findIndex(u => u.id === updatedUser.id);
+        if (idx !== -1) localUsers[idx] = updatedUser;
+        return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        name: updatedUser.name,
+        email: updatedUser.email,
+        whatsapp: updatedUser.whatsapp,
+        cro: updatedUser.cro,
+        role: updatedUser.role,
+        status: updatedUser.status,
+        allowed_types: updatedUser.allowedTypes,
+        preferences: updatedUser.preferences
+      })
+      .eq('id', updatedUser.id);
+    if (error) throw error;
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    if (isMockMode) {
+        const idx = localUsers.findIndex(u => u.id === userId);
+        if (idx !== -1) localUsers.splice(idx, 1);
+        return;
+    }
+    // Nota: No Supabase, deletar da tabela 'auth.users' requer a Service Role Key (backend).
+    // Aqui deletamos apenas o perfil público. O ideal é usar uma Edge Function para deletar o Auth User também.
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
+  // --- MATERIALS ---
+  getMaterials: async (role: Role): Promise<Material[]> => {
+    if (isMockMode) {
+        if (role === 'super_admin') return [...localMaterials];
+        return localMaterials.filter(m => m.active && m.allowedRoles.includes(role));
+    }
+
+    let query = supabase
+      .from('materials')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    // Se não for admin, aplica filtros de visibilidade (embora o RLS já faça isso, é bom filtrar no front/query também)
+    if (role !== 'super_admin') {
+      query = query
+        .eq('active', true)
+        .contains('allowed_roles', [role]);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map(mapMaterialFromDb);
+  },
+
+  createMaterial: async (material: Omit<Material, 'id' | 'createdAt'>): Promise<Material> => {
+    if (isMockMode) {
+        const newMat: Material = {
+            ...material,
+            id: `mat-${Date.now()}`,
+            createdAt: new Date().toISOString()
         };
-        users.push(newUser);
-        resolve(newUser);
-      }, 500);
-    });
+        localMaterials.unshift(newMat);
+        return newMat;
+    }
+
+    const { data, error } = await supabase
+      .from('materials')
+      .insert({
+        title: material.title,
+        type: material.type,
+        allowed_roles: material.allowedRoles,
+        assets: material.assets,
+        active: material.active
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return mapMaterialFromDb(data);
   },
 
-  // Users Management
-  getUsers: async () => {
-    return new Promise<UserProfile[]>((resolve) => {
-      setTimeout(() => resolve([...users]), 300);
-    });
+  updateMaterial: async (material: Material): Promise<void> => {
+    if (isMockMode) {
+        const idx = localMaterials.findIndex(m => m.id === material.id);
+        if (idx !== -1) localMaterials[idx] = material;
+        return;
+    }
+
+    const { error } = await supabase
+      .from('materials')
+      .update({
+        title: material.title,
+        type: material.type,
+        allowed_roles: material.allowedRoles,
+        assets: material.assets,
+        active: material.active
+      })
+      .eq('id', material.id);
+
+    if (error) throw error;
   },
 
-  updateUserStatus: async (userId: string, status: UserStatus) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const index = users.findIndex(u => u.id === userId);
-        if (index !== -1) {
-          users[index].status = status;
-        }
-        resolve();
-      }, 300);
-    });
+  deleteMaterial: async (id: string): Promise<void> => {
+    if (isMockMode) {
+        const idx = localMaterials.findIndex(m => m.id === id);
+        if (idx !== -1) localMaterials.splice(idx, 1);
+        return;
+    }
+
+    const { error } = await supabase
+      .from('materials')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   },
 
-  updateUser: async (updatedUser: UserProfile) => {
-    return new Promise<void>((resolve) => {
-        setTimeout(() => {
-            const index = users.findIndex(u => u.id === updatedUser.id);
-            if(index !== -1) {
-                users[index] = updatedUser;
-            }
-            resolve();
-        }, 300);
-    });
+  // --- ANALYTICS ---
+  logAccess: async (materialId: string, userId: string, language: Language): Promise<void> => {
+    if (isMockMode) {
+        const mat = localMaterials.find(m => m.id === materialId);
+        const usr = localUsers.find(u => u.id === userId);
+        localLogs.unshift({
+            id: `log-${Date.now()}`,
+            materialId,
+            materialTitle: mat?.title['pt-br'] || 'Material',
+            userId,
+            userName: usr?.name || 'User',
+            userRole: usr?.role || 'client',
+            language,
+            timestamp: new Date().toISOString()
+        });
+        return;
+    }
+
+    const { error } = await supabase
+      .from('access_logs')
+      .insert({
+        material_id: materialId,
+        user_id: userId,
+        language: language
+      });
+      
+    if (error) console.error("Error logging access:", error);
   },
 
-  deleteUser: async (userId: string) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        users = users.filter(u => u.id !== userId);
-        resolve();
-      }, 300);
-    });
-  },
+  getAccessLogs: async (): Promise<AccessLog[]> => {
+    if (isMockMode) return [...localLogs];
 
-  getMaterials: async (role: Role) => {
-    return new Promise<Material[]>((resolve) => {
-      setTimeout(() => {
-        if (role === 'super_admin') {
-          // Admin sees everything
-          resolve(materials);
-        } else {
-          // Users see only allowed AND active materials
-          resolve(materials.filter(m => m.active && m.allowedRoles.includes(role)));
-        }
-      }, 300);
-    });
-  },
+    // Join manual ou View no banco seria melhor, mas vamos buscar e mapear
+    // Precisamos buscar logs e fazer join com materials e profiles para ter os nomes
+    
+    const { data: logs, error } = await supabase
+      .from('access_logs')
+      .select(`
+        id,
+        material_id,
+        user_id,
+        language,
+        timestamp,
+        materials ( title ),
+        profiles ( name, role )
+      `)
+      .order('timestamp', { ascending: false });
 
-  // Admin only
-  createMaterial: async (material: Omit<Material, 'id' | 'createdAt'>) => {
-    return new Promise<Material>((resolve) => {
-      setTimeout(() => {
-        const newMaterial: Material = {
-          ...material,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date().toISOString()
+    if (error) throw error;
+
+    return logs.map((log: any) => {
+        // Safe access to joined data
+        const matTitle = log.materials?.title?.['pt-br'] || log.materials?.title?.['en-us'] || 'Material Excluído';
+        const userName = log.profiles?.name || 'Usuário Removido';
+        const userRole = log.profiles?.role || 'client';
+
+        return {
+            id: log.id,
+            materialId: log.material_id,
+            materialTitle: matTitle,
+            userId: log.user_id,
+            userName: userName,
+            userRole: userRole,
+            language: log.language,
+            timestamp: log.timestamp
         };
-        materials.unshift(newMaterial); // Add to top
-        resolve(newMaterial);
-      }, 400);
     });
   },
 
-  updateMaterial: async (material: Material) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const index = materials.findIndex(m => m.id === material.id);
-        if (index !== -1) {
-          materials[index] = material;
-        }
-        resolve();
-      }, 300);
-    });
-  },
-
-  deleteMaterial: async (id: string) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        materials = materials.filter(m => m.id !== id);
-        resolve();
-      }, 300);
-    });
-  }
+  // Métodos legacy mantidos para não quebrar contrato do AuthContext antigo,
+  // mas agora lançam erro ou redirecionam, pois o AuthContext novo cuidará disso.
+  login: async () => { throw new Error("Use supabase.auth.signInWithPassword"); },
+  register: async () => { throw new Error("Use supabase.auth.signUp"); }
 };

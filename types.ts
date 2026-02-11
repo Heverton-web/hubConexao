@@ -1,3 +1,4 @@
+
 export type Role = 'client' | 'distributor' | 'consultant' | 'super_admin';
 export type Language = 'pt-br' | 'en-us' | 'es-es';
 export type MaterialType = 'image' | 'pdf' | 'video';
@@ -31,6 +32,17 @@ export interface Material {
   assets: Partial<Record<Language, MaterialAsset>>;
   active: boolean;
   createdAt: string;
+}
+
+export interface AccessLog {
+  id: string;
+  materialId: string;
+  materialTitle: string; // Denormalized for simpler display
+  userId: string;
+  userName: string;
+  userRole: Role;
+  language: Language;
+  timestamp: string;
 }
 
 export interface ColorScheme {
