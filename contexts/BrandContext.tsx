@@ -14,12 +14,27 @@ export const BrandProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fallback defaults in case DB fails completely
+  const defaults: SystemConfig = {
+      appName: 'Hub Conexão',
+      themeLight: { background: '#f8fafc', surface: '#ffffff', textMain: '#0f172a', textMuted: '#64748b', border: '#e2e8f0', accent: '#3b82f6', success: '#10b981', warning: '#f59e0b', error: '#ef4444' },
+      themeDark: { background: '#0f172a', surface: '#1e293b', textMain: '#f8fafc', textMuted: '#94a3b8', border: 'transparent', accent: '#6366f1', success: '#22c55e', warning: '#eab308', error: '#ef4444' }
+  };
+
   // Fetch config on load
   useEffect(() => {
-    mockDb.getSystemConfig().then(data => {
-      setConfig(data);
-      setIsLoading(false);
-    });
+    mockDb.getSystemConfig()
+      .then(data => {
+        setConfig(data);
+      })
+      .catch(err => {
+        console.error("BrandContext Init Error:", err);
+        // Apply defaults to ensure app loads even if DB is down/missing
+        setConfig(defaults);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   // Inject CSS Variables for both Light and Dark modes
@@ -64,13 +79,24 @@ export const BrandProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [config]);
 
   const updateConfig = async (newConfig: SystemConfig) => {
-    await mockDb.updateSystemConfig(newConfig);
-    setConfig(newConfig);
+    try {
+        await mockDb.updateSystemConfig(newConfig);
+        setConfig(newConfig);
+    } catch (e) {
+        console.error("Failed to update config", e);
+        throw e;
+    }
   };
 
   return (
-    <BrandContext.Provider value={{ config: config!, updateConfig, isLoading }}>
-      {!isLoading && config ? children : <div className="h-screen w-full flex items-center justify-center bg-gray-50 text-gray-500">Carregando...</div>}
+    <BrandContext.Provider value={{ config: config || defaults, updateConfig, isLoading }}>
+      {!isLoading && config ? children : (
+         // Simple loading indicator instead of blank screen
+         <div className="h-screen w-full flex flex-col gap-4 items-center justify-center bg-gray-50 text-gray-500 font-medium animate-pulse">
+            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-blue-500 animate-spin"></div>
+            <span>Carregando Sistema...</span>
+         </div>
+      )}
     </BrandContext.Provider>
   );
 };

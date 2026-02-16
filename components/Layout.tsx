@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBrand } from '../contexts/BrandContext';
-import { Moon, Sun, LogOut, Globe } from 'lucide-react';
+import { Moon, Sun, LogOut, Globe, ChevronDown } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -12,60 +12,77 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const { config } = useBrand();
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-200 relative">
+    <div className="min-h-screen flex flex-col transition-colors duration-500 relative">
       
-      {/* Floating Glass Header */}
-      {/* Removemos border-border e shadow-black/5 para um look mais clean em dark mode */}
-      <header className="sticky top-0 z-30 w-full px-4 pt-4 pointer-events-none">
+      {/* Floating Dynamic Header */}
+      <header className="sticky top-0 z-40 w-full px-4 pt-4 pointer-events-none">
         <div className="container mx-auto">
-            <div className="bg-surface/80 backdrop-blur-xl shadow-lg rounded-2xl p-4 flex justify-between items-center pointer-events-auto transition-all duration-300 hover:shadow-xl hover:bg-surface/90">
-            <div className="flex items-center space-x-3">
-                {config.logoUrl ? (
-                <img src={config.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
-                ) : (
-                <div className="w-9 h-9 bg-gradient-to-br from-accent to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-accent/20">
-                    {config.appName.substring(0, 2).toUpperCase()}
+            <div className="bg-surface/70 dark:bg-[#0f172a]/70 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-2xl shadow-black/5 rounded-2xl p-3 pl-5 flex justify-between items-center pointer-events-auto transition-all duration-500 hover:bg-surface/90 hover:shadow-accent/5">
+            
+            {/* Logo Area */}
+            <div className="flex items-center space-x-4 group cursor-default">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-accent blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-500 rounded-full"></div>
+                    {config.logoUrl ? (
+                    <img src={config.logoUrl} alt="Logo" className="relative h-9 w-auto object-contain transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                    <div className="relative w-10 h-10 bg-gradient-to-br from-accent to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-accent/20 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
+                        {config.appName.substring(0, 2).toUpperCase()}
+                    </div>
+                    )}
                 </div>
-                )}
-                <h1 className="text-xl font-bold hidden sm:block text-main tracking-tight">{config.appName}</h1>
+                <h1 className="text-xl font-bold hidden sm:block text-main tracking-tight group-hover:text-accent transition-colors duration-300">{config.appName}</h1>
             </div>
 
-            <div className="flex items-center gap-4">
-                {/* Language Selector - Borderless */}
-                <div className="hidden md:flex items-center gap-1 bg-page/50 rounded-full px-3 py-1.5 hover:bg-page transition-colors">
-                <Globe size={14} className="text-muted" />
-                <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value as any)}
-                    className="bg-transparent border-none text-xs focus:ring-0 cursor-pointer text-main font-bold outline-none uppercase"
-                >
-                    <option value="pt-br">PT</option>
-                    <option value="en-us">EN</option>
-                    <option value="es-es">ES</option>
-                </select>
+            {/* Actions Area */}
+            <div className="flex items-center gap-3">
+                
+                {/* Language Pill */}
+                <div className="hidden md:flex items-center gap-2 bg-page/50 border border-border/50 rounded-full px-1.5 py-1.5 hover:border-accent/50 transition-colors group">
+                    <div className="p-1.5 bg-surface rounded-full shadow-sm text-muted group-hover:text-accent transition-colors">
+                        <Globe size={14} />
+                    </div>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as any)}
+                        className="bg-transparent border-none text-xs focus:ring-0 cursor-pointer text-main font-bold outline-none uppercase pr-2 hover:text-accent transition-colors"
+                    >
+                        <option value="pt-br">PT</option>
+                        <option value="en-us">EN</option>
+                        <option value="es-es">ES</option>
+                    </select>
                 </div>
 
                 {/* Theme Toggle */}
                 <button
                 onClick={toggleTheme}
-                className="p-2 rounded-full hover:bg-page text-muted hover:text-accent transition-all hover:rotate-12"
+                className="relative overflow-hidden w-10 h-10 rounded-full flex items-center justify-center bg-page/50 border border-border/50 text-muted hover:text-accent hover:border-accent/50 hover:bg-surface transition-all duration-300 group"
                 >
-                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                    <div className="absolute inset-0 bg-accent/10 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></div>
+                    <div className="relative z-10 transition-transform duration-500 group-hover:rotate-180">
+                        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                    </div>
                 </button>
 
-                {/* User Info & Logout */}
-                <div className="flex items-center gap-3 pl-4">
-                <div className="text-right hidden md:block leading-tight">
-                    <p className="text-sm font-bold text-main">{user?.name}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted font-semibold">{t(`role.${user?.role}`)}</p>
-                </div>
-                <button
-                    onClick={logout}
-                    className="group p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all"
-                    title={t('common.logout')}
-                >
-                    <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+                {/* User Profile Pill */}
+                <div className="flex items-center gap-3 pl-2">
+                    <div className="flex items-center gap-3 bg-page/50 border border-border/50 hover:border-accent/30 rounded-full p-1 pr-4 transition-all duration-300 cursor-default group">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-accent to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow-md ring-2 ring-surface group-hover:ring-accent/30 transition-all">
+                            {user?.name.charAt(0)}
+                        </div>
+                        <div className="hidden md:block leading-none">
+                            <p className="text-xs font-bold text-main group-hover:text-accent transition-colors">{user?.name.split(' ')[0]}</p>
+                            <p className="text-[9px] uppercase tracking-wide text-muted font-semibold mt-0.5">{t(`role.${user?.role}`)}</p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={logout}
+                        className="group relative w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30"
+                        title={t('common.logout')}
+                    >
+                        <LogOut size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                    </button>
                 </div>
             </div>
             </div>

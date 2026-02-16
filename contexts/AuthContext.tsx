@@ -7,10 +7,11 @@ interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginMock: (role: Role) => Promise<void>; // New Method
+  loginMock: (role: Role) => Promise<void>; 
   register: (data: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isDbMissing: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,26 +19,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDbMissing, setIsDbMissing] = useState(false);
 
-  // Sincronizar sessão do Supabase ao carregar
   useEffect(() => {
-    // 1. Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
+    // 1. Timeout de Segurança: Se o Supabase demorar > 3s, libera o app para evitar tela branca eterna
+    const safetyTimeout = setTimeout(() => {
+        console.warn("Auth timeout reached - forcing UI unlock");
         setIsLoading(false);
-      }
-    });
+    }, 3000);
 
-    // 2. Escutar mudanças de auth (login, logout, token refresh)
+    const initAuth = async () => {
+        // Checa banco primeiro
+        await checkDbConnection();
+        
+        // Depois checa sessão
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+            await fetchProfile(session.user.id);
+        } else {
+            setIsLoading(false);
+        }
+        
+        clearTimeout(safetyTimeout);
+    };
+
+    initAuth();
+
+    // Listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         fetchProfile(session.user.id);
       } else {
-        // Se não estamos em sessão real, não limpamos o user imediatamente se for mock, 
-        // mas aqui assumimos que auth real tem prioridade.
-        // O Mock Login setará o user manualmente e não disparará esse listener.
         if (!user || !user.id.startsWith('mock-')) {
             setUser(null);
         }
@@ -48,14 +61,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  const checkDbConnection = async () => {
+    // Verificação leve para saber se as tabelas existem
+    const { error } = await supabase.from('system_config').select('id').limit(1);
+    if (error && error.code === '42P01') {
+        setIsDbMissing(true);
+        setIsLoading(false); // CRÍTICO: Desbloqueia a UI imediatamente para mostrar o Modal
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
     try {
       const profile = await mockDb.getProfileById(userId);
       if (profile) {
         setUser(profile);
+      } else {
+        // PERFIL ÓRFÃO: Usuário existe no Auth, mas não na tabela profiles
+        console.warn("Perfil não encontrado para usuário logado. Tentando recuperar...");
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+             await ensureProfile(userId, {
+                 name: userData.user.user_metadata.name || 'Usuário Recuperado',
+                 email: userData.user.email,
+                 role: userData.user.user_metadata.role || 'client',
+                 whatsapp: userData.user.user_metadata.whatsapp || '',
+                 cro: userData.user.user_metadata.cro
+             });
+             const newProfile = await mockDb.getProfileById(userId);
+             if (newProfile) setUser(newProfile);
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao carregar perfil:", error);
+      if (error.code === '42P01') {
+          setIsDbMissing(true);
+          setIsLoading(false); // Garante desbloqueio em caso de erro fatal
+      }
     } finally {
       setIsLoading(false);
     }
@@ -68,15 +109,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) throw error;
-    mockDb.disableMockMode(); // Ensure we are using real DB on real login
+    mockDb.disableMockMode();
   };
 
   const loginMock = async (role: Role) => {
       setIsLoading(true);
-      mockDb.enableMockMode(); // Activate mock data
+      mockDb.enableMockMode();
       
-      // Get the mock user for this role from mockDb
-      // We assume consistent IDs in mockDb
       const mockId = role === 'super_admin' ? 'mock-admin' : 
                      role === 'client' ? 'mock-client' :
                      role === 'distributor' ? 'mock-distrib' : 'mock-consult';
@@ -88,44 +127,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
   };
 
-  const register = async (data: any) => {
-    // 1. Tentar cadastro no Supabase Auth
-    // Nota: Se houver um Trigger no banco (Abordagem 3) que falha, este signUp falhará.
-    // Se o trigger não existir, o signUp funciona mas o perfil não é criado.
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password || 'temp-password-change-me', // Fallback apenas para segurança
-      options: {
-        data: {
+  // Helper para garantir que o perfil existe no banco
+  const ensureProfile = async (userId: string, data: any) => {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+          id: userId,
           name: data.name,
+          email: data.email,
           role: data.role,
           whatsapp: data.whatsapp,
-          cro: data.cro
-        }
+          cro: data.cro || null,
+          status: 'pending', 
+          preferences: { theme: 'light', language: 'pt-br' }
+      }, { onConflict: 'id' });
+
+      if (profileError) {
+          console.error("Erro ao salvar perfil manual:", profileError);
+          if (profileError.code === '42P01') { 
+              setIsDbMissing(true);
+              setIsLoading(false);
+              throw new Error("MISSING_DB_SETUP");
+          }
       }
-    });
+  };
 
-    if (authError) throw authError;
+  const register = async (data: any) => {
+    try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password || 'temp-password-change-me',
+          options: {
+            data: {
+              name: data.name,
+              role: data.role,
+              whatsapp: data.whatsapp,
+              cro: data.cro
+            }
+          }
+        });
 
-    // 2. Garantir criação do perfil (Fallback client-side)
-    // Se o Trigger não existir ou não tiver rodado, inserimos manualmente.
-    // Usamos 'upsert' para não dar erro se o Trigger já tiver criado.
-    if (authData.user) {
-        const { error: profileError } = await supabase.from('profiles').upsert({
-            id: authData.user.id,
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            whatsapp: data.whatsapp,
-            cro: data.cro,
-            status: 'pending', // Usuários novos entram como pendente por padrão
-            preferences: { theme: 'light', language: 'pt-br' }
-        }, { onConflict: 'id' });
+        if (authError) throw authError;
 
-        if (profileError) {
-            console.error("Aviso: Falha ao garantir perfil via cliente. Verifique se o Trigger do banco está ativo.", profileError);
-            // Não lançamos erro aqui para não bloquear o fluxo se o usuário já foi criado no Auth.
+        if (authData.user) {
+            await ensureProfile(authData.user.id, data);
         }
+
+    } catch (error: any) {
+        if (error.code === '42P01' || error.message?.includes('Database error')) {
+             setIsDbMissing(true);
+             setIsLoading(false);
+             throw new Error("MISSING_DB_SETUP");
+        }
+        throw error;
     }
     
     alert("Cadastro realizado! Verifique seu e-mail para confirmar a conta (se configurado) ou aguarde aprovação.");
@@ -142,7 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginMock, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginMock, register, logout, isLoading, isDbMissing }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

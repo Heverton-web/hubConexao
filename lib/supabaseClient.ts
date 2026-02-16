@@ -1,15 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Substitua estas variáveis pelas suas credenciais reais do Supabase
-// Em produção, use import.meta.env.VITE_SUPABASE_URL
-
-// Função auxiliar para acesso seguro às variáveis de ambiente
+// Acesso seguro às variáveis de ambiente injetadas pelo Vite
 const getEnv = (key: string) => {
   const meta = import.meta as any;
   return meta?.env?.[key];
 };
 
-const SUPABASE_URL = getEnv('VITE_SUPABASE_URL') || 'https://mojqcygmahwrrypbhgrk.supabase.co';
-const SUPABASE_ANON_KEY = getEnv('VITE_SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vanFjeWdtYWh3cnJ5cGJoZ3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzU2MjAsImV4cCI6MjA4NjQxMTYyMH0.PeHw-sf-gsxaWNA-at3PXmurSp1KLzK8KiIoGBLlilc';
+const SUPABASE_URL = getEnv('VITE_SUPABASE_URL');
+const SUPABASE_ANON_KEY = getEnv('VITE_SUPABASE_ANON_KEY');
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Fallback apenas para evitar crash inicial se as envs não existirem
+// O usuário verá um erro claro no console ou o Modal de SQL se tentar usar.
+const FALLBACK_URL = 'https://placeholder.supabase.co';
+const FALLBACK_KEY = 'placeholder';
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('⚠️ VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não encontrados no .env. Usando placeholders.');
+}
+
+export const supabase = createClient(
+    SUPABASE_URL || FALLBACK_URL, 
+    SUPABASE_ANON_KEY || FALLBACK_KEY
+);

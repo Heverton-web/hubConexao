@@ -36,7 +36,7 @@ const ColorInput = ({ label, value, onChange, hint }: { label: string, value: st
   </div>
 );
 
-const ThemeEditorSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
+const ThemeEditorSection = ({ title, children }: { title: string, children?: React.ReactNode }) => (
   <div className="space-y-3 mb-6">
       <h4 className="text-xs font-bold uppercase text-muted tracking-wider pb-2">{title}</h4>
       <div className="grid grid-cols-2 gap-4">
@@ -233,28 +233,40 @@ export const Admin: React.FC = () => {
   };
 
   const handleSaveMaterial = async (materialData: any) => {
-    if (materialData.id) {
-      await mockDb.updateMaterial(materialData);
-    } else {
-      await mockDb.createMaterial(materialData);
+    try {
+        if (materialData.id) {
+            await mockDb.updateMaterial(materialData);
+        } else {
+            await mockDb.createMaterial(materialData);
+        }
+        loadMaterials();
+    } catch (e: any) {
+        alert("Erro ao salvar material: " + (e.message || e.details || JSON.stringify(e)));
     }
-    loadMaterials();
   };
 
   const handleToggleActive = async (material: Material) => {
-    await mockDb.updateMaterial({ ...material, active: !material.active });
-    loadMaterials();
+    try {
+        await mockDb.updateMaterial({ ...material, active: !material.active });
+        loadMaterials();
+    } catch (e: any) {
+        alert("Erro ao atualizar status: " + e.message);
+    }
   };
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
 
-    if (itemToDelete.type === 'material') {
-        await mockDb.deleteMaterial(itemToDelete.id);
-        loadMaterials();
-    } else {
-        await mockDb.deleteUser(itemToDelete.id);
-        loadUsers();
+    try {
+        if (itemToDelete.type === 'material') {
+            await mockDb.deleteMaterial(itemToDelete.id);
+            loadMaterials();
+        } else {
+            await mockDb.deleteUser(itemToDelete.id);
+            loadUsers();
+        }
+    } catch (e: any) {
+        alert("Erro ao excluir: " + e.message);
     }
     setIsConfirmOpen(false);
     setItemToDelete(null);
@@ -297,8 +309,12 @@ export const Admin: React.FC = () => {
 
   // --- User Handlers ---
   const handleUserStatus = async (userId: string, status: UserStatus) => {
-    await mockDb.updateUserStatus(userId, status);
-    loadUsers();
+    try {
+        await mockDb.updateUserStatus(userId, status);
+        loadUsers();
+    } catch (e: any) {
+        alert("Erro ao atualizar status do usuário: " + e.message);
+    }
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -307,8 +323,12 @@ export const Admin: React.FC = () => {
   };
   
   const handleSaveUser = async (updatedUser: UserProfile) => {
-    await mockDb.updateUser(updatedUser);
-    loadUsers();
+    try {
+        await mockDb.updateUser(updatedUser);
+        loadUsers();
+    } catch (e: any) {
+        alert("Erro ao atualizar usuário: " + e.message);
+    }
   };
 
   const handleCopyLink = (url: string, role: string) => {
@@ -414,8 +434,12 @@ export const Admin: React.FC = () => {
 
   // --- Settings Handlers ---
   const handleSaveSettings = async () => {
-    await updateConfig(localConfig);
-    alert('Configurações salvas e aplicadas!');
+    try {
+        await updateConfig(localConfig);
+        alert('Configurações salvas e aplicadas!');
+    } catch (e: any) {
+        alert("Erro ao salvar configurações: " + e.message);
+    }
   };
 
   // Render Helpers (Functions instead of components to avoid unmount on re-render)
