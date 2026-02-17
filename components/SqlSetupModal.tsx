@@ -123,60 +123,60 @@ insert into public.system_config (id) values (1) on conflict do nothing;
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-fade-in" style={{ zIndex: 99999 }}>
       <div className="bg-surface rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up border border-yellow-500/30">
-        
+
         <div className="p-6 border-b border-border bg-surface flex justify-between items-start">
-            <div className="flex gap-4">
-                <div className="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 animate-pulse">
-                    <Database size={24} />
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold text-main">Configuração do Banco (Modo Aberto)</h3>
-                    <p className="text-sm text-muted mt-1 max-w-lg">
-                        Este script remove as políticas de segurança (RLS) para facilitar o desenvolvimento.
-                        <strong>Copie e execute no Painel do Supabase > SQL Editor.</strong>
-                    </p>
-                </div>
+          <div className="flex gap-4">
+            <div className="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 animate-pulse">
+              <Database size={24} />
             </div>
-            {onClose && (
-                <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted hover:text-main transition-colors">
-                    <X size={24} />
-                </button>
-            )}
+            <div>
+              <h3 className="text-xl font-bold text-main">Configuração do Banco (Modo Aberto)</h3>
+              <p className="text-sm text-muted mt-1 max-w-lg">
+                Este script remove as políticas de segurança (RLS) para facilitar o desenvolvimento.
+                <strong>Copie e execute no Painel do Supabase {'>'} SQL Editor.</strong>
+              </p>
+            </div>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted hover:text-main transition-colors">
+              <X size={24} />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-hidden relative group bg-[#1e1e1e]">
-            <div className="absolute top-4 right-4 z-10">
-                <button 
-                    onClick={handleCopy}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
+          <div className="absolute top-4 right-4 z-10">
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                         ${copied ? 'bg-green-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}
                     `}
-                >
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                    {copied ? 'Copiado!' : 'Copiar SQL'}
-                </button>
-            </div>
-            <pre className="w-full h-full p-6 overflow-auto text-xs font-mono text-blue-100 leading-relaxed selection:bg-blue-500/30">
-                <code>{sqlScript}</code>
-            </pre>
+            >
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              {copied ? 'Copiado!' : 'Copiar SQL'}
+            </button>
+          </div>
+          <pre className="w-full h-full p-6 overflow-auto text-xs font-mono text-blue-100 leading-relaxed selection:bg-blue-500/30">
+            <code>{sqlScript}</code>
+          </pre>
         </div>
 
         <div className="p-4 bg-surface border-t border-border flex justify-between items-center">
-            <p className="text-xs text-muted">Após rodar o script, recarregue esta página.</p>
-            <div className="flex gap-3">
-                <button onClick={() => window.open('https://supabase.com/dashboard/project/_/sql', '_blank')} className="px-4 py-2.5 rounded-lg bg-page hover:bg-muted/10 text-muted hover:text-main font-bold transition-colors text-xs uppercase tracking-wide">
-                    Abrir SQL Editor
-                </button>
-                {onClose ? (
-                    <button onClick={onClose} className="px-6 py-2.5 rounded-lg bg-main text-page font-bold hover:opacity-90 transition-opacity">
-                        Já executei
-                    </button>
-                ) : (
-                    <button onClick={() => window.location.reload()} className="px-6 py-2.5 rounded-lg bg-accent text-white font-bold hover:opacity-90 transition-opacity">
-                        Recarregar Aplicação
-                    </button>
-                )}
-            </div>
+          <p className="text-xs text-muted">Após rodar o script, recarregue esta página.</p>
+          <div className="flex gap-3">
+            <button onClick={() => window.open('https://supabase.com/dashboard/project/_/sql', '_blank')} className="px-4 py-2.5 rounded-lg bg-page hover:bg-muted/10 text-muted hover:text-main font-bold transition-colors text-xs uppercase tracking-wide">
+              Abrir SQL Editor
+            </button>
+            {onClose ? (
+              <button onClick={onClose} className="px-6 py-2.5 rounded-lg bg-main text-page font-bold hover:opacity-90 transition-opacity">
+                Já executei
+              </button>
+            ) : (
+              <button onClick={() => window.location.reload()} className="px-6 py-2.5 rounded-lg bg-accent text-white font-bold hover:opacity-90 transition-opacity">
+                Recarregar Aplicação
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

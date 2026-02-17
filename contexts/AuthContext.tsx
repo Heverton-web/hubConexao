@@ -7,7 +7,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginMock: (role: Role) => Promise<void>; 
+  loginMock: (role: Role) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -24,24 +24,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // 1. Timeout de Segurança: Se o Supabase demorar > 3s, libera o app para evitar tela branca eterna
     const safetyTimeout = setTimeout(() => {
-        console.warn("Auth timeout reached - forcing UI unlock");
-        setIsLoading(false);
+      console.warn("Auth timeout reached - forcing UI unlock");
+      setIsLoading(false);
     }, 3000);
 
     const initAuth = async () => {
-        // Checa banco primeiro
-        await checkDbConnection();
-        
-        // Depois checa sessão
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-            await fetchProfile(session.user.id);
-        } else {
-            setIsLoading(false);
-        }
-        
-        clearTimeout(safetyTimeout);
+      // Checa banco primeiro
+      await checkDbConnection();
+
+      // Depois checa sessão
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setIsLoading(false);
+      }
+
+      clearTimeout(safetyTimeout);
     };
 
     initAuth();
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchProfile(session.user.id);
       } else {
         if (!user || !user.id.startsWith('mock-')) {
-            setUser(null);
+          setUser(null);
         }
         setIsLoading(false);
       }
@@ -65,8 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Verificação leve para saber se as tabelas existem
     const { error } = await supabase.from('system_config').select('id').limit(1);
     if (error && error.code === '42P01') {
-        setIsDbMissing(true);
-        setIsLoading(false); // CRÍTICO: Desbloqueia a UI imediatamente para mostrar o Modal
+      setIsDbMissing(true);
+      setIsLoading(false); // CRÍTICO: Desbloqueia a UI imediatamente para mostrar o Modal
     }
   };
 
@@ -80,22 +80,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn("Perfil não encontrado para usuário logado. Tentando recuperar...");
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {
-             await ensureProfile(userId, {
-                 name: userData.user.user_metadata.name || 'Usuário Recuperado',
-                 email: userData.user.email,
-                 role: userData.user.user_metadata.role || 'client',
-                 whatsapp: userData.user.user_metadata.whatsapp || '',
-                 cro: userData.user.user_metadata.cro
-             });
-             const newProfile = await mockDb.getProfileById(userId);
-             if (newProfile) setUser(newProfile);
+          await ensureProfile(userId, {
+            name: userData.user.user_metadata.name || 'Usuário Recuperado',
+            email: userData.user.email,
+            role: userData.user.user_metadata.role || 'client',
+            whatsapp: userData.user.user_metadata.whatsapp || '',
+            cro: userData.user.user_metadata.cro
+          });
+          const newProfile = await mockDb.getProfileById(userId);
+          if (newProfile) setUser(newProfile);
         }
       }
     } catch (error: any) {
       console.error("Erro ao carregar perfil:", error);
       if (error.code === '42P01') {
-          setIsDbMissing(true);
-          setIsLoading(false); // Garante desbloqueio em caso de erro fatal
+        setIsDbMissing(true);
+        setIsLoading(false); // Garante desbloqueio em caso de erro fatal
       }
     } finally {
       setIsLoading(false);
@@ -113,83 +113,83 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginMock = async (role: Role) => {
-      setIsLoading(true);
-      mockDb.enableMockMode();
-      
-      const mockId = role === 'super_admin' ? 'mock-admin' : 
-                     role === 'client' ? 'mock-client' :
-                     role === 'distributor' ? 'mock-distrib' : 'mock-consult';
-      
-      const profile = await mockDb.getProfileById(mockId);
-      if (profile) {
-          setUser(profile);
-      }
-      setIsLoading(false);
+    setIsLoading(true);
+    mockDb.enableMockMode();
+
+    const mockId = role === 'super_admin' ? 'mock-admin' :
+      role === 'client' ? 'mock-client' :
+        role === 'distributor' ? 'mock-distrib' : 'mock-consult';
+
+    const profile = await mockDb.getProfileById(mockId);
+    if (profile) {
+      setUser(profile);
+    }
+    setIsLoading(false);
   };
 
   // Helper para garantir que o perfil existe no banco
   const ensureProfile = async (userId: string, data: any) => {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-          id: userId,
-          name: data.name,
-          email: data.email,
-          role: data.role,
-          whatsapp: data.whatsapp,
-          cro: data.cro || null,
-          status: 'pending', 
-          preferences: { theme: 'light', language: 'pt-br' }
-      }, { onConflict: 'id' });
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: userId,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      whatsapp: data.whatsapp,
+      cro: data.cro || null,
+      status: 'pending',
+      preferences: { theme: 'light', language: 'pt-br' }
+    }, { onConflict: 'id' });
 
-      if (profileError) {
-          console.error("Erro ao salvar perfil manual:", profileError);
-          if (profileError.code === '42P01') { 
-              setIsDbMissing(true);
-              setIsLoading(false);
-              throw new Error("MISSING_DB_SETUP");
-          }
+    if (profileError) {
+      console.error("Erro ao salvar perfil manual:", profileError);
+      if (profileError.code === '42P01') {
+        setIsDbMissing(true);
+        setIsLoading(false);
+        throw new Error("MISSING_DB_SETUP");
       }
+    }
   };
 
   const register = async (data: any) => {
     try {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password || 'temp-password-change-me',
-          options: {
-            data: {
-              name: data.name,
-              role: data.role,
-              whatsapp: data.whatsapp,
-              cro: data.cro
-            }
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password || 'temp-password-change-me',
+        options: {
+          data: {
+            name: data.name,
+            role: data.role,
+            whatsapp: data.whatsapp,
+            cro: data.cro
           }
-        });
-
-        if (authError) throw authError;
-
-        if (authData.user) {
-            await ensureProfile(authData.user.id, data);
         }
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        await ensureProfile(authData.user.id, data);
+      }
 
     } catch (error: any) {
-        if (error.code === '42P01' || error.message?.includes('Database error')) {
-             setIsDbMissing(true);
-             setIsLoading(false);
-             throw new Error("MISSING_DB_SETUP");
-        }
-        throw error;
+      if (error.code === '42P01' || error.message?.includes('Database error')) {
+        setIsDbMissing(true);
+        setIsLoading(false);
+        throw new Error("MISSING_DB_SETUP");
+      }
+      throw error;
     }
-    
-    alert("Cadastro realizado! Verifique seu e-mail para confirmar a conta (se configurado) ou aguarde aprovação.");
+
+    // Sucesso silencioso - o componente chamador mostrará o toast
   };
 
   const logout = async () => {
     if (user && user.id.startsWith('mock-')) {
-        setUser(null);
-        mockDb.disableMockMode();
+      setUser(null);
+      mockDb.disableMockMode();
     } else {
-        await supabase.auth.signOut();
-        setUser(null);
+      await supabase.auth.signOut();
+      setUser(null);
     }
   };
 

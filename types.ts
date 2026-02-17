@@ -32,6 +32,8 @@ export interface Material {
   type: MaterialType;
   allowedRoles: Role[];
   assets: Partial<Record<Language, MaterialAsset>>;
+  tags: string[];
+  category?: string;
   active: boolean;
   createdAt: string;
 }

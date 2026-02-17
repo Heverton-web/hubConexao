@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Mail, MessageCircle, Send, Paperclip } from 'lucide-react';
 import { useBrand } from '../contexts/BrandContext';
+import { useToast } from '../contexts/ToastContext';
 
 interface UserCommunicationModalProps {
   user: UserProfile;
@@ -13,7 +14,8 @@ interface UserCommunicationModalProps {
 export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ user, onClose }) => {
   const { t } = useLanguage();
   const { config } = useBrand();
-  
+  const { addToast } = useToast();
+
   const [mode, setMode] = useState<'email' | 'whatsapp'>('email');
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +31,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
     setLoading(true);
 
     if (!config.webhookUrl) {
-      alert('Webhook URL não configurada em Configurações.');
+      addToast('Webhook URL não configurada em Configurações.', 'warning');
       setLoading(false);
       return;
     }
@@ -60,17 +62,17 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
       console.log('--- N8N WEBHOOK PAYLOAD ---');
       console.log(JSON.stringify(payload, null, 2));
       console.log('Target:', config.webhookUrl);
-      
+
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // Real call implementation would be:
       // await fetch(config.webhookUrl, { method: 'POST', body: JSON.stringify(payload) });
 
-      alert(t('comm.success'));
+      addToast(t('comm.success'), 'success');
       onClose();
     } catch (error) {
-      alert('Erro ao enviar.');
+      addToast('Erro ao enviar.', 'error');
     } finally {
       setLoading(false);
     }
@@ -79,17 +81,17 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
       <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl flex flex-col border border-border overflow-hidden animate-slide-up">
-        
+
         {/* Header */}
         <div className="p-4 border-b border-border flex justify-between items-center bg-surface">
           <div className="flex items-center gap-3">
-             <div className="p-2 bg-page rounded-lg border border-border">
-                {mode === 'email' ? <Mail className="text-blue-500" size={20} /> : <MessageCircle className="text-green-500" size={20} />}
-             </div>
-             <div>
-               <h3 className="font-bold text-lg text-main">{t('comm.title')}</h3>
-               <p className="text-xs text-muted">Para: {user.name} ({mode === 'email' ? user.email : user.whatsapp})</p>
-             </div>
+            <div className="p-2 bg-page rounded-lg border border-border">
+              {mode === 'email' ? <Mail className="text-blue-500" size={20} /> : <MessageCircle className="text-green-500" size={20} />}
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-main">{t('comm.title')}</h3>
+              <p className="text-xs text-muted">Para: {user.name} ({mode === 'email' ? user.email : user.whatsapp})</p>
+            </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted hover:text-main">
             <X size={24} />
@@ -97,13 +99,13 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
         </div>
 
         <div className="flex border-b border-border">
-          <button 
+          <button
             onClick={() => setMode('email')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${mode === 'email' ? 'bg-surface text-accent border-b-2 border-accent' : 'bg-page text-muted hover:text-main'}`}
           >
             {t('comm.type.email')}
           </button>
-          <button 
+          <button
             onClick={() => setMode('whatsapp')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${mode === 'whatsapp' ? 'bg-surface text-green-500 border-b-2 border-green-500' : 'bg-page text-muted hover:text-main'}`}
           >
@@ -112,21 +114,21 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-surface flex-1 overflow-y-auto">
-          
+
           {mode === 'email' && (
             <div className="space-y-4 animate-fade-in">
               <div>
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subject')}</label>
-                <input 
-                  type="text" required 
+                <input
+                  type="text" required
                   className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                   value={subject} onChange={e => setSubject(e.target.value)}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subtitle')}</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
                   value={subtitle} onChange={e => setSubtitle(e.target.value)}
                 />
@@ -135,23 +137,23 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
           )}
 
           {mode === 'whatsapp' && (
-             <div className="space-y-4 animate-fade-in">
-               <div>
-                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.wa.type')}</label>
-                 <div className="flex gap-2">
-                   <button type="button" onClick={() => setWaType('text')} className={`flex-1 py-2 rounded border text-sm ${waType === 'text' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.text')}</button>
-                   <button type="button" onClick={() => setWaType('file')} className={`flex-1 py-2 rounded border text-sm ${waType === 'file' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.file')}</button>
-                 </div>
-               </div>
-             </div>
+            <div className="space-y-4 animate-fade-in">
+              <div>
+                <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.wa.type')}</label>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setWaType('text')} className={`flex-1 py-2 rounded border text-sm ${waType === 'text' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.text')}</button>
+                  <button type="button" onClick={() => setWaType('file')} className={`flex-1 py-2 rounded border text-sm ${waType === 'file' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.file')}</button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Common Fields */}
           <div>
             <label className="block text-xs font-semibold text-main mb-1.5">
-               {mode === 'email' ? t('comm.email.body') : t('comm.wa.message')}
+              {mode === 'email' ? t('comm.email.body') : t('comm.wa.message')}
             </label>
-            <textarea 
+            <textarea
               required
               rows={5}
               className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none resize-none"
@@ -161,15 +163,15 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
 
           {(mode === 'email' || (mode === 'whatsapp' && waType === 'file')) && (
             <div className="animate-fade-in">
-               <label className="block text-xs font-semibold text-main mb-1.5 flex items-center gap-2">
-                 <Paperclip size={14} /> {t('comm.file.url')}
-               </label>
-               <input 
-                  type="text" required={mode === 'whatsapp' && waType === 'file'}
-                  placeholder="https://..."
-                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none font-mono text-xs"
-                  value={fileUrl} onChange={e => setFileUrl(e.target.value)}
-                />
+              <label className="block text-xs font-semibold text-main mb-1.5 flex items-center gap-2">
+                <Paperclip size={14} /> {t('comm.file.url')}
+              </label>
+              <input
+                type="text" required={mode === 'whatsapp' && waType === 'file'}
+                placeholder="https://..."
+                className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none font-mono text-xs"
+                value={fileUrl} onChange={e => setFileUrl(e.target.value)}
+              />
             </div>
           )}
 
@@ -177,8 +179,8 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
 
         <div className="p-4 border-t border-border bg-page flex justify-end gap-3">
           <button onClick={onClose} type="button" className="px-5 py-2.5 rounded-lg text-muted hover:bg-muted/10 font-medium">{t('cancel')}</button>
-          <button 
-            onClick={handleSubmit} 
+          <button
+            onClick={handleSubmit}
             disabled={loading}
             className={`
               px-6 py-2.5 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg transition-transform active:scale-95
