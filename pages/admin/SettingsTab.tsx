@@ -5,8 +5,9 @@ import { useToast } from '../../contexts/ToastContext';
 import { useBrand } from '../../contexts/BrandContext';
 import { ChevronRight, Sun, Moon, Save, ExternalLink, Copy, CheckCircle, Share2, Image as ImageIcon, X, Check } from 'lucide-react';
 
-// Lucide doesn't have "Type", "Webhook", "Palette" exactly — let's use suitable alternatives
-import { Type, Webhook, Palette } from 'lucide-react';
+import { Type, Webhook, Palette, Smartphone, Key, ShieldCheck, Trash2, Plus, Clock } from 'lucide-react';
+import { mockDb } from '../../lib/mockDb';
+import { ApiKey } from '../../types';
 
 // --- External Helper Components ---
 const ColorInput = ({ label, value, onChange, hint }: { label: string, value: string, onChange: (val: string) => void, hint: string }) => (
@@ -73,8 +74,53 @@ export const SettingsTab: React.FC = () => {
     const { addToast } = useToast();
 
     const [localConfig, setLocalConfig] = useState<SystemConfig>(config);
-    const [settingsTab, setSettingsTab] = useState<'identity' | 'integrations' | 'themes' | 'invites'>('identity');
+    const [settingsTab, setSettingsTab] = useState<'identity' | 'integrations' | 'api-keys' | 'themes' | 'invites'>('identity');
     const [copiedLink, setCopiedLink] = useState<string | null>(null);
+    const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+    const [newKeyName, setNewKeyName] = useState('');
+    const [isLoadingKeys, setIsLoadingKeys] = useState(false);
+
+    // Initial load for API keys
+    React.useEffect(() => {
+        if (settingsTab === 'api-keys') {
+            loadApiKeys();
+        }
+    }, [settingsTab]);
+
+    const loadApiKeys = async () => {
+        setIsLoadingKeys(true);
+        try {
+            const keys = await mockDb.getApiKeys();
+            setApiKeys(keys);
+        } catch (e) {
+            addToast('Erro ao carregar chaves de API', 'error');
+        } finally {
+            setIsLoadingKeys(false);
+        }
+    };
+
+    const handleCreateKey = async () => {
+        if (!newKeyName.trim()) return;
+        try {
+            const key = await mockDb.createApiKey(newKeyName);
+            setApiKeys([key, ...apiKeys]);
+            setNewKeyName('');
+            addToast('Chave de API gerada com sucesso!', 'success');
+        } catch (e) {
+            addToast('Erro ao gerar chave', 'error');
+        }
+    };
+
+    const handleDeleteKey = async (id: string) => {
+        if (!confirm('Tem certeza que deseja revogar esta chave?')) return;
+        try {
+            await mockDb.deleteApiKey(id);
+            setApiKeys(apiKeys.filter(k => k.id !== id));
+            addToast('Chave revogada', 'success');
+        } catch (e) {
+            addToast('Erro ao revogar chave', 'error');
+        }
+    };
 
     const handleSaveSettings = async () => {
         try {
@@ -122,6 +168,7 @@ export const SettingsTab: React.FC = () => {
                         <p className="px-4 py-2 text-xs font-bold uppercase text-muted tracking-wider mb-2">Opções</p>
                         {renderSettingsSidebarItem('identity', 'Identidade Visual', Type)}
                         {renderSettingsSidebarItem('integrations', 'Integrações', Webhook)}
+                        {renderSettingsSidebarItem('api-keys', 'Chaves de API (ERP)', Key)}
                         {renderSettingsSidebarItem('themes', 'Temas', Palette)}
                         {renderSettingsSidebarItem('invites', t('user.invite'), Share2)}
                     </div>
@@ -133,11 +180,12 @@ export const SettingsTab: React.FC = () => {
                     <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xl font-bold text-main flex items-center gap-2">
                             {settingsTab === 'identity' && <><Type size={24} className="text-accent" /> Identidade Visual</>}
-                            {settingsTab === 'integrations' && <><Webhook size={24} className="text-purple-500" /> Integrações</>}
+                            {settingsTab === 'integrations' && <><Webhook size={24} className="text-purple-500" /> Integrações & Webhooks</>}
+                            {settingsTab === 'api-keys' && <><Key size={24} className="text-indigo-500" /> API para Sistemas Externos (Protheus/TOTVS)</>}
                             {settingsTab === 'themes' && <><Palette size={24} className="text-orange-500" /> Personalização de Temas</>}
                             {settingsTab === 'invites' && <><Share2 size={24} className="text-green-500" /> {t('user.invite')}</>}
                         </h3>
-                        {settingsTab !== 'invites' && (
+                        {settingsTab !== 'invites' && settingsTab !== 'api-keys' && (
                             <button onClick={handleSaveSettings} className="bg-accent text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-accent/20 hover:opacity-90 transition-opacity flex items-center gap-2">
                                 <Save size={18} /> Salvar Alterações
                             </button>
@@ -178,9 +226,14 @@ export const SettingsTab: React.FC = () => {
 
                     {/* Integrations */}
                     {settingsTab === 'integrations' && (
-                        <div className="bg-surface p-6 rounded-xl shadow-sm animate-fade-in">
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-main">URL do Webhook (N8N)</label>
+                        <div className="space-y-6 animate-fade-in">
+                            {/* n8n Webhook */}
+                            <div className="bg-surface p-6 rounded-xl shadow-sm border border-border/50">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Webhook size={20} className="text-purple-500" />
+                                    <h4 className="font-bold text-main">Automação de Dados (n8n / Zapier)</h4>
+                                </div>
+                                <label className="block text-sm font-medium mb-1 text-main">URL do Webhook Master</label>
                                 <div className="flex gap-2">
                                     <div className="p-3 bg-page rounded-l-lg text-muted font-bold text-xs flex items-center">POST</div>
                                     <input
@@ -192,8 +245,123 @@ export const SettingsTab: React.FC = () => {
                                     />
                                 </div>
                                 <p className="text-xs text-muted mt-3 leading-relaxed">
-                                    Esta URL será chamada via POST com um payload JSON sempre que uma mensagem for enviada através da gestão de usuários.
+                                    O Hub enviará notificações de eventos (novo usuário, conclusão de trilha) para esta URL para processamento externo no ERP.
                                 </p>
+                            </div>
+
+                            {/* WhatsApp Integration */}
+                            <div className="bg-surface p-6 rounded-xl shadow-sm border border-border/50">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Smartphone size={20} className="text-green-500" />
+                                    <h4 className="font-bold text-main">Notificações WhatsApp (Evolution API)</h4>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1 text-main">API Key</label>
+                                        <input
+                                            type="password"
+                                            value={localConfig.whatsappApiKey || ''}
+                                            onChange={e => setLocalConfig({ ...localConfig, whatsappApiKey: e.target.value })}
+                                            className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1 text-main">Nome da Instância</label>
+                                        <input
+                                            type="text"
+                                            placeholder="ex: hub-conexao"
+                                            value={localConfig.whatsappInstance || ''}
+                                            onChange={e => setLocalConfig({ ...localConfig, whatsappInstance: e.target.value })}
+                                            className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-muted mt-3">
+                                    Permite que o sistema envie avisos automáticos de novos materiais diretamente para o WhatsApp dos consultores.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* API Keys */}
+                    {settingsTab === 'api-keys' && (
+                        <div className="space-y-6 animate-fade-in">
+                            <div className="bg-surface p-6 rounded-xl shadow-sm border border-border/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <ShieldCheck size={20} className="text-indigo-500" />
+                                    <h4 className="font-bold text-main">Gerenciamento de Tokens</h4>
+                                </div>
+                                <p className="text-sm text-muted mb-6">Gere chaves para que sistemas como Protheus/TOTVS possam enviar dados de XP e Ranking sincronizados com o ERP.</p>
+
+                                <div className="flex gap-2 mb-8">
+                                    <input
+                                        type="text"
+                                        placeholder="Nome da Integração (ex: Protheus Produção)"
+                                        value={newKeyName}
+                                        onChange={e => setNewKeyName(e.target.value)}
+                                        className="flex-1 p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
+                                    />
+                                    <button
+                                        onClick={handleCreateKey}
+                                        className="bg-accent text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
+                                    >
+                                        <Plus size={18} /> Gerar Token
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {isLoadingKeys ? (
+                                        <div className="text-center py-8 text-muted italic">Carregando chaves...</div>
+                                    ) : apiKeys.length === 0 ? (
+                                        <div className="text-center py-8 text-muted border-2 border-dashed border-border rounded-xl">
+                                            Nenhuma chave de API gerada até o momento.
+                                        </div>
+                                    ) : (
+                                        apiKeys.map(apiKey => (
+                                            <div key={apiKey.id} className="bg-page p-4 rounded-xl border border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                                        <Key size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-main">{apiKey.name}</p>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <code className="text-[10px] bg-surface px-2 py-0.5 rounded text-accent font-mono border border-accent/20">
+                                                                {apiKey.key.substring(0, 12)}••••••••••••
+                                                            </code>
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(apiKey.key);
+                                                                    addToast('Chave completa copiada!', 'success');
+                                                                }}
+                                                                className="text-muted hover:text-accent transition-colors"
+                                                            >
+                                                                <Copy size={12} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between md:justify-end gap-6">
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] text-muted flex items-center gap-1">
+                                                            <Clock size={10} /> Criada em: {new Date(apiKey.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                        <p className="text-[10px] text-muted">
+                                                            Último uso: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleDateString() : 'Nunca'}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteKey(apiKey.id)}
+                                                        className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
+                                                        title="Revogar Chave"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

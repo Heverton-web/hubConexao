@@ -99,10 +99,20 @@ export interface ColorScheme {
   error: string;      // Status Erro, Excluir, Inativo
 }
 
+export interface ApiKey {
+  id: string;
+  name: string;
+  key: string;
+  createdAt: string;
+  lastUsedAt?: string;
+}
+
 export interface SystemConfig {
   appName: string;
   logoUrl?: string;
-  webhookUrl?: string; // New field for N8N integration
+  webhookUrl?: string; // n8n
+  whatsappApiKey?: string;
+  whatsappInstance?: string;
   themeLight: ColorScheme;
   themeDark: ColorScheme;
 }

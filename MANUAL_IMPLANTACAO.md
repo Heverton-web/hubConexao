@@ -113,6 +113,28 @@ CREATE POLICY "Materiais visíveis por role" ON public.materials
 FOR SELECT USING (
   (SELECT role FROM public.profiles WHERE id = auth.uid()) = ANY(allowed_roles)
 );
+
+-- 10. Tabelas de Configuração e Chaves de API (Enterprise)
+CREATE TABLE public.system_config (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    app_name TEXT DEFAULT 'Hub Conexão',
+    logo_url TEXT,
+    webhook_url TEXT, -- n8n
+    whatsapp_api_key TEXT,
+    whatsapp_instance TEXT,
+    theme_light JSONB,
+    theme_dark JSONB,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT one_row_only CHECK (id = 1)
+);
+
+CREATE TABLE public.api_keys (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    key TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_used_at TIMESTAMP WITH TIME ZONE
+);
 ```
 
 1. **Configuração do Storage**:
