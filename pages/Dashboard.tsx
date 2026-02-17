@@ -353,15 +353,13 @@ export const Dashboard: React.FC = () => {
 
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      // Logic to show generic page numbers nicely could be more complex, 
-                      // but for now simple sliding window or just simple list if small
                       let pageNum = i + 1;
                       if (totalPages > 5 && currentPage > 3) {
                         pageNum = currentPage - 2 + i;
                       }
                       // Clamp
                       if (pageNum > totalPages) return null;
-                      if (pageNum < 1) return null; // Should not happen with current logic if careful
+                      if (pageNum < 1) return null;
 
                       return (
                         <button
@@ -394,15 +392,13 @@ export const Dashboard: React.FC = () => {
         )}
       </div>
 
-      {
-        viewingMaterial && (
-          <ViewerModal
-            material={viewingMaterial.mat}
-            language={viewingMaterial.lang}
-            onClose={() => setViewingMaterial(null)}
-          />
-        )
-      }
-    </div >
+      {viewingMaterial && (
+        <ViewerModal
+          material={viewingMaterial.mat}
+          language={viewingMaterial.lang}
+          onClose={() => setViewingMaterial(null)}
+        />
+      )}
+    </div>
   );
 };
