@@ -19,6 +19,11 @@ export interface UsePaginationReturn<T> {
 export function usePagination<T>({ data, itemsPerPage = 12 }: UsePaginationProps<T>): UsePaginationReturn<T> {
     const [currentPage, setCurrentPage] = useState(1);
 
+    // Reset to page 1 when data changes (filtering)
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [data.length]);
+
     const totalPages = useMemo(() => Math.ceil(data.length / itemsPerPage), [data.length, itemsPerPage]);
 
     const currentData = useMemo(() => {
@@ -41,9 +46,13 @@ export function usePagination<T>({ data, itemsPerPage = 12 }: UsePaginationProps
     };
 
     // Reset page when data length changes significantly (e.g. filtering)
-    // Note: specific useEffect logic can be added here if needed, 
-    // currently we rely on user resetting page if filter changes
-    // or we can add a listener to reset if totalPages changes drastically
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        } else if (data.length === 0) {
+            setCurrentPage(1);
+        }
+    }, [data.length, totalPages, currentPage]);
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, data.length);

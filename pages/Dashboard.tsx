@@ -10,6 +10,39 @@ import { Search, Grid, FileText, Image as ImageIcon, Video, Filter, ChevronRight
 import { useKeyboardShortcuts, Shortcut } from '../hooks/useKeyboardShortcuts';
 import { usePagination } from '../hooks/usePagination';
 
+// Modern Pill Menu Item
+const MenuCategory = ({ type, icon: Icon, label, count, active, onClick }: { type: MaterialType | 'all', icon: any, label: string, count: number, active: boolean, onClick: (type: MaterialType | 'all') => void }) => (
+  <button
+    onClick={() => onClick(type)}
+    className={`
+      group relative w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between transition-all duration-500 ease-out overflow-hidden
+      ${active
+        ? 'bg-gradient-to-r from-accent to-accent/80 text-white shadow-lg shadow-accent/30 translate-x-2'
+        : 'bg-transparent text-muted hover:bg-surface hover:text-main'}
+    `}
+  >
+    {/* Dynamic Background on Hover (Inactive) */}
+    {!active && <div className="absolute inset-0 bg-surface/0 group-hover:bg-surface/50 transition-colors duration-300"></div>}
+
+    <div className="flex items-center gap-4 relative z-10">
+      <div className={`p-2 rounded-xl transition-all duration-300 ${active ? 'bg-white/20 text-white' : 'bg-surface border border-border group-hover:scale-110 group-hover:border-accent/30'}`}>
+        <Icon size={18} />
+      </div>
+      <span className={`text-sm tracking-wide ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
+    </div>
+
+    <div className="flex items-center gap-2 relative z-10">
+      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all duration-300
+          ${active
+          ? 'bg-white/20 text-white backdrop-blur-sm'
+          : 'bg-surface border border-border group-hover:border-accent/30'}
+       `}>
+        {count}
+      </span>
+    </div>
+  </button>
+);
+
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
@@ -132,39 +165,6 @@ export const Dashboard: React.FC = () => {
     setViewingMaterial({ mat, lang });
   };
 
-  // Modern Pill Menu Item
-  const MenuCategory = ({ type, icon: Icon, label, count, active }: { type: MaterialType | 'all', icon: any, label: string, count: number, active: boolean }) => (
-    <button
-      onClick={() => setFilterType(type)}
-      className={`
-        group relative w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between transition-all duration-500 ease-out overflow-hidden
-        ${active
-          ? 'bg-gradient-to-r from-accent to-accent/80 text-white shadow-lg shadow-accent/30 translate-x-2'
-          : 'bg-transparent text-muted hover:bg-surface hover:text-main'}
-      `}
-    >
-      {/* Dynamic Background on Hover (Inactive) */}
-      {!active && <div className="absolute inset-0 bg-surface/0 group-hover:bg-surface/50 transition-colors duration-300"></div>}
-
-      <div className="flex items-center gap-4 relative z-10">
-        <div className={`p-2 rounded-xl transition-all duration-300 ${active ? 'bg-white/20 text-white' : 'bg-surface border border-border group-hover:scale-110 group-hover:border-accent/30'}`}>
-          <Icon size={18} />
-        </div>
-        <span className={`text-sm tracking-wide ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
-      </div>
-
-      <div className="flex items-center gap-2 relative z-10">
-        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all duration-300
-            ${active
-            ? 'bg-white/20 text-white backdrop-blur-sm'
-            : 'bg-surface border border-border group-hover:border-accent/30'}
-         `}>
-          {count}
-        </span>
-      </div>
-    </button>
-  );
-
   return (
     <div className="flex flex-col md:flex-row gap-8 relative">
 
@@ -186,10 +186,10 @@ export const Dashboard: React.FC = () => {
               </h3>
             </div>
 
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="all" icon={Grid} label={t('filter.all')} count={counts.all} active={filterType === 'all'} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="pdf" icon={FileText} label={t('filter.pdf')} count={counts.pdf} active={filterType === 'pdf'} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="image" icon={ImageIcon} label={t('filter.image')} count={counts.image} active={filterType === 'image'} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="video" icon={Video} label={t('filter.video')} count={counts.video} active={filterType === 'video'} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="all" icon={Grid} label={t('filter.all')} count={counts.all} active={filterType === 'all'} onClick={setFilterType} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="pdf" icon={FileText} label={t('filter.pdf')} count={counts.pdf} active={filterType === 'pdf'} onClick={setFilterType} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="image" icon={ImageIcon} label={t('filter.image')} count={counts.image} active={filterType === 'image'} onClick={setFilterType} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="video" icon={Video} label={t('filter.video')} count={counts.video} active={filterType === 'video'} onClick={setFilterType} /></div>
 
             {availableCategories.length > 0 && (
               <>
@@ -394,13 +394,15 @@ export const Dashboard: React.FC = () => {
         )}
       </div>
 
-      {viewingMaterial && (
-        <ViewerModal
-          material={viewingMaterial.mat}
-          language={viewingMaterial.lang}
-          onClose={() => setViewingMaterial(null)}
-        />
-      )}
-    </div>
+      {
+        viewingMaterial && (
+          <ViewerModal
+            material={viewingMaterial.mat}
+            language={viewingMaterial.lang}
+            onClose={() => setViewingMaterial(null)}
+          />
+        )
+      }
+    </div >
   );
 };
