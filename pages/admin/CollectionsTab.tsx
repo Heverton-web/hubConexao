@@ -38,12 +38,30 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
         }
     }, [globalLoading]);
 
-    const handleSave = async (col: Partial<Collection>) => {
+    const handleSave = async (col: Partial<Collection>, materialIds: string[]) => {
+        let savedCol: Collection;
         if (col.id) {
             await mockDb.updateCollection(col as Collection);
+            savedCol = col as Collection;
         } else {
-            await mockDb.createCollection(col as any);
+            savedCol = await mockDb.createCollection(col as any);
         }
+
+        // Logic for handling item updates (simplified for mock/base version)
+        // In a real DB we'd want a more robust sync, but here we can:
+        // 1. Remove old items (if editing)
+        if (col.id) {
+            const currentItems = await mockDb.getCollectionItems(col.id);
+            for (const item of currentItems) {
+                await mockDb.removeMaterialFromCollection(item.item.id);
+            }
+        }
+
+        // 2. Add new items in order
+        for (const matId of materialIds) {
+            await mockDb.addMaterialToCollection(savedCol.id, matId);
+        }
+
         setIsModalOpen(false);
         fetchCollections();
     };

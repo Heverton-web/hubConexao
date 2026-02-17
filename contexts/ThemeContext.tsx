@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -18,7 +18,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.classList.add(theme);
   }, [theme]);
 
-  const toggleTheme = (e?: React.MouseEvent<HTMLElement> | MouseEvent) => {
+  const toggleTheme = useCallback((e?: React.MouseEvent<HTMLElement> | MouseEvent) => {
     const isAppearanceTransition =
       // @ts-ignore
       document.startViewTransition &&
@@ -60,10 +60,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       );
     });
-  };
+  }, [theme]);
+
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

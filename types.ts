@@ -18,6 +18,8 @@ export interface UserProfile {
     theme: 'light' | 'dark';
     language: Language;
   };
+  points?: number;
+  rank?: string;
 }
 
 export interface MaterialAsset {
@@ -36,6 +38,7 @@ export interface Material {
   category?: string;
   active: boolean;
   createdAt: string;
+  points?: number;
 }
 
 // --- Novas Interfaces para Trilhas e Progresso (Fase 1) ---
@@ -48,6 +51,13 @@ export interface Collection {
   allowedRoles: Role[];
   active: boolean;
   createdAt: string;
+  stats?: {
+    video: number;
+    pdf: number;
+    image: number;
+  };
+  points?: number;
+  progress?: number; // 0 to 100
 }
 
 export interface CollectionItem {

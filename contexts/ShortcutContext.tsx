@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 export type KeyCombo = {
     key: string;
@@ -36,7 +36,10 @@ export const ShortcutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, []);
 
     const unregisterShortcut = useCallback((id: string) => {
-        setShortcuts(prev => prev.filter(s => s.id !== id));
+        setShortcuts(prev => {
+            if (!prev.some(s => s.id === id)) return prev;
+            return prev.filter(s => s.id !== id);
+        });
     }, []);
 
     useEffect(() => {
@@ -82,8 +85,10 @@ export const ShortcutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [shortcuts]);
 
+    const value = useMemo(() => ({ shortcuts, registerShortcut, unregisterShortcut }), [shortcuts, registerShortcut, unregisterShortcut]);
+
     return (
-        <ShortcutContext.Provider value={{ shortcuts, registerShortcut, unregisterShortcut }}>
+        <ShortcutContext.Provider value={value}>
             {children}
         </ShortcutContext.Provider>
     );

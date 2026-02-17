@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { mockDb } from '../lib/mockDb';
-import { Material, Language, MaterialType } from '../types';
+import { Material, Language, MaterialType, Collection } from '../types';
 import { MaterialCard } from '../components/MaterialCard';
+import { CollectionCard } from '../components/CollectionCard';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ViewerModal } from '../components/ViewerModal';
 import { Search, Grid, FileText, Image as ImageIcon, Video, Filter, ChevronRight, ChevronLeft, Layers, Sparkles, Command, Tag, Folder } from 'lucide-react';
@@ -44,20 +46,21 @@ const MenuCategory = ({ type, icon: Icon, label, count, active, onClick }: { typ
 );
 
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingMaterial, setViewingMaterial] = useState<{ mat: Material, lang: Language } | null>(null);
 
-  // Filter States
+  const [showTrails, setShowTrails] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<MaterialType | 'all'>('all');
   const [filterCategory, setFilterCategory] = useState<string | 'all'>('all');
   const [filterTag, setFilterTag] = useState<string | 'all'>('all');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const dashboardShortcuts: Shortcut[] = [
+  const dashboardShortcuts: Shortcut[] = useMemo(() => [
     {
       id: 'focus-search',
       combo: { key: 'k', ctrl: true },
@@ -84,7 +87,7 @@ export const Dashboard: React.FC = () => {
     { id: 'filter-pdf', combo: { key: '2', alt: true }, action: () => setFilterType('pdf'), description: 'Filtrar: PDFs' },
     { id: 'filter-img', combo: { key: '3', alt: true }, action: () => setFilterType('image'), description: 'Filtrar: Imagens' },
     { id: 'filter-vid', combo: { key: '4', alt: true }, action: () => setFilterType('video'), description: 'Filtrar: Vídeos' }
-  ];
+  ], []);
 
   useKeyboardShortcuts(dashboardShortcuts);
 
@@ -101,7 +104,28 @@ export const Dashboard: React.FC = () => {
     }
   }, [user]);
 
-  const filteredMaterials = useMemo(() => {
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+  useEffect(() => {
+    if (user && showTrails) {
+      setLoading(true);
+      setTimeout(() => {
+        mockDb.getCollections(user.role).then(data => {
+          setCollections(data);
+          setLoading(false);
+        });
+      }, 600);
+    }
+  }, [user, showTrails]);
+
+  const filteredData = useMemo(() => {
+    if (showTrails) {
+      return collections.filter(c => {
+        const title = c.title[language] || c.title['pt-br'] || '';
+        return title.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+    }
+
     return materials.filter(mat => {
       if (!mat.allowedRoles.includes(user?.role as any)) return false;
       if (user?.allowedTypes && user.allowedTypes.length > 0) {
@@ -115,7 +139,7 @@ export const Dashboard: React.FC = () => {
 
       return matchesSearch && matchesType && matchesCategory && matchesTag;
     });
-  }, [materials, searchTerm, filterType, filterCategory, filterTag, language, user]);
+  }, [materials, collections, searchTerm, filterType, filterCategory, filterTag, language, user, showTrails]);
 
   // Pagination
   const {
@@ -127,7 +151,7 @@ export const Dashboard: React.FC = () => {
     jumpToPage,
     startIndex,
     endIndex
-  } = usePagination({ data: filteredMaterials, itemsPerPage: 9 });
+  } = usePagination({ data: filteredData as any[], itemsPerPage: 9 });
 
   // Scroll to top of grid when page changes
   useEffect(() => {
@@ -186,10 +210,34 @@ export const Dashboard: React.FC = () => {
               </h3>
             </div>
 
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="all" icon={Grid} label={t('filter.all')} count={counts.all} active={filterType === 'all'} onClick={setFilterType} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="pdf" icon={FileText} label={t('filter.pdf')} count={counts.pdf} active={filterType === 'pdf'} onClick={setFilterType} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="image" icon={ImageIcon} label={t('filter.image')} count={counts.image} active={filterType === 'image'} onClick={setFilterType} /></div>
-            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="video" icon={Video} label={t('filter.video')} count={counts.video} active={filterType === 'video'} onClick={setFilterType} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="all" icon={Grid} label={t('filter.all')} count={counts.all} active={!showTrails && filterType === 'all'} onClick={() => { setShowTrails(false); setFilterType('all'); }} /></div>
+
+            <div className="min-w-[160px] md:min-w-0 flex-1">
+              <button
+                onClick={() => setShowTrails(true)}
+                className={`
+                  group relative w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between transition-all duration-500 ease-out overflow-hidden
+                  ${showTrails
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30 translate-x-2'
+                    : 'bg-transparent text-muted hover:bg-surface hover:text-main'}
+                `}
+              >
+                {!showTrails && <div className="absolute inset-0 bg-surface/0 group-hover:bg-surface/50 transition-colors duration-300"></div>}
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className={`p-2 rounded-xl transition-all duration-300 ${showTrails ? 'bg-white/20 text-white' : 'bg-surface border border-border group-hover:scale-110 group-hover:border-purple-500/30'}`}>
+                    <Layers size={18} />
+                  </div>
+                  <span className={`text-sm tracking-wide ${showTrails ? 'font-bold' : 'font-medium'}`}>{t('tab.collections')}</span>
+                </div>
+                <div className="flex items-center gap-2 relative z-10">
+                  <Sparkles size={14} className={showTrails ? 'text-white/60' : 'text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity'} />
+                </div>
+              </button>
+            </div>
+
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="pdf" icon={FileText} label={t('filter.pdf')} count={counts.pdf} active={!showTrails && filterType === 'pdf'} onClick={(t) => { setShowTrails(false); setFilterType(t); }} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="image" icon={ImageIcon} label={t('filter.image')} count={counts.image} active={!showTrails && filterType === 'image'} onClick={(t) => { setShowTrails(false); setFilterType(t); }} /></div>
+            <div className="min-w-[160px] md:min-w-0 flex-1"><MenuCategory type="video" icon={Video} label={t('filter.video')} count={counts.video} active={!showTrails && filterType === 'video'} onClick={(t) => { setShowTrails(false); setFilterType(t); }} /></div>
 
             {availableCategories.length > 0 && (
               <>
@@ -301,7 +349,7 @@ export const Dashboard: React.FC = () => {
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : filteredMaterials.length === 0 ? (
+        ) : filteredData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 bg-surface/20 backdrop-blur-sm border border-white/5 rounded-[2rem] animate-fade-in text-center px-4">
             <div className="w-24 h-24 bg-gradient-to-br from-surface to-page rounded-full flex items-center justify-center mb-6 text-muted shadow-lg shadow-black/5 ring-4 ring-surface">
               <Filter size={32} className="opacity-50" />
@@ -321,16 +369,26 @@ export const Dashboard: React.FC = () => {
         ) : (
           <div className="flex flex-col gap-8 pb-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {currentData.map((mat, index) => (
+              {currentData.map((item: any, index: number) => (
                 <div
-                  key={mat.id}
+                  key={item.id}
                   className="animate-slide-up"
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
-                  <MaterialCard
-                    material={mat}
-                    onView={handleViewMaterial}
-                  />
+                  {showTrails ? (
+                    <CollectionCard
+                      collection={item as Collection}
+                      onClick={(c) => {
+                        console.log('CLICKED TRAIL:', c.id, c);
+                        navigate(`/collections/${c.id}`);
+                      }}
+                    />
+                  ) : (
+                    <MaterialCard
+                      material={item as Material}
+                      onView={handleViewMaterial}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -339,7 +397,7 @@ export const Dashboard: React.FC = () => {
             {totalPages > 1 && (
               <div className="flex items-center justify-between bg-surface/50 backdrop-blur-sm p-4 rounded-2xl border border-white/5 animate-fade-in">
                 <span className="text-sm text-muted font-medium ml-2">
-                  {t('pagination.showing')} <strong className="text-main">{startIndex + 1}-{endIndex}</strong> {t('pagination.of')} <strong className="text-main">{filteredMaterials.length}</strong>
+                  {t('pagination.showing')} <strong className="text-main">{startIndex + 1}-{endIndex}</strong> {t('pagination.of')} <strong className="text-main">{filteredData.length}</strong>
                 </span>
 
                 <div className="flex items-center gap-2">

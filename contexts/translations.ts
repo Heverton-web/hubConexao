@@ -155,6 +155,42 @@ export const translations: Record<Language, Record<string, string>> = {
         'auth.test_env': 'Ambiente de Teste',
         'auth.btn.reset_db': 'Resetar Banco REAL',
         'auth.btn.seeding': 'Criando usuários...',
+
+        // Pagination & Lists
+        'pagination.showing': 'Mostrando',
+        'pagination.of': 'de',
+        'library': 'Biblioteca',
+        'filter.clear': 'Limpar filtros',
+        'no.results.title': 'Nenhum resultado encontrado',
+
+        // Tags & Categories
+        'category.placeholder': 'Ex: Marketing, Vendas...',
+        'filter.category.all': 'Todas as Categorias',
+        'tags.label': 'Tags',
+        'tags.add': 'Adicionar tag...',
+        'tags.count': 'tags',
+        'filter.tags.popular': 'Tags Populares',
+
+        // DropZone
+        'dropzone.file_or_url': 'Arquivo ou URL',
+        'dropzone.accept.video': 'Aceita MP4, Youtube, Embeds',
+        'dropzone.drag.image': 'Arraste uma imagem ou cole a URL',
+        'dropzone.drag.video': 'Arraste um vídeo ou cole link do YouTube/Drive',
+        'dropzone.drag.pdf': 'Arraste um PDF ou cole a URL',
+        'dropzone.drag.default': 'Arraste um arquivo ou cole uma URL',
+        'dropzone.paste.hint': 'Cole (Ctrl+V) ou clique para selecionar',
+        'dropzone.drop.here': 'Solte o arquivo aqui!',
+        'dropzone.uploaded': 'Enviado',
+        'dropzone.error.type': 'Tipo de arquivo inválido para este campo.',
+
+        'user.col.name': 'Usuário',
+        'user.col.contacts': 'Contatos',
+        'user.col.profile': 'Perfil',
+        'no.users': 'Nenhum usuário encontrado.',
+        'optional': '(Opcional)',
+        'material.modal.subtitle': 'Preencha as informações globais e o conteúdo por idioma.',
+        'material.video.link': 'Link do Vídeo',
+        'material.file': 'Arquivo',
     },
     'en-us': {
         'app.title': 'MaterialShare Pro',
@@ -287,11 +323,8 @@ export const translations: Record<Language, Record<string, string>> = {
         'library': 'Library',
         'filter.clear': 'Clear filters',
         'no.results.title': 'No results found',
-        'tips.pro.title': 'Pro Tip',
-        'tips.pro.desc': 'Use <kbd>Ctrl+K</kbd> to focus search quickly.',
 
         // Tags & Categories
-        'category.label': 'Category',
         'category.placeholder': 'Ex: Marketing, Sales...',
         'filter.category.all': 'All Categories',
         'tags.label': 'Tags',
@@ -475,5 +508,41 @@ export const translations: Record<Language, Record<string, string>> = {
         'analytics.rank.users': 'Top 5 Usuarios Activos',
         'analytics.filter.type': 'Filtrar por Tipo de Documento',
         'analytics.filter.role': 'Filtrar por Perfil de Usuario',
+
+        // Pagination & Lists
+        'pagination.showing': 'Mostrando',
+        'pagination.of': 'de',
+        'library': 'Biblioteca',
+        'filter.clear': 'Limpiar filtros',
+        'no.results.title': 'No se encontraron resultados',
+
+        // Tags & Categories
+        'category.placeholder': 'Ej: Marketing, Ventas...',
+        'filter.category.all': 'Todas las Categorías',
+        'tags.label': 'Etiquetas',
+        'tags.add': 'Añadir etiqueta...',
+        'tags.count': 'etiquetas',
+        'filter.tags.popular': 'Etiquetas Populares',
+
+        // DropZone
+        'dropzone.file_or_url': 'Archivo o URL',
+        'dropzone.accept.video': 'Acepta MP4, Youtube, Embeds',
+        'dropzone.drag.image': 'Arrastra una imagen o pega la URL',
+        'dropzone.drag.video': 'Arrastra un video o pega el enlace de YouTube/Drive',
+        'dropzone.drag.pdf': 'Arrastra un PDF o pega la URL',
+        'dropzone.drag.default': 'Arrastra un archivo o pega una URL',
+        'dropzone.paste.hint': 'Pega (Ctrl+V) o haz clic para seleccionar',
+        'dropzone.drop.here': '¡Suelta el archivo aquí!',
+        'dropzone.uploaded': 'Subido',
+        'dropzone.error.type': 'Tipo de archivo no válido para este campo.',
+
+        'user.col.name': 'Usuario',
+        'user.col.contacts': 'Contactos',
+        'user.col.profile': 'Perfil',
+        'no.users': 'No se encontraron usuarios.',
+        'optional': '(Opcional)',
+        'material.modal.subtitle': 'Complete la información global y el contenido por idioma.',
+        'material.video.link': 'Enlace del Video',
+        'material.file': 'Archivo',
     }
 };

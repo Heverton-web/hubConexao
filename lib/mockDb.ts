@@ -2,37 +2,46 @@ import { supabase } from './supabaseClient';
 import { Material, UserProfile, Role, SystemConfig, UserStatus, AccessLog, Language, Collection, CollectionItem, MaterialAsset } from '../types';
 
 // --- MOCK DATA STORE (FALLBACK ONLY FOR READS) ---
-let isMockMode = false; // Changed to false to use Supabase
+let isMockMode = true; // Changed to true as requested
+
+const RANKS = [
+  { name: 'Iniciante', minPoints: 0 },
+  { name: 'Bronze', minPoints: 500 },
+  { name: 'Prata', minPoints: 1500 },
+  { name: 'Ouro', minPoints: 3000 },
+  { name: 'Esmeralda', minPoints: 5000 },
+  { name: 'Master', minPoints: 10000 },
+];
 
 // Mock Data Definitions (still kept for reference/fallback if needed)
 const localUsers: UserProfile[] = [
-  { id: 'mock-admin', name: 'Super Admin (Mock)', email: 'admin@demo.com', role: 'super_admin', whatsapp: '11999999999', status: 'active', preferences: { theme: 'light', language: 'pt-br' } },
-  { id: 'mock-client', name: 'Cliente Exemplo', email: 'client@demo.com', role: 'client', whatsapp: '11988888888', cro: '12345', status: 'active', allowedTypes: ['pdf', 'image', 'video'], preferences: { theme: 'light', language: 'pt-br' } },
-  { id: 'mock-distrib', name: 'Distribuidor Parceiro', email: 'distributor@demo.com', role: 'distributor', whatsapp: '11977777777', status: 'active', preferences: { theme: 'light', language: 'pt-br' } },
-  { id: 'mock-consult', name: 'Consultor de Vendas', email: 'consultant@demo.com', role: 'consultant', whatsapp: '11966666666', status: 'active', preferences: { theme: 'light', language: 'pt-br' } }
+  { id: 'mock-admin', name: 'Super Admin (Mock)', email: 'admin@demo.com', role: 'super_admin', whatsapp: '11999999999', status: 'active', preferences: { theme: 'light', language: 'pt-br' }, points: 5000, rank: 'Esmeralda' },
+  { id: 'mock-client', name: 'Cliente Exemplo', email: 'client@demo.com', role: 'client', whatsapp: '11988888888', cro: '12345', status: 'active', allowedTypes: ['pdf', 'image', 'video'], preferences: { theme: 'light', language: 'pt-br' }, points: 120, rank: 'Iniciante' },
+  { id: 'mock-distrib', name: 'Distribuidor Parceiro', email: 'distributor@demo.com', role: 'distributor', whatsapp: '11977777777', status: 'active', preferences: { theme: 'light', language: 'pt-br' }, points: 1500, rank: 'Prata' },
+  { id: 'mock-consult', name: 'Consultor de Vendas', email: 'consultant@demo.com', role: 'consultant', whatsapp: '11966666666', status: 'active', preferences: { theme: 'light', language: 'pt-br' }, points: 3200, rank: 'Ouro' }
 ];
 
 const localMaterials: Material[] = [
-  { id: 'mat-1', title: { 'pt-br': 'Catálogo Geral 2024' }, type: 'pdf', category: 'Catálogos', tags: ['2024', 'Lançamento'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-01-15T10:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' }, 'en-us': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
-  { id: 'mat-2', title: { 'pt-br': 'Manual de Instalação - Porcelanato' }, type: 'pdf', category: 'Técnico', tags: ['Instalação', 'Obra'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-02-10T14:30:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
-  { id: 'mat-3', title: { 'pt-br': 'Campanha Verão 2025' }, type: 'video', category: 'Marketing', tags: ['Verão', 'Redes Sociais'], allowedRoles: ['distributor', 'consultant'], active: true, createdAt: '2024-03-05T09:15:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } } },
-  { id: 'mat-4', title: { 'pt-br': 'Tabela de Preços Q1 2025' }, type: 'pdf', category: 'Comercial', tags: ['Preços', 'Confidencial'], allowedRoles: ['distributor', 'super_admin'], active: true, createdAt: '2024-01-02T08:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
-  { id: 'mat-5', title: { 'pt-br': 'Treinamento: Superando Objeções' }, type: 'video', category: 'Treinamento', tags: ['Vendas', 'Negociação'], allowedRoles: ['consultant'], active: true, createdAt: '2024-03-20T16:45:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } } },
-  { id: 'mat-6', title: { 'pt-br': 'Ambiente Cozinha Planejada' }, type: 'image', category: 'Inspiração', tags: ['Cozinha', 'Decoração'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-04-01T11:20:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/800x600', status: 'published' } } },
-  { id: 'mat-7', title: { 'pt-br': 'Fachada Moderna' }, type: 'image', category: 'Inspiração', tags: ['Fachada', 'Arquitetura'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-04-05T13:10:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/800x600', status: 'published' } } },
-  { id: 'mat-8', title: { 'pt-br': 'Especificações Técnicas - Linha Premium' }, type: 'pdf', category: 'Técnico', tags: ['Premium', 'Especificações'], allowedRoles: ['consultant'], active: true, createdAt: '2024-02-28T10:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
-  { id: 'mat-9', title: { 'pt-br': 'Logo Kit (Vetores)' }, type: 'image', category: 'Marketing', tags: ['Branding', 'Logo'], allowedRoles: ['distributor'], active: true, createdAt: '2024-01-10T09:00:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/500x500', status: 'published' } } },
-  { id: 'mat-10', title: { 'pt-br': 'Vídeo Institucional 2024', 'en-us': 'Institutional Video 2024' }, type: 'video', category: 'Institucional', tags: ['Marca', 'História'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-01-01T12:00:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' }, 'en-us': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } } },
-  { id: 'mat-11', title: { 'pt-br': 'Guia de Cores 2025' }, type: 'pdf', category: 'Design', tags: ['Tendências', 'Cores'], allowedRoles: ['consultant', 'distributor'], active: true, createdAt: '2024-05-15T14:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
-  { id: 'mat-12', title: { 'pt-br': 'Post Instagram - Promoção' }, type: 'image', category: 'Marketing', tags: ['Social Media', 'Promo'], allowedRoles: ['distributor'], active: true, createdAt: '2024-06-01T10:30:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/1080x1080', status: 'published' } } },
-  { id: 'mat-13', title: { 'pt-br': 'Webinar: Tendências de Mercado' }, type: 'video', category: 'Treinamento', tags: ['Mercado', 'Estratégia'], allowedRoles: ['consultant', 'distributor'], active: true, createdAt: '2024-06-10T16:00:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } } },
-  { id: 'mat-14', title: { 'pt-br': 'Certificado de Garantia' }, type: 'pdf', category: 'Legal', tags: ['Garantia', 'Jurídico'], allowedRoles: ['client'], active: true, createdAt: '2024-01-20T08:30:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } } },
+  { id: 'mat-1', title: { 'pt-br': 'Catálogo Geral 2024' }, type: 'pdf', category: 'Catálogos', tags: ['2024', 'Lançamento'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-01-15T10:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 50 },
+  { id: 'mat-2', title: { 'pt-br': 'Manual de Instalação' }, type: 'pdf', category: 'Técnico', tags: ['Instalação'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-02-10T14:30:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 100 },
+  { id: 'mat-3', title: { 'pt-br': 'Campanha Verão 2025' }, type: 'video', category: 'Marketing', tags: ['Verão'], allowedRoles: ['distributor', 'consultant'], active: true, createdAt: '2024-03-05T09:15:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } }, points: 150 },
+  { id: 'mat-4', title: { 'pt-br': 'Tabela de Preços Q1' }, type: 'pdf', category: 'Comercial', tags: ['Preços'], allowedRoles: ['distributor', 'super_admin'], active: true, createdAt: '2024-01-02T08:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 50 },
+  { id: 'mat-5', title: { 'pt-br': 'Treinamento: Objeções' }, type: 'video', category: 'Treinamento', tags: ['Vendas'], allowedRoles: ['consultant'], active: true, createdAt: '2024-03-20T16:45:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } }, points: 200 },
+  { id: 'mat-6', title: { 'pt-br': 'Ambiente Cozinha' }, type: 'image', category: 'Inspiração', tags: ['Cozinha'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-04-01T11:20:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/800x600', status: 'published' } }, points: 30 },
+  { id: 'mat-7', title: { 'pt-br': 'Fachada Moderna' }, type: 'image', category: 'Inspiração', tags: ['Fachada'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-04-05T13:10:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/800x600', status: 'published' } }, points: 30 },
+  { id: 'mat-8', title: { 'pt-br': 'Especificações Técnicas' }, type: 'pdf', category: 'Técnico', tags: ['Premium'], allowedRoles: ['consultant'], active: true, createdAt: '2024-02-28T10:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 100 },
+  { id: 'mat-9', title: { 'pt-br': 'Logo Kit' }, type: 'image', category: 'Marketing', tags: ['Branding'], allowedRoles: ['distributor'], active: true, createdAt: '2024-01-10T09:00:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/500x500', status: 'published' } }, points: 30 },
+  { id: 'mat-10', title: { 'pt-br': 'Institucional 2024' }, type: 'video', category: 'Institucional', tags: ['Marca'], allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-01-01T12:00:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } }, points: 150 },
+  { id: 'mat-11', title: { 'pt-br': 'Guia de Cores 2025' }, type: 'pdf', category: 'Design', tags: ['Tendências', 'Cores'], allowedRoles: ['consultant', 'distributor'], active: true, createdAt: '2024-05-15T14:00:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 100 },
+  { id: 'mat-12', title: { 'pt-br': 'Post Instagram - Promoção' }, type: 'image', category: 'Marketing', tags: ['Social Media', 'Promo'], allowedRoles: ['distributor'], active: true, createdAt: '2024-06-01T10:30:00Z', assets: { 'pt-br': { url: 'https://via.placeholder.com/1080x1080', status: 'published' } }, points: 30 },
+  { id: 'mat-13', title: { 'pt-br': 'Webinar: Tendências de Mercado' }, type: 'video', category: 'Treinamento', tags: ['Mercado', 'Estratégia'], allowedRoles: ['consultant', 'distributor'], active: true, createdAt: '2024-06-10T16:00:00Z', assets: { 'pt-br': { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', status: 'published' } }, points: 200 },
+  { id: 'mat-14', title: { 'pt-br': 'Certificado de Garantia' }, type: 'pdf', category: 'Legal', tags: ['Garantia', 'Jurídico'], allowedRoles: ['client'], active: true, createdAt: '2024-01-20T08:30:00Z', assets: { 'pt-br': { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', status: 'published' } }, points: 50 },
 ];
 
 const localCollections: Collection[] = [
-  { id: 'col-1', title: { 'pt-br': 'Onboarding Consultores', 'en-us': 'Consultant Onboarding' }, description: { 'pt-br': 'Tudo que você precisa saber para começar.', 'en-us': 'Everything you need to know to start.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['consultant'], active: true, createdAt: '2024-01-10T10:00:00Z' },
-  { id: 'col-2', title: { 'pt-br': 'Lançamentos 2024', 'en-us': '2024 Releases' }, description: { 'pt-br': 'Conheça nossa nova linha de produtos.', 'en-us': 'Meet our new product line.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-02-15T14:00:00Z' },
-  { id: 'col-3', title: { 'pt-br': 'Kit Marketing Digital', 'en-us': 'Digital Marketing Kit' }, description: { 'pt-br': 'Materiais prontos para redes sociais.', 'en-us': 'Ready-to-use social media assets.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['distributor'], active: true, createdAt: '2024-03-01T09:00:00Z' }
+  { id: 'col-1', title: { 'pt-br': 'Onboarding Consultores', 'en-us': 'Consultant Onboarding' }, description: { 'pt-br': 'Tudo que você precisa saber para começar.', 'en-us': 'Everything you need to know to start.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['consultant'], active: true, createdAt: '2024-01-10T10:00:00Z', points: 500, progress: 65 },
+  { id: 'col-2', title: { 'pt-br': 'Lançamentos 2024', 'en-us': '2024 Releases' }, description: { 'pt-br': 'Conheça nossa nova linha de produtos.', 'en-us': 'Meet our new product line.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['client', 'distributor', 'consultant'], active: true, createdAt: '2024-02-15T14:00:00Z', points: 350, progress: 10 },
+  { id: 'col-3', title: { 'pt-br': 'Kit Marketing Digital', 'en-us': 'Digital Marketing Kit' }, description: { 'pt-br': 'Materiais prontos para redes sociais.', 'en-us': 'Ready-to-use social media assets.' }, coverImage: 'https://via.placeholder.com/400x200', allowedRoles: ['distributor'], active: true, createdAt: '2024-03-01T09:00:00Z', points: 1200, progress: 100 }
 ];
 
 const localCollectionItems = [
@@ -67,7 +76,9 @@ const mapProfileFromDb = (data: any): UserProfile => ({
   cro: data.cro,
   status: data.status,
   allowedTypes: data.allowed_types,
-  preferences: data.preferences || { theme: 'light', language: 'pt-br' }
+  preferences: data.preferences || { theme: 'light', language: 'pt-br' },
+  points: data.points || 0,
+  rank: data.rank || 'Iniciante'
 });
 
 const mapMaterialFromDb = (data: any): Material => {
@@ -90,9 +101,27 @@ const mapMaterialFromDb = (data: any): Material => {
     active: data.active,
     createdAt: data.created_at,
     tags: data.tags || [],
-    category: data.category
+    category: data.category,
+    points: data.points || 50
   };
 };
+
+const calculateRank = (points: number) => {
+  const rank = [...RANKS].reverse().find(r => points >= r.minPoints);
+  return rank ? rank.name : 'Iniciante';
+};
+
+const calculateCollectionStats = (collectionId: string) => {
+  const items = localCollectionItems.filter(i => i.collectionId === collectionId);
+  const stats = { video: 0, pdf: 0, image: 0 };
+  items.forEach(item => {
+    const mat = localMaterials.find(m => m.id === item.materialId);
+    if (mat) {
+      stats[mat.type]++;
+    }
+  });
+  return stats;
+}
 
 export const mockDb = {
 
@@ -348,7 +377,14 @@ export const mockDb = {
       if (error.code === '42P01') return [];
       throw error;
     }
-    return data || [];
+
+    const results = data || [];
+
+    // Virtual Stats in Mock Mode or if using DB without specific stats table
+    return results.map(c => ({
+      ...c,
+      stats: isMockMode ? calculateCollectionStats(c.id) : c.stats || { video: 0, pdf: 0, image: 0 }
+    }));
   },
 
   getCollectionById: async (id: string): Promise<Collection | null> => {
@@ -447,5 +483,40 @@ export const mockDb = {
   removeMaterialFromCollection: async (itemId: string): Promise<void> => {
     const { error } = await supabase.from('collection_items').delete().eq('id', itemId);
     if (error) throw error;
+  },
+
+  // --- GAMIFICATION ---
+  completeMaterial: async (userId: string, materialId: string): Promise<void> => {
+    // 1. Log completion in Supabase
+    const { error: progressError } = await supabase.from('user_progress').upsert({
+      user_id: userId,
+      material_id: materialId,
+      status: 'completed',
+      completed_at: new Date().toISOString()
+    });
+
+    if (progressError && progressError.code !== '42P01') console.error("Error saving progress:", progressError);
+
+    // 2. Award Points
+    const material = localMaterials.find(m => m.id === materialId);
+    const pointsToAdd = material?.points || 50;
+
+    if (isMockMode || userId.startsWith('mock-')) {
+      const user = localUsers.find(u => u.id === userId);
+      if (user) {
+        user.points = (user.points || 0) + pointsToAdd;
+        user.rank = calculateRank(user.points);
+      }
+    } else {
+      // Real DB Update
+      const { data: user } = await supabase.from('profiles').select('points').eq('id', userId).single();
+      if (user) {
+        const newPoints = (user.points || 0) + pointsToAdd;
+        await supabase.from('profiles').update({
+          points: newPoints,
+          rank: calculateRank(newPoints)
+        }).eq('id', userId);
+      }
+    }
   }
 };

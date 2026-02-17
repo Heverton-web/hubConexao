@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserProfile, Role } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { mockDb } from '../lib/mockDb';
@@ -61,16 +61,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkDbConnection = async () => {
+  const checkDbConnection = useCallback(async () => {
     // Verificação leve para saber se as tabelas existem
     const { error } = await supabase.from('system_config').select('id').limit(1);
     if (error && error.code === '42P01') {
       setIsDbMissing(true);
       setIsLoading(false); // CRÍTICO: Desbloqueia a UI imediatamente para mostrar o Modal
     }
-  };
+  }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const ensureProfile = useCallback(async (userId: string, data: any) => {
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: userId,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      whatsapp: data.whatsapp,
+      cro: data.cro || null,
+      status: 'pending',
+      preferences: { theme: 'light', language: 'pt-br' }
+    }, { onConflict: 'id' });
+
+    if (profileError) {
+      console.error("Erro ao salvar perfil manual:", profileError);
+      if (profileError.code === '42P01') {
+        setIsDbMissing(true);
+        setIsLoading(false);
+        throw new Error("MISSING_DB_SETUP");
+      }
+    }
+  }, []);
+
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const profile = await mockDb.getProfileById(userId);
       if (profile) {
@@ -100,9 +122,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [ensureProfile]);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -110,9 +132,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (error) throw error;
     mockDb.disableMockMode();
-  };
+  }, []);
 
-  const loginMock = async (role: Role) => {
+  const loginMock = useCallback(async (role: Role) => {
     setIsLoading(true);
     mockDb.enableMockMode();
 
@@ -125,32 +147,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(profile);
     }
     setIsLoading(false);
-  };
+  }, []);
 
-  // Helper para garantir que o perfil existe no banco
-  const ensureProfile = async (userId: string, data: any) => {
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: userId,
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      whatsapp: data.whatsapp,
-      cro: data.cro || null,
-      status: 'pending',
-      preferences: { theme: 'light', language: 'pt-br' }
-    }, { onConflict: 'id' });
 
-    if (profileError) {
-      console.error("Erro ao salvar perfil manual:", profileError);
-      if (profileError.code === '42P01') {
-        setIsDbMissing(true);
-        setIsLoading(false);
-        throw new Error("MISSING_DB_SETUP");
-      }
-    }
-  };
-
-  const register = async (data: any) => {
+  const register = useCallback(async (data: any) => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -181,9 +181,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Sucesso silencioso - o componente chamador mostrará o toast
-  };
+  }, [ensureProfile]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (user && user.id.startsWith('mock-')) {
       setUser(null);
       mockDb.disableMockMode();
@@ -191,10 +191,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.auth.signOut();
       setUser(null);
     }
-  };
+  }, [user]);
+
+  const value = useMemo(() => ({
+    user,
+    isAuthenticated: !!user,
+    login,
+    loginMock,
+    register,
+    logout,
+    isLoading,
+    isDbMissing
+  }), [user, login, loginMock, register, logout, isLoading, isDbMissing]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginMock, register, logout, isLoading, isDbMissing }}>
+    <AuthContext.Provider value={value}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -19,7 +19,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
     const [isShortcutsOpen, setIsShortcutsOpen] = React.useState(false);
 
-    const globalShortcuts: Shortcut[] = [
+    const globalShortcuts: Shortcut[] = useMemo(() => [
         {
             id: 'toggle-theme',
             combo: { key: 'j', ctrl: true },
@@ -43,7 +43,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             description: 'Sair da conta',
             global: true
         }
-    ];
+    ], [toggleTheme, logout, t]);
 
     useKeyboardShortcuts(globalShortcuts);
 
