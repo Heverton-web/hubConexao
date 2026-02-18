@@ -52,14 +52,14 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, onReload, isLoading =
         prevPage,
         startIndex,
         endIndex
-    } = usePagination({ data: filteredUsers, itemsPerPage: 10 });
+    } = usePagination<UserProfile>({ data: filteredUsers, itemsPerPage: 10 });
 
     const handleUserStatus = async (userId: string, status: UserStatus) => {
         try {
             await mockDb.updateUserStatus(userId, status);
             onReload();
         } catch (e: any) {
-            addToast('Erro ao atualizar status do usu\u00e1rio: ' + e.message, 'error');
+            addToast('Erro ao atualizar status do usuário: ' + e.message, 'error');
         }
     };
 
@@ -82,91 +82,108 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, onReload, isLoading =
             await mockDb.updateUser(updatedUser);
             onReload();
         } catch (e: any) {
-            addToast('Erro ao atualizar usu\u00e1rio: ' + e.message, 'error');
+            addToast('Erro ao atualizar usuário: ' + e.message, 'error');
         }
     };
 
     return (
-        <div className="animate-fade-in space-y-6">
-            {/* Filters Toolbar */}
-            <div className="bg-surface p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-2.5 text-muted" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nome ou email..."
-                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none focus:ring-2 focus:ring-accent text-main"
-                        value={userSearch}
-                        onChange={e => setUserSearch(e.target.value)}
-                    />
+        <div className="animate-reveal space-y-8">
+            {/* Filters Toolbar Aura */}
+            <div className="aura-glass p-6 rounded-3xl border-white/[0.03] flex flex-col lg:flex-row gap-6 items-center">
+                <div className="relative flex-1 w-full group/search">
+                    <div className="absolute inset-0 bg-accent/20 rounded-xl blur-lg opacity-0 group-focus-within/search:opacity-10 transition-all duration-500"></div>
+                    <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+                        <div className="pl-4 text-white/20 group-focus-within/search:text-accent transition-colors">
+                            <Search size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Buscar por nome ou email..."
+                            className="w-full bg-transparent border-none py-3 px-4 text-white placeholder-white/10 focus:ring-0 text-[13px] font-bold outline-none uppercase tracking-widest"
+                            value={userSearch}
+                            onChange={e => setUserSearch(e.target.value)}
+                        />
+                    </div>
                 </div>
-                <div className="flex w-full md:w-auto gap-3">
+
+                <div className="flex w-full lg:w-auto gap-4">
                     <select
-                        className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
+                        className="flex-1 lg:w-44 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[10px] font-black uppercase tracking-widest text-white/40 outline-none focus:border-accent/40 focus:bg-white/[0.04] transition-all appearance-none cursor-pointer"
                         value={userRoleFilter}
                         onChange={e => setUserRoleFilter(e.target.value as any)}
                     >
-                        <option value="all">{t('user.filter.all')}</option>
-                        <option value="client">{t('role.client')}</option>
-                        <option value="distributor">{t('role.distributor')}</option>
-                        <option value="consultant">{t('role.consultant')}</option>
+                        <option value="all" className="bg-[#08090B]">{t('user.filter.all')}</option>
+                        <option value="client" className="bg-[#08090B]">{t('role.client')}</option>
+                        <option value="distributor" className="bg-[#08090B]">{t('role.distributor')}</option>
+                        <option value="consultant" className="bg-[#08090B]">{t('role.consultant')}</option>
                     </select>
+
                     <select
-                        className="flex-1 md:w-40 p-2 rounded-lg bg-gray-50 dark:bg-black/20 text-sm outline-none text-main"
+                        className="flex-1 lg:w-44 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[10px] font-black uppercase tracking-widest text-white/40 outline-none focus:border-accent/40 focus:bg-white/[0.04] transition-all appearance-none cursor-pointer"
                         value={userStatusFilter}
                         onChange={e => setUserStatusFilter(e.target.value as any)}
                     >
-                        <option value="all">{t('user.filter.status.all')}</option>
-                        <option value="pending">{t('user.status.pending')}</option>
-                        <option value="active">{t('user.status.active')}</option>
-                        <option value="inactive">{t('user.status.inactive')}</option>
-                        <option value="rejected">{t('user.status.rejected')}</option>
+                        <option value="all" className="bg-[#08090B]">{t('user.filter.status.all')}</option>
+                        <option value="pending" className="bg-[#08090B]">{t('user.status.pending')}</option>
+                        <option value="active" className="bg-[#08090B]">{t('user.status.active')}</option>
+                        <option value="inactive" className="bg-[#08090B]">{t('user.status.inactive')}</option>
+                        <option value="rejected" className="bg-[#08090B]">{t('user.status.rejected')}</option>
                     </select>
                 </div>
             </div>
 
-            {/* Users List */}
-            <div className="bg-surface rounded-xl shadow-sm overflow-hidden">
+            {/* Users List Aura */}
+            <div className="aura-glass rounded-[2rem] border-white/[0.03] overflow-hidden">
                 {isLoading ? (
-                    <SkeletonTable rows={5} columns={6} />
+                    <div className="p-20 flex items-center justify-center text-white/5 uppercase font-black tracking-[0.5em] animate-pulse">Sincronizando Perfis...</div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-page text-xs uppercase text-muted font-semibold">
-                                <tr>
-                                    <th className="p-4">Usu\u00e1rio</th>
-                                    <th className="p-4">Contatos</th>
-                                    <th className="p-4">Perfil</th>
-                                    <th className="p-4">{t('permissions')}</th>
-                                    <th className="p-4 text-center">{t('status')}</th>
-                                    <th className="p-4 text-right">{t('actions')}</th>
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-white/[0.03]">
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Usuário</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Contatos</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Perfil</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20">{t('permissions')}</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 text-center">{t('status')}</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="text-sm">
                                 {currentData.map(user => (
-                                    <tr key={user.id} className="hover:bg-page transition-colors text-main">
-                                        <td className="p-4">
-                                            <div className="font-bold text-main">{user.name}</div>
-                                            <div className="text-xs text-muted">{user.cro ? `CRO: ${user.cro}` : 'N/A'}</div>
+                                    <tr key={user.id} className="group border-b border-white/[0.02] hover:bg-white/[0.02] transition-colors">
+                                        <td className="p-6">
+                                            <div className="font-bold text-white/80 group-hover:text-white transition-colors">{user.name}</div>
+                                            <div className="text-[10px] text-white/20 font-medium uppercase tracking-widest mt-1">{user.cro ? `CRO: ${user.cro}` : 'SEM CRO'}</div>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="text-xs space-y-1">
-                                                <div className="flex items-center gap-1"><span className="text-muted">E:</span> {user.email}</div>
-                                                <div className="flex items-center gap-1"><span className="text-muted">W:</span> {user.whatsapp}</div>
+                                        <td className="p-6">
+                                            <div className="space-y-1.5">
+                                                <div className="flex items-center gap-2 group/email cursor-pointer">
+                                                    <div className="w-5 h-5 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover/email:border-accent/40 group-hover/email:bg-accent/10 transition-all">
+                                                        <span className="text-[8px] font-black text-white/20 group-hover/email:text-accent">E</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-white/40 group-hover/email:text-white/60 transition-colors">{user.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 group/wa cursor-pointer">
+                                                    <div className="w-5 h-5 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover/wa:border-success/40 group-hover/wa:bg-success/10 transition-all">
+                                                        <span className="text-[8px] font-black text-white/20 group-hover/wa:text-success">W</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-white/40 group-hover/wa:text-white/60 transition-colors">{user.whatsapp}</span>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="p-4">
-                                            <span className="text-xs font-bold uppercase tracking-wide bg-page px-2 py-1 rounded text-muted">
+                                        <td className="p-6">
+                                            <span className="inline-flex px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-accent/60 group-hover:border-accent/20 transition-all">
                                                 {t(`role.${user.role}`)}
                                             </span>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-1">
+                                        <td className="p-6">
+                                            <div className="flex gap-2">
                                                 {(!user.allowedTypes || user.allowedTypes.length === 0) ? (
-                                                    <span className="text-[10px] uppercase font-bold bg-page px-2 py-1 rounded text-muted">Todos</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/10 italic">TOTAL</span>
                                                 ) : (
                                                     user.allowedTypes.map(type => (
-                                                        <div key={type} className="p-1 rounded bg-page text-muted" title={t(`material.type.${type}`)}>
+                                                        <div key={type} className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center text-white/20 hover:text-accent hover:border-accent/40 transition-all" title={t(`material.type.${type}`)}>
                                                             {type === 'pdf' && <FileText size={14} />}
                                                             {type === 'image' && <ImageIcon size={14} />}
                                                             {type === 'video' && <Video size={14} />}
@@ -175,63 +192,63 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, onReload, isLoading =
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4 text-center">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${user.status === 'active' ? 'bg-success/10 text-success' :
-                                                user.status === 'pending' ? 'bg-warning/10 text-warning' :
-                                                    user.status === 'rejected' ? 'bg-error/10 text-error' :
-                                                        'bg-page text-muted'
+                                        <td className="p-6 text-center">
+                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${user.status === 'active' ? 'bg-success/5 text-success border border-success/20' :
+                                                    user.status === 'pending' ? 'bg-warning/5 text-warning border border-warning/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' :
+                                                        user.status === 'rejected' ? 'bg-error/5 text-error border border-error/20' :
+                                                            'bg-white/[0.02] text-white/20 border border-white/[0.05]'
                                                 }`}>
                                                 {t(`user.status.${user.status}`)}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-1 items-center">
-                                                <button onClick={() => setUserComm(user)} className="p-2 text-accent hover:bg-accent/10 rounded-lg border border-transparent" title={t('comm.title')}>
-                                                    <MessageCircle size={18} />
+                                        <td className="p-6 text-right">
+                                            <div className="flex justify-end gap-2 items-center">
+                                                <button onClick={() => setUserComm(user)} className="w-10 h-10 flex items-center justify-center text-white/20 hover:text-accent bg-white/[0.02] hover:bg-accent/10 border border-white/[0.05] hover:border-accent/20 rounded-xl transition-all" title={t('comm.title')}>
+                                                    <MessageCircle size={16} />
                                                 </button>
                                                 {user.status === 'pending' && (
-                                                    <>
-                                                        <button onClick={() => handleUserStatus(user.id, 'active')} className="p-2 text-success hover:bg-success/10 rounded-lg" title={t('user.action.approve')}><CheckCircle size={18} /></button>
-                                                        <button onClick={() => handleUserStatus(user.id, 'rejected')} className="p-2 text-error hover:bg-error/10 rounded-lg" title={t('user.action.reject')}><XCircle size={18} /></button>
-                                                    </>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => handleUserStatus(user.id, 'active')} className="w-10 h-10 flex items-center justify-center text-success/60 hover:text-success bg-success/5 hover:bg-success/10 border border-success/10 rounded-xl transition-all" title={t('user.action.approve')}><CheckCircle size={16} /></button>
+                                                        <button onClick={() => handleUserStatus(user.id, 'rejected')} className="w-10 h-10 flex items-center justify-center text-error/60 hover:text-error bg-error/5 hover:bg-error/10 border border-error/10 rounded-xl transition-all" title={t('user.action.reject')}><XCircle size={16} /></button>
+                                                    </div>
                                                 )}
-                                                <button onClick={() => setUserEditing(user)} className="p-2 text-accent hover:bg-accent/10 rounded-lg ml-1" title={t('edit')}>
-                                                    <Edit size={18} />
+                                                <button onClick={() => setUserEditing(user)} className="w-10 h-10 flex items-center justify-center text-accent/60 hover:text-accent bg-accent/5 hover:bg-accent/10 border border-accent/10 rounded-xl transition-all" title={t('edit')}>
+                                                    <Edit size={16} />
                                                 </button>
-                                                <button onClick={() => handleDeleteUser(user.id)} className="p-2 text-error hover:bg-error/10 rounded-lg ml-1" title={t('delete')}><Trash2 size={18} /></button>
+                                                <button onClick={() => handleDeleteUser(user.id)} className="w-10 h-10 flex items-center justify-center text-error/60 hover:text-error bg-error/5 hover:bg-error/10 border border-error/10 rounded-xl transition-all" title={t('delete')}><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
                                 {filteredUsers.length === 0 && (
                                     <tr>
-                                        <td colSpan={6} className="p-8 text-center text-muted">Nenhum usu\u00e1rio encontrado.</td>
+                                        <td colSpan={6} className="p-20 text-center text-white/10 uppercase font-black tracking-[0.2em]">Nenhum usuário encontrado.</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
 
-                        {/* Pagination Footer */}
+                        {/* Pagination Footer Aura */}
                         {totalPages > 1 && (
-                            <div className="flex items-center justify-between p-4 border-t border-border">
-                                <span className="text-xs text-muted">
+                            <div className="flex flex-col sm:flex-row items-center justify-between p-8 border-t border-white/[0.03]">
+                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white/20 mb-4 sm:mb-0">
                                     {t('pagination.showing')} {startIndex + 1}-{endIndex} {t('pagination.of')} {filteredUsers.length}
                                 </span>
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-6">
                                     <button
                                         onClick={prevPage}
                                         disabled={currentPage === 1}
-                                        className="p-1 rounded hover:bg-page disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.02] border border-white/[0.05] text-white/20 hover:text-white disabled:opacity-5 transition-all outline-none"
                                     >
-                                        <ChevronLeft size={16} />
+                                        <ChevronLeft size={18} />
                                     </button>
-                                    <span className="text-sm font-medium px-2">{currentPage} / {totalPages}</span>
+                                    <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">{currentPage} <span className="text-white/10 mx-2">/</span> {totalPages}</span>
                                     <button
                                         onClick={nextPage}
                                         disabled={currentPage === totalPages}
-                                        className="p-1 rounded hover:bg-page disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.02] border border-white/[0.05] text-white/20 hover:text-white disabled:opacity-5 transition-all outline-none"
                                     >
-                                        <ChevronRight size={16} />
+                                        <ChevronRight size={18} />
                                     </button>
                                 </div>
                             </div>

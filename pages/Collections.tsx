@@ -38,38 +38,47 @@ export const Collections: React.FC = () => {
     });
 
     return (
-        <div className="space-y-8 animate-fade-in pb-20">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-main mb-2">Trilhas de Aprendizado</h1>
-                    <p className="text-muted">Coleções curadas de materiais para impulsionar seu conhecimento.</p>
+        <div className="space-y-12 animate-reveal pb-20">
+            {/* Header Aura */}
+            <div className="aura-glass p-10 rounded-[2.5rem] border-white/[0.03] flex flex-col md:flex-row justify-between items-center gap-10">
+                <div className="text-center md:text-left">
+                    <h1 className="text-4xl md:text-5xl heading-aura text-white mb-4">Trilhas de Aprendizado</h1>
+                    <p className="text-[15px] text-white/30 font-medium max-w-lg">
+                        Sua jornada de conhecimento organizada em coleções curadas e exclusivas.
+                    </p>
                 </div>
 
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar trilhas..."
-                        className="w-full bg-surface border border-transparent focus:border-accent/50 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
+                <div className="relative w-full md:w-80 group/search">
+                    <div className="absolute inset-0 bg-accent/20 rounded-2xl blur-xl opacity-0 group-focus-within/search:opacity-20 transition-all duration-500"></div>
+                    <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-2xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+                        <div className="pl-5 text-white/20 group-focus-within/search:text-accent transition-colors">
+                            <Search size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Buscar trilhas..."
+                            className="w-full bg-transparent border-none py-4 px-4 text-white placeholder-white/10 focus:ring-0 text-[13px] font-bold outline-none uppercase tracking-widest"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-72 bg-surface/50 rounded-2xl border border-white/5"></div>
+                        <div key={i} className="h-80 aura-glass rounded-[2rem] border-white/[0.03] animate-pulse"></div>
                     ))}
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-muted">
-                    <Layers size={48} className="mb-4 opacity-50" />
-                    <p>Nenhuma trilha encontrada.</p>
+                <div className="py-24 aura-glass rounded-[2.5rem] text-center border-dashed border-white/10">
+                    <Layers size={32} className="mx-auto text-white/5 mb-4" />
+                    <h3 className="text-lg font-bold text-white/40 mb-2">Nenhuma trilha encontrada</h3>
+                    <p className="text-[12px] text-white/20">Tente ajustar seus termos de busca.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filtered.map(col => (
                         <CollectionCard
                             key={col.id}

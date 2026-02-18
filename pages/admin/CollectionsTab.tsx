@@ -90,46 +90,52 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
 
     if (globalLoading || (loading && collections.length === 0)) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-                {[1, 2, 3].map(i => <div key={i} className="h-64 bg-surface rounded-xl"></div>)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
+                {[1, 2, 3].map(i => <div key={i} className="h-80 aura-glass rounded-[2rem] border-white/[0.03]"></div>)}
             </div>
         );
     }
 
     return (
-        <div className="animate-fade-in space-y-6">
-            {/* Actions Bar */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-surface p-4 rounded-xl shadow-sm border border-border">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar coleções..."
-                        className="w-full bg-page border-none rounded-lg pl-10 py-2 text-sm focus:ring-2 focus:ring-accent outline-none"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
+        <div className="animate-reveal space-y-10">
+            {/* Actions Bar Aura */}
+            <div className="aura-glass p-6 rounded-[2rem] border-white/[0.03] flex flex-col lg:flex-row justify-between items-center gap-6">
+                <div className="relative w-full lg:w-96 group/search">
+                    <div className="absolute inset-0 bg-accent/20 rounded-xl blur-lg opacity-0 group-focus-within/search:opacity-10 transition-all duration-500"></div>
+                    <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+                        <div className="pl-4 text-white/20 group-focus-within/search:text-accent transition-colors">
+                            <Search size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Buscar coleções..."
+                            className="w-full bg-transparent border-none py-3 px-4 text-white placeholder-white/10 focus:ring-0 text-[13px] font-bold outline-none uppercase tracking-widest"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 <button
                     onClick={handleCreate}
-                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-accent text-white px-6 py-2 rounded-lg font-bold hover:bg-accent/90 transition-all shadow-lg shadow-accent/20"
+                    className="w-full lg:w-auto flex items-center justify-center gap-3 bg-accent text-white px-10 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all outline-none"
                 >
                     <Plus size={18} /> Nova Coleção
                 </button>
             </div>
 
-            {/* Grid */}
+            {/* Grid Aura */}
             {filteredCollections.length === 0 ? (
-                <div className="text-center py-20 bg-surface rounded-2xl border border-dashed border-border">
-                    <div className="w-16 h-16 bg-page rounded-full flex items-center justify-center mx-auto mb-4 text-muted">
-                        <FolderOpen size={32} />
+                <div className="text-center py-32 aura-glass rounded-[2.5rem] border border-dashed border-white/10 overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent opacity-30"></div>
+                    <div className="w-20 h-20 bg-white/[0.03] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-6 text-white/10 group-hover:text-accent/40 transition-colors duration-700 relative z-10">
+                        <Layers size={40} />
                     </div>
-                    <h3 className="text-lg font-bold text-main">Nenhuma coleção encontrada</h3>
-                    <p className="text-muted text-sm">Crie uma nova coleção para começar.</p>
+                    <h3 className="text-xl font-bold text-white/40 heading-aura relative z-10 mb-2">Nenhuma coleção encontrada</h3>
+                    <p className="text-white/20 text-[12px] font-medium uppercase tracking-widest relative z-10">Crie uma nova trilha premium para começar.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
                     {filteredCollections.map(col => (
                         <CollectionCard
                             key={col.id}
@@ -137,7 +143,7 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
                             isAdmin
                             onClick={() => handleEdit(col)}
                             onEdit={() => handleEdit(col)}
-                            onDelete={() => handleDelete(col)} // Card needs to support delete button if we want or just open modal
+                            onDelete={() => handleDelete(col)}
                         />
                     ))}
                 </div>

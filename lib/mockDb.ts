@@ -250,6 +250,16 @@ export const mockDb = {
     if (error) throw error;
   },
 
+  updateUserStatus: async (id: string, status: UserStatus): Promise<void> => {
+    if (isMockMode || id.startsWith('mock-')) {
+      const user = localUsers.find(u => u.id === id);
+      if (user) user.status = status;
+      return;
+    }
+    const { error } = await supabase.from('profiles').update({ status }).eq('id', id);
+    if (error) throw error;
+  },
+
   // --- MATERIALS ---
   getMaterials: async (role: Role): Promise<Material[]> => {
     if (isMockMode) {
@@ -334,7 +344,105 @@ export const mockDb = {
     return (data || []).map(c => ({ ...c, stats: { video: 0, pdf: 0, image: 0 } })); // Simplified for now
   },
 
-  // ... (Other collection methods: create, update, delete, getItems, add, remove)
+  getCollectionById: async (id: string): Promise<Collection | null> => {
+    if (isMockMode) {
+      const col = localCollections.find(c => c.id === id);
+      return col ? { ...col, stats: calculateCollectionStats(col.id) } : null;
+    }
+    const { data, error } = await supabase.from('collections').select('*').eq('id', id).single();
+    if (error) return null;
+    return { ...data, stats: { video: 0, pdf: 0, image: 0 } };
+  },
+
+  getCollectionItems: async (collectionId: string): Promise<{ item: CollectionItem, material: Material | null }[]> => {
+    if (isMockMode) {
+      const items = localCollectionItems
+        .filter(i => i.collectionId === collectionId)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+
+      return items.map(i => ({
+        item: { id: i.id, collectionId: i.collectionId, materialId: i.materialId, orderIndex: i.orderIndex },
+        material: localMaterials.find(m => m.id === i.materialId) || null
+      }));
+    }
+    const { data, error } = await supabase.from('collection_items').select(`*, materials (*, material_assets (*))`).eq('collection_id', collectionId).order('order_index');
+    if (error) throw error;
+    return (data || []).map((i: any) => ({
+      item: { id: i.id, collectionId: i.collection_id, materialId: i.material_id, orderIndex: i.order_index },
+      material: i.materials ? mapMaterialFromDb(i.materials) : null
+    }));
+  },
+
+  createCollection: async (collection: Omit<Collection, 'id' | 'createdAt'>): Promise<Collection> => {
+    if (isMockMode) {
+      const entry: Collection = { ...collection, id: `col-${Date.now()}`, createdAt: new Date().toISOString() };
+      localCollections.push(entry);
+      return entry;
+    }
+    const { data, error } = await supabase.from('collections').insert({
+      title: collection.title,
+      description: collection.description,
+      cover_image: collection.coverImage,
+      allowed_roles: collection.allowedRoles,
+      active: collection.active,
+      points: collection.points || 0
+    }).select().single();
+    if (error) throw error;
+    return { ...data, coverImage: data.cover_image, allowedRoles: data.allowed_roles };
+  },
+
+  updateCollection: async (collection: Collection): Promise<void> => {
+    if (isMockMode) {
+      const idx = localCollections.findIndex(c => c.id === collection.id);
+      if (idx > -1) localCollections[idx] = collection;
+      return;
+    }
+    const { error } = await supabase.from('collections').update({
+      title: collection.title,
+      description: collection.description,
+      cover_image: collection.coverImage,
+      allowed_roles: collection.allowedRoles,
+      active: collection.active,
+      points: collection.points
+    }).eq('id', collection.id);
+    if (error) throw error;
+  },
+
+  deleteCollection: async (id: string): Promise<void> => {
+    if (isMockMode) {
+      const idx = localCollections.findIndex(c => c.id === id);
+      if (idx > -1) localCollections.splice(idx, 1);
+      return;
+    }
+    const { error } = await supabase.from('collections').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  addMaterialToCollection: async (collectionId: string, materialId: string): Promise<void> => {
+    if (isMockMode) {
+      const order = localCollectionItems.filter(i => i.collectionId === collectionId).length + 1;
+      localCollectionItems.push({ id: `ci-${Date.now()}`, collectionId, materialId, orderIndex: order });
+      return;
+    }
+    const { data: countData } = await supabase.from('collection_items').select('id', { count: 'exact' }).eq('collection_id', collectionId);
+    const order = (countData?.length || 0) + 1;
+    const { error } = await supabase.from('collection_items').insert({
+      collection_id: collectionId,
+      material_id: materialId,
+      order_index: order
+    });
+    if (error) throw error;
+  },
+
+  removeMaterialFromCollection: async (itemId: string): Promise<void> => {
+    if (isMockMode) {
+      const idx = localCollectionItems.findIndex(i => i.id === itemId);
+      if (idx > -1) localCollectionItems.splice(idx, 1);
+      return;
+    }
+    const { error } = await supabase.from('collection_items').delete().eq('id', itemId);
+    if (error) throw error;
+  },
   // --- ANALYTICS ---
   logAccess: async (materialId: string, userId: string, language: Language): Promise<void> => {
     if (!isMockMode) await supabase.from('access_logs').insert({ material_id: materialId, user_id: userId, language: language });

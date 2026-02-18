@@ -113,144 +113,149 @@ export const CollectionDetail: React.FC = () => {
     // --- OVERVIEW MODE ---
     if (!viewMode) {
         return (
-            <div className="animate-fade-in pb-20 max-w-7xl mx-auto px-4 md:px-6">
-                {/* Hero Header */}
-                <div className="relative h-80 md:h-[400px] w-full overflow-hidden rounded-[2.5rem] mt-4 shadow-2xl border border-white/5">
-                    {collection.coverImage ? (
-                        <img src={collection.coverImage} className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105" />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-accent/20 flex items-center justify-center">
-                            <Layers size={80} className="text-white/10" />
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+            <div className="animate-reveal pb-20 max-w-7xl mx-auto">
+                <div className="px-6 md:px-0">
+                    {/* Hero Header Aura */}
+                    <div className="relative h-96 md:h-[450px] w-full overflow-hidden rounded-[2.5rem] mt-6 border-white/[0.03] aura-glass">
+                        {collection.coverImage ? (
+                            <img src={collection.coverImage} className="w-full h-full object-cover transition-transform duration-[2000ms] hover:scale-110 opacity-70" />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-accent/10 to-transparent flex items-center justify-center">
+                                <Layers size={80} className="text-white/10" />
+                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#08090B] via-transparent to-transparent opacity-90"></div>
 
-                    <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 flex flex-col md:flex-row justify-between items-end gap-6">
-                        <div className="flex-1">
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors text-xs font-bold uppercase tracking-widest bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg w-fit border border-white/10"
-                            >
-                                <ChevronLeft size={16} /> Voltar
-                            </button>
-                            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight drop-shadow-2xl">{title}</h1>
-                            <p className="text-white/80 text-lg md:text-xl max-w-2xl leading-relaxed drop-shadow-lg font-medium">{description}</p>
-                        </div>
-
-                        <div className="shrink-0 w-full md:w-auto">
-                            <button
-                                onClick={handleStartTrail}
-                                className="w-full md:w-auto px-10 py-5 rounded-2xl bg-accent text-white font-bold text-xl shadow-2xl shadow-accent/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group"
-                            >
-                                <PlayCircle size={28} className="transition-transform group-hover:rotate-12" />
-                                Começar Agora
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Trail Stats & Info */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
-                    <div className="md:col-span-3 space-y-10">
-                        <div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="h-8 w-1.5 bg-accent rounded-full shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.5)]"></div>
-                                <h2 className="text-2xl font-bold text-main">Roteiro de Aprendizado</h2>
-                                <span className="text-muted text-sm font-medium bg-page px-3 py-1 rounded-full border border-border">
-                                    {items.length} módulos
-                                </span>
+                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 flex flex-col md:flex-row justify-between items-end gap-10">
+                            <div className="flex-1">
+                                <button
+                                    onClick={() => navigate('/dashboard')}
+                                    className="flex items-center gap-3 text-white/40 hover:text-white mb-8 transition-all text-[10px] font-black uppercase tracking-[0.3em] bg-white/[0.03] backdrop-blur-md px-4 py-2 rounded-xl w-fit border border-white/[0.05]"
+                                >
+                                    <ChevronLeft size={16} /> Voltar para HUB
+                                </button>
+                                <h1 className="text-4xl md:text-6xl heading-aura text-white mb-6 leading-tight">{title}</h1>
+                                <p className="text-white/30 text-lg md:text-xl max-w-2xl leading-relaxed font-medium">{description}</p>
                             </div>
 
-                            <div className="space-y-4 relative ml-4 border-l-2 border-border/50 pl-10 py-2">
-                                {items.map((itemObj, index) => {
-                                    if (!itemObj.material) return null;
-                                    const mat = itemObj.material;
-                                    const isDone = completedIds.includes(mat.id);
+                            <div className="shrink-0 w-full md:w-auto pb-4">
+                                <button
+                                    onClick={handleStartTrail}
+                                    className="w-full md:w-auto px-12 py-5 rounded-2xl bg-accent text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-accent/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-4 group"
+                                >
+                                    <PlayCircle size={24} className="transition-transform group-hover:rotate-12" />
+                                    Iniciar Experiência
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                                    return (
-                                        <div key={itemObj.item.id} className="relative group">
-                                            {/* Step Number Tag */}
-                                            <div className={`absolute -left-[54px] top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 z-10 
-                                                ${isDone ? 'bg-success border-success text-white shadow-lg shadow-success/20' : 'bg-surface border-border text-muted group-hover:border-accent'}
+                    {/* Trail Content Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-16">
+                        <div className="lg:col-span-8 space-y-12">
+                            <div>
+                                <div className="flex items-center gap-4 mb-10">
+                                    <div className="h-10 w-1.5 bg-accent rounded-full shadow-[0_0_20px_rgba(0,209,255,0.6)]"></div>
+                                    <h2 className="text-2xl heading-aura text-white">Roteiro de Consumo</h2>
+                                    <span className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
+                                        {items.length} Módulos Disponíveis
+                                    </span>
+                                </div>
+
+                                <div className="space-y-6 relative ml-5 border-l-2 border-white/[0.03] pl-10 py-2">
+                                    {items.map((itemObj, index) => {
+                                        if (!itemObj.material) return null;
+                                        const mat = itemObj.material;
+                                        const isDone = completedIds.includes(mat.id);
+
+                                        return (
+                                            <div key={itemObj.item.id} className="relative group">
+                                                {/* Step Aura Marker */}
+                                                <div className={`absolute -left-[58px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700 z-10 
+                                                ${isDone ? 'bg-success border-success text-white shadow-[0_0_20px_rgba(0,245,160,0.3)]' : 'bg-[#08090B] border-white/[0.05] text-white/20 group-hover:border-accent group-hover:text-accent'}
                                             `}>
-                                                {isDone ? <CheckCircle size={16} /> : <span className="font-bold text-xs">{index + 1}</span>}
-                                            </div>
+                                                    {isDone ? <CheckCircle size={18} /> : <span className="font-black text-xs">{index + 1}</span>}
+                                                </div>
 
-                                            <div className="bg-surface border border-border p-5 rounded-2xl flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:border-accent/40 hover:-translate-x-1">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors 
-                                                        ${isDone ? 'bg-success/10 text-success' : 'bg-page text-muted group-hover:text-accent'}
+                                                <div
+                                                    className="aura-glass p-6 rounded-[1.5rem] flex items-center justify-between transition-all duration-500 hover:-translate-x-2 border-white/[0.03] cursor-pointer"
+                                                    onClick={() => { setCurrentIndex(index); setViewMode(true); }}
+                                                >
+                                                    <div className="flex items-center gap-6">
+                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500
+                                                        ${isDone ? 'bg-success/5 text-success' : 'bg-white/[0.03] text-white/20 group-hover:text-accent group-hover:bg-accent/5'}
                                                     `}>
-                                                        {mat.type === 'video' ? <PlayCircle size={24} /> : mat.type === 'pdf' ? <FileText size={24} /> : <ImageIcon size={24} />}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-lg text-main leading-tight">{mat.title[language] || mat.title['pt-br']}</h3>
-                                                        <div className="flex items-center gap-3 mt-1.5">
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted py-0.5 px-2 bg-page rounded border border-border">
-                                                                {mat.type}
-                                                            </span>
-                                                            <span className="flex items-center gap-1 text-[10px] font-bold text-accent">
-                                                                <Star size={10} fill="currentColor" /> {mat.points || 50} pontos
-                                                            </span>
+                                                            {mat.type === 'video' ? <PlayCircle size={28} /> : mat.type === 'pdf' ? <FileText size={28} /> : <ImageIcon size={28} />}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-xl text-white/90 group-hover:text-white transition-colors">{mat.title[language] || mat.title['pt-br']}</h3>
+                                                            <div className="flex items-center gap-4 mt-2">
+                                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                                                                    {mat.type}
+                                                                </span>
+                                                                <span className="flex items-center gap-2 text-[10px] font-black text-accent uppercase tracking-[0.2em]">
+                                                                    <Star size={12} className="opacity-40" /> {mat.points || 50} Pontos XP
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <button className="w-10 h-10 rounded-xl bg-white/[0.03] text-white/20 group-hover:bg-accent/10 group-hover:text-accent transition-all flex items-center justify-center border border-white/[0.05] group-hover:border-accent/30">
+                                                        <ChevronRight size={18} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => { setCurrentIndex(index); setViewMode(true); }}
-                                                    className="p-3 rounded-xl bg-page text-muted hover:bg-accent hover:text-white transition-all shadow-sm"
-                                                >
-                                                    <ChevronRight size={20} />
-                                                </button>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        {/* Progress Card */}
-                        <div className="bg-surface border border-border rounded-[2rem] p-8 shadow-xl relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-4 transform translate-x-4 -translate-y-4 opacity-5 group-hover:scale-150 transition-transform duration-1000">
-                                <Trophy size={140} className="text-accent" />
-                            </div>
-
-                            <h3 className="text-xs font-bold text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <Trophy size={14} className="text-accent" /> Seu Progresso
-                            </h3>
-
-                            <div className="relative flex items-center justify-center mb-6">
-                                <svg className="w-32 h-32 transform -rotate-90">
-                                    <circle cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" strokeWidth="8" className="text-page" />
-                                    <circle
-                                        cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" strokeWidth="8"
-                                        className="text-accent transition-all duration-1000 ease-out"
-                                        strokeDasharray={351.8}
-                                        strokeDashoffset={351.8 - (351.8 * progress) / 100}
-                                        strokeLinecap="round"
-                                    />
-                                </svg>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-3xl font-black text-main">{progress}%</span>
-                                    <span className="text-[10px] text-muted font-bold uppercase tracking-tighter">Completo</span>
+                                        );
+                                    })}
                                 </div>
                             </div>
-
-                            <p className="text-xs text-muted text-center leading-relaxed">
-                                Complete todos os módulos para ganhar o selo de mestre da trilha e acumular <strong>{items.reduce((acc, i) => acc + (i.material?.points || 0), 0)}</strong> pontos.
-                            </p>
                         </div>
 
-                        {/* Gaming Tip */}
-                        <div className="bg-gradient-to-br from-accent/90 to-accent rounded-[2rem] p-6 text-white shadow-lg shadow-accent/30">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Sparkles size={18} className="animate-pulse" />
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/90">Dica Mestre</span>
+                        <div className="lg:col-span-4 space-y-8">
+                            {/* Progress Aura Card */}
+                            <div className="aura-glass p-10 rounded-[2.5rem] border-white/[0.03] relative overflow-hidden group border-accent/10">
+                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-[2000ms]">
+                                    <Trophy size={160} className="text-white" />
+                                </div>
+
+                                <h3 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
+                                    <Trophy size={14} className="text-accent" /> Status da Jornada
+                                </h3>
+
+                                <div className="relative flex items-center justify-center mb-10">
+                                    <svg className="w-40 h-40 transform -rotate-90">
+                                        <circle cx="80" cy="80" r="72" fill="transparent" stroke="rgba(255,255,255,0.02)" strokeWidth="10" />
+                                        <circle
+                                            cx="80" cy="80" r="72" fill="transparent" stroke="currentColor" strokeWidth="10"
+                                            className="text-accent transition-all duration-1000 ease-out"
+                                            strokeDasharray={452.4}
+                                            strokeDashoffset={452.4 - (452.4 * progress) / 100}
+                                            strokeLinecap="round"
+                                            style={{ filter: 'drop-shadow(0 0 10px rgba(0,209,255,0.4))' }}
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span className="text-5xl font-black text-white heading-aura">{progress}%</span>
+                                        <span className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-1">Concluído</span>
+                                    </div>
+                                </div>
+
+                                <p className="text-[12px] text-white/30 text-center leading-relaxed font-medium">
+                                    Alcance o final desta jornada para resgatar sua recompensa de <strong className="text-white">{items.reduce((acc, i) => acc + (i.material?.points || 0), 0)} XP</strong>.
+                                </p>
                             </div>
-                            <p className="text-sm font-medium leading-relaxed">
-                                Materiais de vídeo costumam dar mais pontos. Assista até o final!
-                            </p>
+
+                            {/* Pro Tip Aura */}
+                            <div className="bg-accent/[0.05] border border-accent/20 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <Sparkles size={20} className="text-accent animate-pulse" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Insights Premium</span>
+                                    </div>
+                                    <p className="text-sm font-medium leading-relaxed text-white/60">
+                                        Sua interação com os materiais é monitorada em tempo real para otimizar seu aprendizado.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -258,31 +263,34 @@ export const CollectionDetail: React.FC = () => {
         );
     }
 
-    // --- CONSUMPTION MODE (Integrated Viewer) ---
+    // --- CONSUMPTION MODE (Integrated Viewer Aura) ---
     return (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col md:flex-row animate-fade-in overflow-hidden">
-            {/* Sidebar (Sequence) */}
-            <aside className={`bg-surface border-r border-border transition-all duration-500 ease-in-out z-50 flex flex-col ${sidebarOpen ? 'w-full md:w-80' : 'w-0 overflow-hidden md:w-0'}`}>
-                <div className="p-6 border-b border-border flex justify-between items-center bg-surface shrink-0">
-                    <div>
-                        <h4 className="font-bold text-main truncate max-w-[180px]">{title}</h4>
-                        <div className="h-1.5 w-full bg-page rounded-full mt-2 overflow-hidden border border-border/50">
-                            <div className="h-full bg-accent transition-all duration-1000" style={{ width: `${progress}%` }}></div>
+        <div className="fixed inset-0 z-[100] bg-[#08090B] flex flex-col md:flex-row animate-reveal overflow-hidden">
+            {/* Sidebar Aura (Sequence) */}
+            <aside className={`aura-glass border-r border-white/[0.03] transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] z-50 flex flex-col relative ${sidebarOpen ? 'w-full md:w-80' : 'w-0 overflow-hidden md:w-0'}`}>
+                <div className="p-8 border-b border-white/[0.03] flex justify-between items-center shrink-0">
+                    <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-white heading-aura truncate text-lg pr-4">{title}</h4>
+                        <div className="flex items-center gap-3 mt-4">
+                            <div className="h-1.5 flex-1 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                                <div className="h-full bg-accent transition-all duration-1000 shadow-[0_0_10px_rgba(0,209,255,0.4)]" style={{ width: `${progress}%` }}></div>
+                            </div>
+                            <span className="text-[10px] font-black text-white/20 whitespace-nowrap">{progress}%</span>
                         </div>
                     </div>
-                    <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-muted">
+                    <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-white/30 hover:text-white transition-colors">
                         <X size={20} />
                     </button>
                     <button
                         onClick={() => { setViewMode(false); }}
-                        className="p-2 hover:bg-page rounded-full text-muted hover:text-accent transition-all ml-2"
+                        className="p-2.5 bg-white/[0.03] hover:bg-error rounded-xl text-white/30 hover:text-white transition-all ml-2 border border-white/[0.05]"
                         title="Sair do modo tela cheia"
                     >
-                        <X size={20} />
+                        <X size={18} />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2 py-4">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 py-6">
                     {items.map((itemObj, index) => {
                         if (!itemObj.material) return null;
                         const mat = itemObj.material;
@@ -293,24 +301,28 @@ export const CollectionDetail: React.FC = () => {
                             <button
                                 key={itemObj.item.id}
                                 onClick={() => setCurrentIndex(index)}
-                                className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all duration-300 group
+                                className={`w-full text-left p-4 rounded-2xl flex items-center gap-4 transition-all duration-500 group relative overflow-hidden
                                     ${isActive
-                                        ? 'bg-accent text-white shadow-lg shadow-accent/20 scale-[1.02]'
-                                        : 'hover:bg-page text-muted hover:text-main'}
+                                        ? 'bg-accent/10 border-accent/20 border'
+                                        : 'hover:bg-white/[0.03] text-white/30 hover:text-white/80 border border-transparent'}
                                 `}
                             >
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all
+                                {isActive && (
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent shadow-[0_0_15px_rgba(0,209,255,0.6)]"></div>
+                                )}
+
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-500
                                     ${isActive
-                                        ? 'bg-white/20 border-white/20'
-                                        : isDone ? 'bg-success/10 border-success/30 text-success' : 'bg-surface border-border'}
+                                        ? 'bg-accent/20 border-accent/30 text-accent'
+                                        : isDone ? 'bg-success/5 border-success/20 text-success' : 'bg-white/[0.02] border-white/[0.05]'}
                                 `}>
-                                    {isDone ? <CheckCircle size={16} /> : <span className="text-[10px] font-bold">{index + 1}</span>}
+                                    {isDone ? <CheckCircle size={16} /> : <span className="text-[10px] font-black">{index + 1}</span>}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-main'}`}>
+                                    <p className={`text-[13px] font-bold truncate transition-colors ${isActive ? 'text-white' : 'text-white/40'}`}>
                                         {mat.title[language] || mat.title['pt-br']}
                                     </p>
-                                    <p className={`text-[9px] uppercase font-bold tracking-widest mt-0.5 ${isActive ? 'text-white/70' : 'text-muted'}`}>
+                                    <p className={`text-[9px] uppercase font-black tracking-widest mt-1.5 transition-colors ${isActive ? 'text-accent' : 'text-white/10 group-hover:text-white/20'}`}>
                                         {mat.type} • {mat.points} pts
                                     </p>
                                 </div>
@@ -320,35 +332,35 @@ export const CollectionDetail: React.FC = () => {
                 </div>
             </aside>
 
-            {/* Main Player Area */}
-            <main className="flex-1 flex flex-col relative bg-black">
-                {/* Top Overlay controls */}
-                <div className="absolute top-0 left-0 right-0 p-4 md:p-6 z-40 flex justify-between items-start pointer-events-none">
-                    <div className="flex items-center gap-3">
+            {/* Main Player Area Aura */}
+            <main className="flex-1 flex flex-col relative bg-[#060709]">
+                {/* Top Controls Aura */}
+                <div className="absolute top-0 left-0 right-0 p-6 md:p-8 z-40 flex justify-between items-center pointer-events-none">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setSidebarOpen(true)}
-                            className={`pointer-events-auto p-3 rounded-2xl bg-black/40 backdrop-blur-md text-white border border-white/10 hover:bg-black/60 transition-all ${sidebarOpen ? 'hidden' : 'flex'}`}
+                            className={`pointer-events-auto w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 border-white/[0.05] hover:text-white hover:bg-white/[0.08] transition-all ${sidebarOpen ? 'hidden md:hidden' : 'flex'}`}
                         >
                             <Menu size={20} />
                         </button>
-                        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 pointer-events-auto hidden sm:block">
-                            <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black uppercase text-accent tracking-tighter bg-accent/20 px-2 py-0.5 rounded">Módulo {currentIndex + 1}</span>
-                                <span className="text-white text-sm font-bold truncate max-w-[200px]">{activeItem?.material?.title[language] || activeItem?.material?.title['pt-br']}</span>
+                        <div className="aura-glass px-6 py-3 rounded-2xl border-white/[0.05] pointer-events-auto hidden sm:block">
+                            <div className="flex items-center gap-5">
+                                <span className="text-[10px] font-black uppercase text-accent tracking-[0.2em] bg-accent/10 px-3 py-1 rounded-lg border border-accent/20">Módulo {currentIndex + 1}</span>
+                                <span className="text-white/80 text-sm font-bold truncate max-w-[300px] heading-aura">{activeItem?.material?.title[language] || activeItem?.material?.title['pt-br']}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pointer-events-auto">
-                        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 flex items-center gap-3 mr-2">
-                            <span className="text-white text-xs font-bold">{progress}%</span>
-                            <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                <div className="h-full bg-accent transition-all duration-1000" style={{ width: `${progress}%` }}></div>
+                    <div className="flex items-center gap-3 pointer-events-auto">
+                        <div className="aura-glass px-6 py-3 rounded-2xl border-white/[0.05] flex items-center gap-4 mr-2">
+                            <span className="text-white text-[10px] font-black tracking-widest">{progress}%</span>
+                            <div className="w-24 h-1 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                                <div className="h-full bg-accent transition-all duration-1000 shadow-[0_0_10px_rgba(0,209,255,0.4)]" style={{ width: `${progress}%` }}></div>
                             </div>
                         </div>
                         <button
                             onClick={() => setViewMode(false)}
-                            className="p-3 rounded-2xl bg-black/40 backdrop-blur-md text-white border border-white/10 hover:bg-black/60 transition-all"
+                            className="w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 border-white/[0.05] hover:text-white hover:bg-error transition-all"
                         >
                             <X size={20} />
                         </button>
@@ -356,9 +368,10 @@ export const CollectionDetail: React.FC = () => {
                 </div>
 
                 {/* Player Integrated Container */}
-                <div className="flex-1 flex items-center justify-center p-0 md:p-8">
+                <div className="flex-1 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent opacity-30"></div>
                     {activeItem?.material ? (
-                        <div className="w-full h-full animate-fade-in" key={activeItem.material.id}>
+                        <div className="w-full h-full animate-reveal relative z-10" key={activeItem.material.id}>
                             <IntegratedViewer
                                 material={activeItem.material}
                                 language={language}
@@ -366,22 +379,22 @@ export const CollectionDetail: React.FC = () => {
                             />
                         </div>
                     ) : (
-                        <div className="text-white">Carregando conteúdo...</div>
+                        <div className="text-white/10 font-black uppercase tracking-[0.5em] animate-pulse">Iniciando Experiência...</div>
                     )}
                 </div>
 
-                {/* Bottom Navigation */}
-                <div className="h-20 border-t border-white/5 bg-black/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-40">
+                {/* Bottom Navigation Aura */}
+                <div className="h-24 border-t border-white/[0.03] aura-glass flex items-center justify-between px-10 transition-all duration-500 shrink-0 z-40">
                     <button
                         onClick={handlePrev}
                         disabled={currentIndex === 0}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/5 text-white font-bold hover:bg-white/10 disabled:opacity-20 transition-all"
+                        className="flex items-center gap-3 px-8 py-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-white/40 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white disabled:opacity-5 transition-all outline-none"
                     >
-                        <ChevronLeft size={20} /> Anterior
+                        <ChevronLeft size={18} /> Anterior
                     </button>
 
                     <div className="hidden md:flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{currentIndex + 1} de {items.length}</span>
+                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] font-['Space_Grotesk']">{currentIndex + 1} <span className="text-white/5 mx-2">/</span> {items.length}</span>
                     </div>
 
                     <button
@@ -394,9 +407,9 @@ export const CollectionDetail: React.FC = () => {
                                 setViewMode(false);
                             }
                         }}
-                        className="flex items-center gap-2 px-10 py-3 rounded-xl bg-accent text-white font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-accent/20"
+                        className="flex items-center gap-4 px-12 py-3.5 rounded-xl bg-accent text-white font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-accent/20"
                     >
-                        {currentIndex < items.length - 1 ? 'Próximo' : 'Finalizar Trilha'} <ChevronRight size={20} />
+                        {currentIndex < items.length - 1 ? 'Próximo Módulo' : 'Finalizar Trilha'} <ChevronRight size={18} />
                     </button>
                 </div>
             </main>

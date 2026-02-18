@@ -19,47 +19,45 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
 
     return (
         <div
-            className="group relative bg-surface border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1"
-            onClick={() => {
-                onClick(collection);
-            }}
+            className="group aura-glass rounded-[2rem] overflow-hidden transition-all duration-500 cursor-pointer hover:-translate-y-2 border-white/[0.03]"
+            onClick={() => onClick(collection)}
         >
-            {/* Cover Image or Gradient Placeholder */}
-            <div className="h-40 w-full relative overflow-hidden bg-page">
+            {/* Cover Area */}
+            <div className="h-44 w-full relative overflow-hidden bg-neutral-900/50">
                 {collection.coverImage ? (
                     <img
                         src={collection.coverImage}
                         alt={title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-purple-500/10 flex items-center justify-center">
-                        <Layers size={48} className="text-accent/40" />
+                    <div className="w-full h-full bg-gradient-to-br from-accent/10 to-transparent flex items-center justify-center">
+                        <Layers size={48} className="text-white/10 group-hover:text-accent/40 transition-colors duration-500" />
                     </div>
                 )}
 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-80" />
+                {/* Overlay Lume */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#08090B] via-transparent to-transparent opacity-90" />
 
-                {/* Badge Trilha */}
-                <div className="absolute top-3 left-3 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] uppercase font-bold text-accent shadow-sm border border-white/10 flex items-center gap-1.5 z-10">
+                {/* Badge Trilha Luminous */}
+                <div className="absolute top-4 left-4 bg-white/[0.03] backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] uppercase font-bold text-accent border border-white/[0.05] flex items-center gap-2 z-10">
                     <FolderOpen size={12} />
-                    <span>Trilha</span>
+                    <span className="tracking-widest">Trilha</span>
                 </div>
 
-                {/* XP Badge */}
+                {/* Points Badge */}
                 {collection.points && (
-                    <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-600 px-2 py-1 rounded-md text-[10px] font-bold text-white shadow-lg border border-white/20 flex items-center gap-1 z-10 animate-fade-in">
+                    <div className="absolute top-4 right-4 bg-accent/10 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold text-accent border border-accent/20 flex items-center gap-1 z-10">
                         <Award size={12} />
                         <span>+{collection.points} XP</span>
                     </div>
                 )}
             </div>
 
-            {/* Content */}
-            <div className="p-5 relative">
-                <div className="flex justify-between items-start gap-4">
-                    <h3 className="font-bold text-lg text-main leading-tight line-clamp-2 group-hover:text-accent transition-colors">
+            {/* Content Aura */}
+            <div className="p-6 relative">
+                <div className="flex justify-between items-start gap-4 mb-3">
+                    <h3 className="font-bold text-xl text-white/90 heading-aura leading-tight line-clamp-2 group-hover:text-white transition-colors">
                         {title}
                     </h3>
 
@@ -67,7 +65,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
                         <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                             <button
                                 onClick={() => onEdit?.(collection)}
-                                className="p-1.5 hover:bg-page rounded text-muted hover:text-main transition-colors"
+                                className="p-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg text-white/20 hover:text-white transition-all"
                             >
                                 <MoreVertical size={16} />
                             </button>
@@ -75,42 +73,42 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
                     )}
                 </div>
 
-                <p className="text-sm text-muted mt-2 line-clamp-2 min-h-[2.5rem]">
-                    {description || 'Sem descrição definida para esta trilha.'}
+                <p className="text-[13px] text-white/30 leading-relaxed line-clamp-2 min-h-[3rem] font-medium">
+                    {description || 'Explore esta trilha de conhecimento premium.'}
                 </p>
 
-                {/* Progress Bar Container */}
-                <div className="mt-5 space-y-1.5">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                        <span className={collection.progress === 100 ? "text-success flex items-center gap-1" : "text-muted"}>
+                {/* Progress Bar Aura */}
+                <div className="mt-6 space-y-2.5">
+                    <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-[0.2em]">
+                        <span className={collection.progress === 100 ? "text-success flex items-center gap-2" : "text-white/20"}>
                             {collection.progress === 100 ? (
                                 <><CheckCircle2 size={12} /> Concluída</>
                             ) : 'Progresso'}
                         </span>
-                        <span className={collection.progress === 100 ? "text-success" : "text-main"}>
+                        <span className={collection.progress === 100 ? "text-success" : "text-white/40"}>
                             {collection.progress || 0}%
                         </span>
                     </div>
-                    <div className="h-1.5 w-full bg-page rounded-full overflow-hidden border border-border/50">
+                    <div className="h-1.5 w-full bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
                         <div
                             className={`h-full transition-all duration-1000 ease-out rounded-full ${collection.progress === 100
-                                    ? 'bg-gradient-to-r from-success to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                                    : 'bg-gradient-to-r from-accent to-indigo-500'
+                                ? 'bg-success shadow-[0_0_15px_rgba(0,245,160,0.4)]'
+                                : 'bg-accent shadow-[0_0_15px_rgba(0,209,255,0.4)]'
                                 }`}
                             style={{ width: `${collection.progress || 0}%` }}
                         />
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-xs font-medium text-muted">
-                    <span className="flex items-center gap-1.5">
-                        <Layers size={14} />
-                        Confira a coleção
+                {/* Footer Lume */}
+                <div className="mt-8 pt-6 border-t border-white/[0.03] flex justify-between items-center">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/20 flex items-center gap-2">
+                        <Layers size={14} className="opacity-40" />
+                        Acessar Trilhas
                     </span>
 
-                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 transform translate-x-0 group-hover:translate-x-1">
-                        <ChevronRight size={16} />
+                    <div className="w-9 h-9 rounded-xl bg-white/[0.03] flex items-center justify-center text-white/40 group-hover:bg-accent/10 group-hover:text-accent border border-white/[0.05] group-hover:border-accent/30 transition-all duration-500 transform translate-x-0 group-hover:translate-x-1">
+                        <ChevronRight size={18} />
                     </div>
                 </div>
             </div>
