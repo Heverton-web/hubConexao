@@ -19,13 +19,15 @@ O **Hub Conexão** (também conhecido como **MaterialShare Pro**) é uma platafo
 
 ## 3. Principais Funcionalidades
 
-### 📦 Gestão de Materiais
+### 📦 Gestão de Materiais (URL-First)
 
-Suporte nativo para três tipos de ativos principais:
+O sistema adota uma abordagem moderna baseada em **URLs Inteligentes**, eliminando uploads pesados e aproveitando o ecossistema de conteúdo existente.
 
-- **PDF**: Visualização integrada via iframe otimizado com controle de zoom.
-- **Vídeo**: Player nativo (para Drive/Direto) e Embed otimizado para YouTube.
-- **Imagens**: Visualização em alta resolução com bloqueio de clique direito (proteção de marca).
+- **Suporte Multi-Provider**: YouTube, Google Drive, Instagram, TikTok, LinkedIn e Links Diretos.
+- **Detecção Automática**: O sistema identifica o tipo de material (Vídeo, PDF, Imagem) e gera embeds otimizados.
+- **Visualização Universal**: Player unificado que se adapta à fonte do conteúdo.
+
+> Para detalhes sobre a arquitetura e design system atualizado, consulte [ARCHITECTURE_UPDATES_2026.md](./docs/ARCHITECTURE_UPDATES_2026.md).
 
 ### 🛤️ Trilhas de Aprendizagem (Collections)
 
