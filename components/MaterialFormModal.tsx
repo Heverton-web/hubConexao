@@ -1,89 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Material, Language, MaterialType, Role, MaterialAsset } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { X, Save, FileText, Image as ImageIcon, Video, Check, Globe, Users, Shield, Link as LinkIcon, Youtube, AlertCircle, Play, Tag } from 'lucide-react';
+import { X, Save, FileText, Image as ImageIcon, Video, Check, Users, Shield, Link as LinkIcon, AlertCircle, Tag, Star, Globe, Clipboard, ExternalLink } from 'lucide-react';
 import { TagInput } from './TagInput';
-import { DropZone } from './DropZone';
+import { detectUrl, PROVIDERS, UrlDetectionResult } from '../lib/urlDetector';
 
-// --- Helper Component (Extracted) ---
-
-interface TypeCardProps {
-  value: MaterialType;
-  icon: any;
-  label: string;
-  currentType: MaterialType;
-  onSelect: (val: MaterialType) => void;
-}
-
-const TypeCard = ({ value, icon: Icon, label, currentType, onSelect }: TypeCardProps) => (
-  <button
-    type="button"
-    onClick={() => onSelect(value)}
-    className={`
-      relative flex-1 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200
-      ${currentType === value
-        ? 'bg-accent/5 text-accent shadow-sm'
-        : 'bg-surface text-muted hover:bg-page hover:text-main'}
-    `}
-  >
-    <Icon size={24} className="mb-2" />
-    <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
-    {currentType === value && (
-      <div className="absolute top-2 right-2 text-accent">
-        <Check size={16} />
-      </div>
-    )}
-  </button>
-);
-
-// --- Video Preview Helper ---
-
-const VideoPreview = ({ url }: { url: string }) => {
-  if (!url) return null;
-
-  // Simple Embed extraction for preview (Logic similar to ViewerModal but simplified)
-  let embedUrl = '';
-  const cleanUrl = url.trim();
-
-  const youtubeMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-  if (youtubeMatch && youtubeMatch[1]) {
-    embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0&modestbranding=1`;
-  } else if (cleanUrl.includes('drive.google.com')) {
-    const driveIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
-    if (driveIdMatch && driveIdMatch[1]) {
-      embedUrl = `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`;
-    }
-  } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
-    // Direct file
-    return (
-      <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg">
-        <video src={cleanUrl} controls className="w-full h-full object-contain" />
-      </div>
-    );
-  }
-
-  if (embedUrl) {
-    return (
-      <div className="mt-4 rounded-xl overflow-hidden bg-black aspect-video relative shadow-lg group">
-        <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Preview" />
-        <div className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md pointer-events-none">
-          Preview
-        </div>
-      </div>
-    );
-  }
-
+// --- Provider Badge ---
+const ProviderBadge = ({ provider, small = false }: { provider: string; small?: boolean }) => {
+  const info = PROVIDERS.find(p => p.id === provider);
+  if (!info) return null;
   return (
-    <div className="mt-4 rounded-xl bg-page p-4 flex items-center justify-center text-muted gap-2 text-sm">
-      <AlertCircle size={16} />
-      Não foi possível gerar preview para este link, mas ele será salvo.
-    </div>
+    <span
+      className={`inline-flex items-center gap-1.5 font-bold uppercase tracking-wider rounded-lg ${small ? 'text-[9px] px-2 py-0.5' : 'text-[10px] px-2.5 py-1'}`}
+      style={{ background: `${info.color}15`, color: info.color }}
+    >
+      <span>{info.icon}</span> {info.label}
+    </span>
   );
 };
 
-// --- Main Component ---
+// --- Type Card ---
+const TypeCard = ({ value, icon: Icon, label, currentType, onSelect }: {
+  value: MaterialType; icon: any; label: string; currentType: MaterialType; onSelect: (val: MaterialType) => void;
+}) => (
+  <button
+    type="button"
+    onClick={() => onSelect(value)}
+    className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-300 border ${currentType === value
+      ? 'bg-accent/[0.06] text-accent border-transparent'
+      : 'bg-white/[0.01] text-white/30 border-transparent hover:text-white/50 hover:bg-white/[0.02]'
+      }`}
+  >
+    <Icon size={20} />
+    <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
+    {currentType === value && <Check size={12} className="text-accent" />}
+  </button>
+);
 
+// --- Main Component ---
 interface MaterialFormModalProps {
   initialData?: Material | null;
   onClose: () => void;
@@ -103,8 +58,11 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
   const [assets, setAssets] = useState<Partial<Record<Language, MaterialAsset>>>({});
   const [tags, setTags] = useState<string[]>([]);
   const [category, setCategory] = useState('');
+  const [points, setPoints] = useState(50);
 
-  // UI State
+  // URL Input State
+  const [urlInput, setUrlInput] = useState('');
+  const [detection, setDetection] = useState<UrlDetectionResult | null>(null);
   const [activeTab, setActiveTab] = useState<Language>('pt-br');
   const [error, setError] = useState<string | null>(null);
 
@@ -118,39 +76,56 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
       setAssets(initialData.assets);
       setTags(initialData.tags || []);
       setCategory(initialData.category || '');
-    } else {
-      setTags([]);
-      setCategory('');
+      setPoints(initialData.points || 50);
+      // Set URL from primary language
+      const primaryAsset = initialData.assets['pt-br'] || initialData.assets['en-us'] || initialData.assets['es-es'];
+      if (primaryAsset?.url) {
+        setUrlInput(primaryAsset.url);
+        const det = detectUrl(primaryAsset.url);
+        setDetection(det);
+      }
     }
   }, [initialData]);
 
-  const handleTitleChange = (lang: Language, value: string) => {
-    setTitles(prev => ({ ...prev, [lang]: value }));
-  };
-
-  // Smart Input Handler
-  const handleUrlPasteOrChange = (lang: Language, value: string) => {
-    let finalValue = value;
-
-    // 1. Detect iframe paste and extract src
+  // URL Change Handler — detect source
+  const handleUrlChange = (value: string) => {
+    // Handle iframe paste
+    let cleanValue = value;
     if (value.includes('<iframe') && value.includes('src=')) {
       const srcMatch = value.match(/src=["'](.*?)["']/);
-      if (srcMatch && srcMatch[1]) {
-        finalValue = srcMatch[1];
-      }
+      if (srcMatch?.[1]) cleanValue = srcMatch[1];
     }
+    setUrlInput(cleanValue);
 
-    setAssets(prev => {
-      const current = prev[lang] || { url: '', status: 'published' };
-      return { ...prev, [lang]: { ...current, url: finalValue } };
-    });
+    const det = detectUrl(cleanValue);
+    setDetection(det);
+
+    if (det) {
+      // Auto-select type
+      setType(det.materialType);
+
+      // Auto-fill URL for active tab
+      setAssets(prev => ({
+        ...prev,
+        [activeTab]: { url: cleanValue, status: 'published' as const }
+      }));
+    }
   };
 
-  const handleSubtitleChange = (lang: Language, value: string) => {
-    setAssets(prev => {
-      const current = prev[lang] || { url: '', status: 'published' };
-      return { ...prev, [lang]: { ...current, subtitleUrl: value } };
-    });
+  // Paste handler
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) handleUrlChange(text);
+    } catch { /* clipboard not available */ }
+  };
+
+  // Per-language URL override
+  const handleLangUrlChange = (lang: Language, url: string) => {
+    setAssets(prev => ({
+      ...prev,
+      [lang]: { url, status: 'published' as const }
+    }));
   };
 
   const toggleRole = (role: Role) => {
@@ -163,26 +138,27 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
     e.preventDefault();
     setError(null);
 
-    const cleanedAssets: Partial<Record<Language, MaterialAsset>> = {};
-    const cleanedTitles: Partial<Record<Language, string>> = {};
-    let hasAtLeastOneValidVersion = false;
+    // Build assets from URL input (use main URL if per-lang not set)
+    const finalAssets: Partial<Record<Language, MaterialAsset>> = {};
+    const finalTitles: Partial<Record<Language, string>> = {};
+    let hasValid = false;
 
     languages.forEach(lang => {
-      const url = assets[lang]?.url?.trim();
-      const title = titles[lang]?.trim();
+      const langUrl = assets[lang]?.url?.trim() || urlInput.trim();
+      const langTitle = titles[lang]?.trim();
 
-      if (url && title) {
-        hasAtLeastOneValidVersion = true;
-        cleanedAssets[lang] = {
-          url: url,
-          subtitleUrl: assets[lang]?.subtitleUrl?.trim(),
+      if (langUrl && langTitle) {
+        hasValid = true;
+        finalAssets[lang] = {
+          url: langUrl,
+          subtitleUrl: assets[lang]?.subtitleUrl,
           status: assets[lang]?.status || 'published'
         };
-        cleanedTitles[lang] = title;
+        finalTitles[lang] = langTitle;
       }
     });
 
-    if (!hasAtLeastOneValidVersion) {
+    if (!hasValid) {
       setError('Preencha o Título e a URL para pelo menos um idioma.');
       return;
     }
@@ -194,279 +170,289 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
 
     const payload = {
       ...(initialData || {}),
-      title: cleanedTitles,
+      title: finalTitles,
       type,
       allowedRoles,
       active,
-      assets: cleanedAssets,
+      assets: finalAssets,
       tags,
-      category
+      category,
+      points
     };
 
     await onSave(payload);
     onClose();
   };
 
-  const hasContent = (lang: Language) => {
-    return (titles[lang]?.length || 0) > 0 || (assets[lang]?.url?.length || 0) > 0;
-  };
-
-  const getUrlPlaceholder = () => {
-    if (type === 'video') return "Cole o link do YouTube, Drive ou MP4 aqui...";
-    if (type === 'image') return t('url.placeholder.image');
-    return t('url.placeholder.pdf');
-  };
+  const typeIcons = { pdf: FileText, image: ImageIcon, video: Video };
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all animate-fade-in" style={{ zIndex: 9999 }}>
-      <div className="bg-surface rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md transition-all animate-fade-in" style={{ zIndex: 9999 }}>
+      <div className="bg-surface rounded-[2rem] w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-slide-up border border-white/[0.01]">
 
         {/* Header */}
-        <div className="px-6 py-4 flex justify-between items-center bg-surface z-10 shrink-0">
+        <div className="px-8 py-6 flex justify-between items-center shrink-0">
           <div>
-            <h3 className="font-bold text-xl text-main">
+            <h3 className="font-bold text-2xl text-white heading-aura">
               {initialData ? t('edit.material') : t('add.material')}
             </h3>
-            <p className="text-sm text-muted">{t('material.modal.subtitle')}</p>
+            <p className="text-[11px] text-white/30 mt-1 font-medium tracking-wide">Cole o link do material para começar</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-page rounded-full transition-colors text-muted hover:text-main">
-            <X size={24} />
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/[0.03] hover:bg-error/20 hover:text-error rounded-xl text-white/30 transition-all">
+            <X size={18} />
           </button>
         </div>
 
         {/* Error Banner */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 px-6 py-3 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-medium">
+          <div className="bg-error/10 px-8 py-3 flex items-center gap-2 text-sm text-error font-medium animate-reveal">
             <AlertCircle size={16} />
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col md:flex-row min-h-0">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 pb-8 space-y-7 min-h-0">
 
-          {/* Left Column: Global Settings */}
-          <div className="w-full md:w-1/3 bg-page p-6 overflow-y-auto">
-            <div className="space-y-6">
-
-              {/* Type Selection */}
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-3 block tracking-wider">{t('type')}</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <TypeCard value="pdf" icon={FileText} label="PDF" currentType={type} onSelect={setType} />
-                  <TypeCard value="image" icon={ImageIcon} label="IMG" currentType={type} onSelect={setType} />
-                  <TypeCard value="video" icon={Video} label="Video" currentType={type} onSelect={setType} />
-                </div>
-              </div>
-
-
-              {/* Category & Tags */}
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold uppercase text-muted mb-2 block tracking-wider">
-                    {t('category.label')}
-                  </label>
-                  <input
-                    type="text"
-                    list="categories"
-                    placeholder={t('category.placeholder')}
-                    className="w-full bg-surface rounded-lg p-2 text-sm text-main focus:border-accent/20 outline-none transition-all"
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                  />
-                  <datalist id="categories">
-                    <option value="Marketing" />
-                    <option value="Produtos" />
-                    <option value="Vendas" />
-                    <option value="Institucional" />
-                  </datalist>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold uppercase text-muted mb-2 block tracking-wider flex items-center gap-2">
-                    <Tag size={14} /> Tags
-                  </label>
-                  <TagInput tags={tags} onChange={setTags} />
-                </div>
-              </div>
-
-              {/* Permissions */}
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-3 block flex items-center gap-2 tracking-wider">
-                  <Users size={14} /> {t('permissions')}
-                </label>
-                <div className="space-y-2">
-                  {allRoles.map(role => (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => toggleRole(role)}
-                      className={`
-                        w-full flex items-center justify-between p-3 rounded-lg transition-all text-sm
-                        ${allowedRoles.includes(role)
-                          ? 'bg-surface text-accent shadow-sm'
-                          : 'bg-surface text-muted/80 hover:text-main hover:bg-white/5'}
-                      `}
-                    >
-                      <span className="font-medium">{t(`role.${role}`)}</span>
-                      {allowedRoles.includes(role) && <Check size={16} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-3 block flex items-center gap-2 tracking-wider">
-                  <Shield size={14} /> {t('status')}
-                </label>
-                <div
-                  onClick={() => setActive(!active)}
-                  className={`
-                    cursor-pointer p-4 rounded-xl flex items-center justify-between transition-colors
-                    ${active
-                      ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                      : 'bg-surface text-muted'}
-                  `}
+          {/* === SECTION 1: URL Input === */}
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+              <LinkIcon size={12} /> URL do Material
+            </label>
+            <div className="relative group">
+              <input
+                type="text"
+                placeholder="Cole o link aqui — YouTube, Google Drive, Instagram, TikTok..."
+                className="w-full bg-white/[0.015] border border-white/[0.01] rounded-2xl px-5 py-4 pr-24 text-white placeholder-white/10 hover:bg-white/[0.025] focus:bg-white/[0.03] outline-none transition-all text-sm"
+                value={urlInput}
+                onChange={e => handleUrlChange(e.target.value)}
+                autoFocus
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handlePaste}
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-accent/10 text-white/30 hover:text-accent transition-all text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
                 >
-                  <span className="font-medium">{active ? t('active') : t('inactive')}</span>
-                  <div className={`w-10 h-6 rounded-full relative transition-colors ${active ? 'bg-green-500' : 'bg-muted/30'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm ${active ? 'left-5' : 'left-1'}`} />
+                  <Clipboard size={11} /> Colar
+                </button>
+              </div>
+            </div>
+
+            {/* Compatible Sources (only show when no URL) */}
+            {!urlInput && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {PROVIDERS.map(p => (
+                  <span key={p.id} className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white/[0.02] text-white/20 flex items-center gap-1.5">
+                    <span>{p.icon}</span> {p.label}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Detection Result */}
+            {detection && urlInput && (
+              <div className="mt-4 bg-white/[0.02] border border-white/[0.03] rounded-2xl p-4 animate-reveal">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <ProviderBadge provider={detection.provider} />
+                    <span className="text-[10px] text-success font-bold uppercase tracking-wider flex items-center gap-1">
+                      <Check size={10} /> Detectado
+                    </span>
                   </div>
+                  <a href={urlInput} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors">
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+
+                {/* Thumbnail preview for YouTube */}
+                {detection.thumbnailUrl && detection.provider === 'youtube' && (
+                  <div className="relative rounded-xl overflow-hidden aspect-video max-h-40 mb-3">
+                    <img src={detection.thumbnailUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Video size={20} className="text-white ml-0.5" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-white/30 font-medium">Tipo detectado:</span>
+                  <span className="text-[10px] font-bold text-accent uppercase tracking-wider flex items-center gap-1">
+                    {React.createElement(typeIcons[detection.materialType], { size: 12 })}
+                    {detection.materialType}
+                  </span>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* === SECTION 2: Type Override === */}
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block">Tipo do Material</label>
+            <div className="grid grid-cols-3 gap-3">
+              <TypeCard value="pdf" icon={FileText} label="PDF" currentType={type} onSelect={setType} />
+              <TypeCard value="image" icon={ImageIcon} label="Imagem" currentType={type} onSelect={setType} />
+              <TypeCard value="video" icon={Video} label="Vídeo" currentType={type} onSelect={setType} />
             </div>
           </div>
 
-          {/* Right Column: Localized Content */}
-          <div className="flex-1 flex flex-col bg-surface min-h-0">
+          {/* === SECTION 3: Title per language === */}
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+              <Globe size={12} /> Título por Idioma
+            </label>
 
             {/* Language Tabs */}
-            <div className="flex px-6 pt-4 gap-6 overflow-x-auto shrink-0">
+            <div className="flex gap-4 mb-4">
               {languages.map(lang => {
-                const isCompleted = hasContent(lang);
-                const label = lang === 'pt-br' ? 'Português' : lang === 'en-us' ? 'English' : 'Español';
                 const flag = lang === 'pt-br' ? '🇧🇷' : lang === 'en-us' ? '🇺🇸' : '🇪🇸';
-
+                const label = lang === 'pt-br' ? 'Português' : lang === 'en-us' ? 'English' : 'Español';
+                const hasContent = !!(titles[lang]?.trim());
                 return (
                   <button
                     key={lang}
                     type="button"
                     onClick={() => setActiveTab(lang)}
-                    className={`
-                      pb-4 px-1 relative font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 outline-none
-                      ${activeTab === lang
-                        ? 'text-accent'
-                        : 'text-muted hover:text-main'}
-                    `}
+                    className={`relative pb-2 text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === lang ? 'text-accent' : 'text-white/30 hover:text-white/60'}`}
                   >
-                    <span className="text-base">{flag}</span> {label}
-                    {isCompleted && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 ml-1" title="Conteúdo inserido"></span>
-                    )}
-                    {activeTab === lang && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-t-full" />
-                    )}
+                    <span>{flag}</span> {label}
+                    {hasContent && <span className="w-1.5 h-1.5 rounded-full bg-success" />}
+                    {activeTab === lang && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />}
                   </button>
                 );
               })}
             </div>
 
-            {/* Tab Content */}
-            <div className="flex-1 p-6 overflow-y-auto min-h-0 bg-page/30">
-              <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
+            {/* Title Input */}
+            <input
+              type="text"
+              placeholder={`Título do material (${activeTab})`}
+              className="w-full bg-white/[0.015] border border-white/[0.01] rounded-xl px-5 py-3.5 text-white placeholder-white/10 hover:bg-white/[0.025] focus:bg-white/[0.03] outline-none transition-all text-sm"
+              value={titles[activeTab] || ''}
+              onChange={e => setTitles(prev => ({ ...prev, [activeTab]: e.target.value }))}
+            />
 
-                <div className="space-y-4">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-main mb-1.5 block">
-                      {t('title')} <span className="text-red-500">*</span>
-                    </span>
-                    <input
-                      type="text"
-                      placeholder={`Ex: Catálogo 2024 (${activeTab})`}
-                      className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:border-accent/20 outline-none transition-all shadow-sm"
-                      value={titles[activeTab] || ''}
-                      onChange={e => handleTitleChange(activeTab, e.target.value)}
-                    />
-                  </label>
+            {/* Per-language URL override (collapsible) */}
+            {activeTab !== 'pt-br' && (
+              <div className="mt-3">
+                <input
+                  type="text"
+                  placeholder={`URL diferente para ${activeTab} (opcional — usa a URL principal se vazio)`}
+                  className="w-full bg-white/[0.01] border border-transparent rounded-xl px-5 py-3 text-white/60 placeholder-white/10 hover:bg-white/[0.02] focus:bg-white/[0.03] outline-none transition-all text-xs font-mono"
+                  value={assets[activeTab]?.url || ''}
+                  onChange={e => handleLangUrlChange(activeTab, e.target.value)}
+                />
+              </div>
+            )}
+          </div>
 
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="w-full border-t border-border/20"></div>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="px-2 bg-page/30 text-xs text-muted uppercase tracking-wider font-semibold">
-                        {type === 'video' ? t('material.video.link') : t('material.file')}
-                      </span>
-                    </div>
-                  </div>
+          {/* === SECTION 4: Category & Tags === */}
+          <div className="grid grid-cols-2 gap-5">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block">Categoria</label>
+              <input
+                type="text"
+                list="categories"
+                placeholder="Ex: Marketing, Vendas..."
+                className="w-full bg-white/[0.015] border border-white/[0.01] rounded-xl px-4 py-3 text-sm text-white placeholder-white/10 hover:bg-white/[0.025] focus:bg-white/[0.03] outline-none transition-all"
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+              />
+              <datalist id="categories">
+                <option value="Marketing" />
+                <option value="Produtos" />
+                <option value="Vendas" />
+                <option value="Institucional" />
+                <option value="Treinamento" />
+              </datalist>
+            </div>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+                <Star size={12} /> Pontos XP
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={1000}
+                step={10}
+                className="w-full bg-white/[0.015] border border-white/[0.01] rounded-xl px-4 py-3 text-sm text-white placeholder-white/10 hover:bg-white/[0.025] focus:bg-white/[0.03] outline-none transition-all appearance-none"
+                value={points}
+                onChange={e => setPoints(Number(e.target.value))}
+              />
+            </div>
+          </div>
 
-                  <label className="block group">
-                    <span className="text-sm font-semibold text-main mb-1.5 flex items-center justify-between">
-                      <span>{t('dropzone.file_or_url')} <span className="text-red-500">*</span></span>
-                      {type === 'video' && (
-                        <span className="text-[10px] font-normal bg-accent/10 text-accent px-2 py-0.5 rounded">
-                          {t('dropzone.accept.video')}
-                        </span>
-                      )}
-                    </span>
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+              <Tag size={12} /> Tags
+            </label>
+            <TagInput tags={tags} onChange={setTags} />
+          </div>
 
-                    <DropZone
-                      onFileAccepted={(url, file) => handleUrlPasteOrChange(activeTab, url)}
-                      currentUrl={assets[activeTab]?.url}
-                      accept={type === 'image' ? 'image' : type === 'video' ? 'video' : 'pdf'}
-                      placeholder={
-                        type === 'image' ? t('dropzone.drag.image') :
-                          type === 'video' ? t('dropzone.drag.video') :
-                            t('dropzone.drag.pdf')
-                      }
-                    />
-                  </label>
-
-                  {/* VIDEO PREVIEW SECTION */}
-                  {type === 'video' && assets[activeTab]?.url && (
-                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                      <VideoPreview url={assets[activeTab]!.url!} />
-                    </div>
-                  )}
-
-                  {type === 'video' && (
-                    <label className="block animate-fade-in pt-2">
-                      <span className="text-sm font-semibold text-main mb-1.5 block">
-                        {t('asset.subtitle')} <span className="text-xs font-normal text-muted">{t('optional')}</span>
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="https://exemplo.com/legenda.vtt"
-                        className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:border-accent/20 outline-none transition-all font-mono text-sm shadow-sm"
-                        value={assets[activeTab]?.subtitleUrl || ''}
-                        onChange={(e) => handleSubtitleChange(activeTab, e.target.value)}
-                      />
-                    </label>
-                  )}
-                </div>
+          {/* === SECTION 5: Permissions & Status === */}
+          <div className="grid grid-cols-2 gap-5">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+                <Users size={12} /> Permissões
+              </label>
+              <div className="space-y-2">
+                {allRoles.map(role => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => toggleRole(role)}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-sm border ${allowedRoles.includes(role)
+                      ? 'bg-accent/[0.06] text-accent border-transparent'
+                      : 'bg-white/[0.01] text-white/30 border-transparent hover:text-white/50 hover:bg-white/[0.02]'
+                      }`}
+                  >
+                    <span className="font-medium">{t(`role.${role}`)}</span>
+                    {allowedRoles.includes(role) && <Check size={14} />}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 bg-surface flex justify-end gap-3 shrink-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 rounded-lg text-muted hover:bg-page font-medium transition-colors"
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mb-3 block flex items-center gap-2">
+                <Shield size={12} /> Status
+              </label>
+              <div
+                onClick={() => setActive(!active)}
+                className={`cursor-pointer p-4 rounded-xl flex items-center justify-between transition-all border ${active
+                  ? 'bg-success/[0.06] text-success border-transparent'
+                  : 'bg-white/[0.01] text-white/30 border-transparent hover:bg-white/[0.02]'
+                  }`}
               >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2.5 rounded-lg bg-accent text-white hover:opacity-90 font-medium flex items-center gap-2 shadow-lg shadow-accent/20 transition-transform active:scale-95"
-              >
-                <Save size={18} />
-                {t('save')}
-              </button>
+                <span className="font-medium text-sm">{active ? t('active') : t('inactive')}</span>
+                <div className={`w-10 h-6 rounded-full relative transition-colors ${active ? 'bg-success' : 'bg-white/10'}`}>
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm ${active ? 'left-5' : 'left-1'}`} />
+                </div>
+              </div>
             </div>
-
           </div>
+
         </form>
+
+        {/* Footer */}
+        <div className="px-8 py-5 flex justify-end gap-3 shrink-0 border-t border-white/[0.03]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-xl text-white/30 hover:text-white hover:bg-white/[0.05] font-medium transition-all text-sm"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-2.5 rounded-xl bg-accent text-white hover:opacity-90 font-bold flex items-center gap-2 shadow-lg shadow-accent/20 transition-all active:scale-95 text-sm"
+          >
+            <Save size={16} />
+            {t('save')}
+          </button>
+        </div>
+
       </div>
     </div>,
     document.body
