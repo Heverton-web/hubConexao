@@ -23,7 +23,7 @@ const TypeCard = ({ value, icon: Icon, label, currentType, onSelect }: TypeCardP
     className={`
       relative flex-1 flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200
       ${currentType === value
-        ? 'bg-accent/5 text-accent shadow-sm ring-2 ring-accent'
+        ? 'bg-accent/5 text-accent shadow-sm'
         : 'bg-surface text-muted hover:bg-page hover:text-main'}
     `}
   >
@@ -269,7 +269,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     type="text"
                     list="categories"
                     placeholder={t('category.placeholder')}
-                    className="w-full bg-surface border border-border rounded-lg p-2 text-sm text-main focus:ring-2 focus:ring-accent outline-none transition-all"
+                    className="w-full bg-surface rounded-lg p-2 text-sm text-main focus:border-accent/20 outline-none transition-all"
                     value={category}
                     onChange={e => setCategory(e.target.value)}
                   />
@@ -303,8 +303,8 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                       className={`
                         w-full flex items-center justify-between p-3 rounded-lg transition-all text-sm
                         ${allowedRoles.includes(role)
-                          ? 'bg-surface text-accent shadow-sm ring-1 ring-accent'
-                          : 'bg-surface text-muted/80 hover:text-main hover:bg-white/50'}
+                          ? 'bg-surface text-accent shadow-sm'
+                          : 'bg-surface text-muted/80 hover:text-main hover:bg-white/5'}
                       `}
                     >
                       <span className="font-medium">{t(`role.${role}`)}</span>
@@ -383,7 +383,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                     <input
                       type="text"
                       placeholder={`Ex: Catálogo 2024 (${activeTab})`}
-                      className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent outline-none transition-all shadow-sm"
+                      className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:border-accent/20 outline-none transition-all shadow-sm"
                       value={titles[activeTab] || ''}
                       onChange={e => handleTitleChange(activeTab, e.target.value)}
                     />
@@ -437,7 +437,7 @@ export const MaterialFormModal: React.FC<MaterialFormModalProps> = ({ initialDat
                       <input
                         type="text"
                         placeholder="https://exemplo.com/legenda.vtt"
-                        className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:ring-2 focus:ring-accent outline-none transition-all font-mono text-sm shadow-sm"
+                        className="w-full p-3 rounded-lg bg-surface text-main placeholder-muted focus:border-accent/20 outline-none transition-all font-mono text-sm shadow-sm"
                         value={assets[activeTab]?.subtitleUrl || ''}
                         onChange={(e) => handleSubtitleChange(activeTab, e.target.value)}
                       />

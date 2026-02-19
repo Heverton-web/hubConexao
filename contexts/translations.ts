@@ -26,6 +26,12 @@ export const translations: Record<Language, Record<string, string>> = {
         'landing.consultant.benefit.2': 'Scripts de Vendas e Argumenta\u00e7\u00e3o',
         'landing.consultant.benefit.3': 'Materiais de Apoio para Apresenta\u00e7\u00f5es',
 
+        'landing.super_admin.title': 'Painel de Administra\u00e7\u00e3o',
+        'landing.super_admin.desc': 'Gerencie toda a plataforma: usu\u00e1rios, materiais, trilhas e configura\u00e7\u00f5es do sistema.',
+        'landing.super_admin.benefit.1': 'Controle Total de Usu\u00e1rios e Permiss\u00f5es',
+        'landing.super_admin.benefit.2': 'Gest\u00e3o de Materiais, Trilhas e Conte\u00fados',
+        'landing.super_admin.benefit.3': 'Configura\u00e7\u00f5es Avan\u00e7adas do Sistema',
+
         'dashboard.title': 'Materiais Dispon\u00edveis',
         'admin.title': 'Painel Administrativo',
         'common.logout': 'Sair',
@@ -215,6 +221,12 @@ export const translations: Record<Language, Record<string, string>> = {
         'landing.consultant.benefit.1': 'Technical and Commercial Training',
         'landing.consultant.benefit.2': 'Sales Scripts and Argumentation',
         'landing.consultant.benefit.3': 'Support Materials for Presentations',
+
+        'landing.super_admin.title': 'Administration Panel',
+        'landing.super_admin.desc': 'Manage the entire platform: users, materials, collections, and system settings.',
+        'landing.super_admin.benefit.1': 'Full User and Permissions Control',
+        'landing.super_admin.benefit.2': 'Materials, Collections and Content Management',
+        'landing.super_admin.benefit.3': 'Advanced System Configuration',
 
         'dashboard.title': 'Available Materials',
         'admin.title': 'Admin Panel',
@@ -408,6 +420,12 @@ export const translations: Record<Language, Record<string, string>> = {
         'landing.consultant.benefit.1': 'Entrenamientos T\u00e9cnicos y Comerciales',
         'landing.consultant.benefit.2': 'Guiones de Ventas y Argumentaci\u00f3n',
         'landing.consultant.benefit.3': 'Materiales de Apoyo para Presentaciones',
+
+        'landing.super_admin.title': 'Panel de Administración',
+        'landing.super_admin.desc': 'Gestione toda la plataforma: usuarios, materiales, colecciones y configuraciones del sistema.',
+        'landing.super_admin.benefit.1': 'Control Total de Usuarios y Permisos',
+        'landing.super_admin.benefit.2': 'Gestión de Materiales, Colecciones y Contenidos',
+        'landing.super_admin.benefit.3': 'Configuraciones Avanzadas del Sistema',
 
         'dashboard.title': 'Materiales Disponibles',
         'admin.title': 'Panel de Administraci\u00f3n',

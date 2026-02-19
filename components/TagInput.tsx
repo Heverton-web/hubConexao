@@ -44,7 +44,10 @@ export const TagInput: React.FC<TagInputProps> = ({
 
     return (
         <div className="w-full">
-            <div className="flex flex-wrap gap-2 p-2 bg-surface border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent transition-all min-h-[42px]">
+            <div className={`
+                flex flex-wrap gap-2 p-2 bg-surface rounded-lg transition-all min-h-[42px]
+                focus-within:bg-page focus-within:shadow-inner
+            `}>
                 {tags.map((tag, index) => (
                     <span
                         key={index}

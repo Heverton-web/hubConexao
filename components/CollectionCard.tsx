@@ -19,7 +19,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
 
     return (
         <div
-            className="group aura-glass rounded-[2rem] overflow-hidden transition-all duration-500 cursor-pointer hover:-translate-y-2 border-white/[0.03]"
+            className="group aura-glass rounded-[2rem] overflow-hidden transition-all duration-500 cursor-pointer hover:-translate-y-2"
             onClick={() => onClick(collection)}
         >
             {/* Cover Area */}
@@ -37,17 +37,17 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
                 )}
 
                 {/* Overlay Lume */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#08090B] via-transparent to-transparent opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-t from-page via-transparent to-transparent opacity-90" />
 
                 {/* Badge Trilha Luminous */}
-                <div className="absolute top-4 left-4 bg-white/[0.03] backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] uppercase font-bold text-accent border border-white/[0.05] flex items-center gap-2 z-10">
+                <div className="absolute top-4 left-4 bg-white/[0.03] backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] uppercase font-bold text-accent flex items-center gap-2 z-10">
                     <FolderOpen size={12} />
                     <span className="tracking-widest">Trilha</span>
                 </div>
 
                 {/* Points Badge */}
                 {collection.points && (
-                    <div className="absolute top-4 right-4 bg-accent/10 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold text-accent border border-accent/20 flex items-center gap-1 z-10">
+                    <div className="absolute top-4 right-4 bg-accent/5 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold text-accent flex items-center gap-1 z-10">
                         <Award size={12} />
                         <span>+{collection.points} XP</span>
                     </div>
@@ -89,7 +89,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
                             {collection.progress || 0}%
                         </span>
                     </div>
-                    <div className="h-1.5 w-full bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                    <div className="h-1.5 w-full bg-white/[0.01] rounded-full overflow-hidden">
                         <div
                             className={`h-full transition-all duration-1000 ease-out rounded-full ${collection.progress === 100
                                 ? 'bg-success shadow-[0_0_15px_rgba(0,245,160,0.4)]'
@@ -101,13 +101,13 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCl
                 </div>
 
                 {/* Footer Lume */}
-                <div className="mt-8 pt-6 border-t border-white/[0.03] flex justify-between items-center">
+                <div className="mt-8 pt-6 flex justify-between items-center">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/20 flex items-center gap-2">
                         <Layers size={14} className="opacity-40" />
                         Acessar Trilhas
                     </span>
 
-                    <div className="w-9 h-9 rounded-xl bg-white/[0.03] flex items-center justify-center text-white/40 group-hover:bg-accent/10 group-hover:text-accent border border-white/[0.05] group-hover:border-accent/30 transition-all duration-500 transform translate-x-0 group-hover:translate-x-1">
+                    <div className="w-9 h-9 rounded-xl bg-white/[0.01] flex items-center justify-center text-white/40 group-hover:bg-accent/[0.03] group-hover:text-accent transition-all duration-500 transform translate-x-0 group-hover:translate-x-1">
                         <ChevronRight size={18} />
                     </div>
                 </div>

@@ -94,9 +94,21 @@ export interface ColorScheme {
   textMuted: string;  // Texto secundário/ícones
   border: string;     // Cor de bordas e divisores
   accent: string;     // Cor da marca (botões, links)
+
+  // Custom Design Colors (Aura 2026)
+  lume: string;       // Cor Champagne do botão premium
+  lumeText: string;   // Cor do texto no botão Lume
+  phantom: string;    // Efeito de sombra/glow secundário
+  glow: string;       // Cor de brilho neon principal
+
+  // Status
   success: string;    // Status Ativo, Sucesso
   warning: string;    // Status Pendente, Alerta
   error: string;      // Status Erro, Excluir, Inativo
+
+  // Advanced Effects
+  glass: string;      // Cor de fundo do vidro (rgba)
+  shadow: string;     // Sombra de elevação global
 }
 
 export interface ApiKey {
@@ -107,12 +119,49 @@ export interface ApiKey {
   lastUsedAt?: string;
 }
 
+export interface EffectsConfig {
+  glassBlur: number;        // Blur do vidro em px
+  glassSaturate: number;    // Saturação do vidro em %
+  glassOpacity: number;     // Opacidade do fundo do vidro (0-1)
+  grainOpacity: number;     // Opacidade do grão de filme (0-1)
+  mouseGlowIntensity: number; // Intensidade do brilho que segue o mouse (0-1)
+  hoverLift: number;        // Distância de levitação no hover em px
+  revealDuration: number;   // Duração da animação de entrada em segundos
+  glowIntensity: number;    // Intensidade geral do brilho neon (shadow blur)
+}
+
+export interface ElementStyle {
+  radius: string;
+  borderWidth: string;
+  borderColor: string;
+  bg: string;
+  text: string;
+  hoverBg: string;
+  hoverText: string;
+  hoverBorder: string;
+  shadow: string;
+}
+
+export interface ElementsConfig {
+  button: ElementStyle;
+  input: ElementStyle;
+  container: ElementStyle;
+  modal: ElementStyle;
+  toast: ElementStyle;
+  icon: {
+    color: string;
+    hoverColor: string;
+  };
+}
+
 export interface SystemConfig {
   appName: string;
-  logoUrl?: string;
+  logoUrl?: string; // URL do logo da empresa
   webhookUrl?: string; // n8n
   whatsappApiKey?: string;
   whatsappInstance?: string;
-  themeLight: ColorScheme;
-  themeDark: ColorScheme;
+  registrationRoles?: Role[]; // Perfis habilitados para cadastro público
+  theme: ColorScheme;
+  effects: EffectsConfig;
+  elements: ElementsConfig;
 }

@@ -40,7 +40,7 @@ export const Collections: React.FC = () => {
     return (
         <div className="space-y-12 animate-reveal pb-20">
             {/* Header Aura */}
-            <div className="aura-glass p-10 rounded-[2.5rem] border-white/[0.03] flex flex-col md:flex-row justify-between items-center gap-10">
+            <div className="aura-glass p-10 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-10">
                 <div className="text-center md:text-left">
                     <h1 className="text-4xl md:text-5xl heading-aura text-white mb-4">Trilhas de Aprendizado</h1>
                     <p className="text-[15px] text-white/30 font-medium max-w-lg">
@@ -50,7 +50,7 @@ export const Collections: React.FC = () => {
 
                 <div className="relative w-full md:w-80 group/search">
                     <div className="absolute inset-0 bg-accent/20 rounded-2xl blur-xl opacity-0 group-focus-within/search:opacity-20 transition-all duration-500"></div>
-                    <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-2xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+                    <div className="relative bg-white/[0.01] rounded-2xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:bg-white/[0.02]">
                         <div className="pl-5 text-white/20 group-focus-within/search:text-accent transition-colors">
                             <Search size={18} />
                         </div>
@@ -68,11 +68,11 @@ export const Collections: React.FC = () => {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-80 aura-glass rounded-[2rem] border-white/[0.03] animate-pulse"></div>
+                        <div key={i} className="h-80 aura-glass rounded-[2rem] animate-pulse"></div>
                     ))}
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="py-24 aura-glass rounded-[2.5rem] text-center border-dashed border-white/10">
+                <div className="py-24 aura-glass rounded-[2.5rem] text-center">
                     <Layers size={32} className="mx-auto text-white/5 mb-4" />
                     <h3 className="text-lg font-bold text-white/40 mb-2">Nenhuma trilha encontrada</h3>
                     <p className="text-[12px] text-white/20">Tente ajustar seus termos de busca.</p>

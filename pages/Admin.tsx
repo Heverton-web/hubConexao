@@ -49,16 +49,16 @@ export const Admin: React.FC = () => {
   const renderTabButton = (id: AdminTab, label: string, Icon: any) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`relative px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3 group
+      className={`relative px-4 md:px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3 group
         ${activeTab === id
-          ? 'bg-accent/10 text-accent border border-accent/20'
-          : 'text-white/20 hover:text-white/60 hover:bg-white/[0.02] border border-transparent'
+          ? 'bg-accent/10 text-accent'
+          : 'text-main/20 hover:text-main/60 hover:bg-main/[0.02]'
         }`}
     >
       <Icon size={14} className={activeTab === id ? "animate-pulse" : ""} />
       <span className="hidden lg:inline">{label}</span>
       {activeTab === id && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full shadow-[0_0_10px_rgba(0,209,255,1)]"></div>
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)]"></div>
       )}
     </button>
   );
@@ -66,13 +66,13 @@ export const Admin: React.FC = () => {
   return (
     <div className="space-y-12 animate-reveal">
       {/* Admin Header Aura */}
-      <div className="aura-glass p-8 md:p-10 rounded-[2.5rem] border-white/[0.03] flex flex-col xl:flex-row justify-between items-center gap-8">
+      <div className="aura-glass p-8 md:p-10 rounded-[2.5rem] flex flex-col xl:flex-row justify-between items-center gap-8">
         <div className="text-center xl:text-left">
-          <h2 className="text-4xl heading-aura text-white mb-3">Central de Comando</h2>
-          <p className="text-[13px] text-white/20 font-medium tracking-wide">Gerencie recursos, usuários e visualize métricas da plataforma.</p>
+          <h2 className="text-4xl heading-aura text-main mb-3">Central de Comando</h2>
+          <p className="text-[13px] text-main/20 font-medium tracking-wide">Gerencie recursos, usuários e visualize métricas da plataforma.</p>
         </div>
 
-        <div className="flex flex-wrap justify-center bg-white/[0.02] border border-white/[0.05] rounded-[1.5rem] p-1.5 backdrop-blur-3xl shadow-2xl">
+        <div className="flex flex-nowrap justify-center items-center bg-main/[0.02] rounded-[2rem] p-1.5 backdrop-blur-3xl shadow-2xl overflow-x-auto no-scrollbar max-w-full">
           {renderTabButton('materials', t('tab.materials'), ImageIcon)}
           {renderTabButton('collections', t('tab.collections'), Layers)}
           {renderTabButton('users', t('tab.users'), Users)}

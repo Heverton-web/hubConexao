@@ -80,12 +80,12 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
 
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
-      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl flex flex-col border border-border overflow-hidden animate-slide-up">
+      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up">
 
         {/* Header */}
-        <div className="p-4 border-b border-border flex justify-between items-center bg-surface">
+        <div className="p-4 flex justify-between items-center bg-surface">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-page rounded-lg border border-border">
+            <div className="p-2 bg-page rounded-lg">
               {mode === 'email' ? <Mail className="text-blue-500" size={20} /> : <MessageCircle className="text-green-500" size={20} />}
             </div>
             <div>
@@ -98,7 +98,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
           </button>
         </div>
 
-        <div className="flex border-b border-border">
+        <div className="flex bg-page/30">
           <button
             onClick={() => setMode('email')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${mode === 'email' ? 'bg-surface text-accent border-b-2 border-accent' : 'bg-page text-muted hover:text-main'}`}
@@ -121,7 +121,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subject')}</label>
                 <input
                   type="text" required
-                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
+                  className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:border-accent/20 outline-none"
                   value={subject} onChange={e => setSubject(e.target.value)}
                 />
               </div>
@@ -129,7 +129,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.email.subtitle')}</label>
                 <input
                   type="text"
-                  className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none"
+                  className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:border-accent/20 outline-none"
                   value={subtitle} onChange={e => setSubtitle(e.target.value)}
                 />
               </div>
@@ -141,8 +141,8 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
               <div>
                 <label className="block text-xs font-semibold text-main mb-1.5">{t('comm.wa.type')}</label>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setWaType('text')} className={`flex-1 py-2 rounded border text-sm ${waType === 'text' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.text')}</button>
-                  <button type="button" onClick={() => setWaType('file')} className={`flex-1 py-2 rounded border text-sm ${waType === 'file' ? 'bg-green-500 text-white border-green-600' : 'bg-page border-border text-muted'}`}>{t('comm.wa.file')}</button>
+                  <button type="button" onClick={() => setWaType('text')} className={`flex-1 py-2 rounded text-sm ${waType === 'text' ? 'bg-green-500 text-white' : 'bg-page text-muted'}`}>{t('comm.wa.text')}</button>
+                  <button type="button" onClick={() => setWaType('file')} className={`flex-1 py-2 rounded text-sm ${waType === 'file' ? 'bg-green-500 text-white' : 'bg-page text-muted'}`}>{t('comm.wa.file')}</button>
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
             <textarea
               required
               rows={5}
-              className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none resize-none"
+              className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:border-accent/20 outline-none resize-none"
               value={body} onChange={e => setBody(e.target.value)}
             />
           </div>
@@ -169,7 +169,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
               <input
                 type="text" required={mode === 'whatsapp' && waType === 'file'}
                 placeholder="https://..."
-                className="w-full p-2.5 rounded-lg border border-border bg-gray-50 dark:bg-black/20 text-main focus:ring-2 focus:ring-accent outline-none font-mono text-xs"
+                className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main focus:border-accent/20 outline-none font-mono text-xs"
                 value={fileUrl} onChange={e => setFileUrl(e.target.value)}
               />
             </div>
@@ -177,7 +177,7 @@ export const UserCommunicationModal: React.FC<UserCommunicationModalProps> = ({ 
 
         </form>
 
-        <div className="p-4 border-t border-border bg-page flex justify-end gap-3">
+        <div className="p-4 bg-page flex justify-end gap-3">
           <button onClick={onClose} type="button" className="px-5 py-2.5 rounded-lg text-muted hover:bg-muted/10 font-medium">{t('cancel')}</button>
           <button
             onClick={handleSubmit}

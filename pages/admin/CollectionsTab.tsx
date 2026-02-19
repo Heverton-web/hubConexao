@@ -91,7 +91,7 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
     if (globalLoading || (loading && collections.length === 0)) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
-                {[1, 2, 3].map(i => <div key={i} className="h-80 aura-glass rounded-[2rem] border-white/[0.03]"></div>)}
+                {[1, 2, 3].map(i => <div key={i} className="h-80 aura-glass rounded-[2rem]"></div>)}
             </div>
         );
     }
@@ -99,10 +99,10 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
     return (
         <div className="animate-reveal space-y-10">
             {/* Actions Bar Aura */}
-            <div className="aura-glass p-6 rounded-[2rem] border-white/[0.03] flex flex-col lg:flex-row justify-between items-center gap-6">
+            <div className="aura-glass p-6 rounded-[2.5rem] flex flex-col lg:flex-row justify-between items-center gap-6">
                 <div className="relative w-full lg:w-96 group/search">
                     <div className="absolute inset-0 bg-accent/20 rounded-xl blur-lg opacity-0 group-focus-within/search:opacity-10 transition-all duration-500"></div>
-                    <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+                    <div className="relative bg-white/[0.01] rounded-xl flex items-center transition-all duration-300 group-focus-within/search:bg-white/[0.02]">
                         <div className="pl-4 text-white/20 group-focus-within/search:text-accent transition-colors">
                             <Search size={18} />
                         </div>
@@ -118,7 +118,7 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
 
                 <button
                     onClick={handleCreate}
-                    className="w-full lg:w-auto flex items-center justify-center gap-3 bg-accent text-white px-10 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all outline-none"
+                    className="btn-aura-lume px-10 py-3.5 flex items-center justify-center gap-3 w-full lg:w-auto"
                 >
                     <Plus size={18} /> Nova Coleção
                 </button>
@@ -126,9 +126,10 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ isLoading: globa
 
             {/* Grid Aura */}
             {filteredCollections.length === 0 ? (
-                <div className="text-center py-32 aura-glass rounded-[2.5rem] border border-dashed border-white/10 overflow-hidden relative group">
+                <div className="text-center py-32 aura-glass rounded-[2.5rem] overflow-hidden relative group">
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)]"></div>
                     <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent opacity-30"></div>
-                    <div className="w-20 h-20 bg-white/[0.03] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-6 text-white/10 group-hover:text-accent/40 transition-colors duration-700 relative z-10">
+                    <div className="w-20 h-20 bg-white/[0.03] rounded-3xl flex items-center justify-center mx-auto mb-6 text-white/10 group-hover:text-accent/40 transition-colors duration-700 relative z-10">
                         <Layers size={40} />
                     </div>
                     <h3 className="text-xl font-bold text-white/40 heading-aura relative z-10 mb-2">Nenhuma coleção encontrada</h3>

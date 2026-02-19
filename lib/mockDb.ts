@@ -50,7 +50,15 @@ const localCollectionItems = [
   { id: 'ci-8', collectionId: 'col-3', materialId: 'mat-12', orderIndex: 3 },
 ];
 
-const localAccessLogs: any[] = [];
+const localAccessLogs: any[] = [
+  { id: 'log-1', materialId: 'mat-1', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 2).toISOString() },
+  { id: 'log-2', materialId: 'mat-3', userId: 'mock-distrib', userName: 'Distribuidor Parceiro', userRole: 'distributor', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 5).toISOString() },
+  { id: 'log-3', materialId: 'mat-1', userId: 'mock-consult', userName: 'Consultor de Vendas', userRole: 'consultant', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 24).toISOString() },
+  { id: 'log-4', materialId: 'mat-10', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 48).toISOString() },
+  { id: 'log-5', materialId: 'mat-3', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 72).toISOString() },
+  { id: 'log-6', materialId: 'mat-5', userId: 'mock-consult', userName: 'Consultor de Vendas', userRole: 'consultant', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 12).toISOString() },
+  { id: 'log-7', materialId: 'mat-1', userId: 'mock-client', userName: 'Cliente Exemplo', userRole: 'client', language: 'pt-br', timestamp: new Date(Date.now() - 3600000 * 1).toISOString() },
+];
 
 const localApiKeys: ApiKey[] = [
   { id: 'key-1', name: 'Integração Protheus', key: 'sk_live_conexao_123456789', createdAt: '2024-06-20T10:00:00Z' }
@@ -62,8 +70,94 @@ let localSystemConfig: SystemConfig = {
   webhookUrl: 'https://n8n.suaempresa.com/webhook/conexao-hub',
   whatsappApiKey: '',
   whatsappInstance: '',
-  themeLight: { background: '#f8fafc', surface: '#ffffff', textMain: '#0f172a', textMuted: '#64748b', border: '#e2e8f0', accent: '#3b82f6', success: '#10b981', warning: '#f59e0b', error: '#ef4444' },
-  themeDark: { background: '#0f172a', surface: '#1e293b', textMain: '#f8fafc', textMuted: '#94a3b8', border: 'transparent', accent: '#6366f1', success: '#22c55e', warning: '#eab308', error: '#ef4444' }
+  theme: {
+    background: '#08090B',
+    surface: '#121418',
+    textMain: '#FFFFFF',
+    textMuted: '#8E9196',
+    border: 'rgba(255,255,255,0.02)',
+    accent: '#00D1FF',
+    lume: '#E8E1D1',
+    lumeText: '#08090B',
+    phantom: '#A19B8F',
+    glow: '#00D1FF',
+    success: '#00F5A0',
+    warning: '#F59E0B',
+    error: '#FF4D4D',
+    glass: 'rgba(18, 20, 24, 0.4)',
+    shadow: '0 30px 60px -12px rgba(0, 0, 0, 0.5)'
+  },
+  effects: {
+    glassBlur: 40,
+    glassSaturate: 180,
+    glassOpacity: 0.4,
+    grainOpacity: 0.04,
+    mouseGlowIntensity: 0.05,
+    hoverLift: 8,
+    revealDuration: 0.8,
+    glowIntensity: 20
+  },
+  elements: {
+    button: {
+      radius: '1rem',
+      borderWidth: '0px',
+      borderColor: 'transparent',
+      bg: 'var(--color-lume)',
+      text: 'var(--color-lume-text)',
+      hoverBg: 'var(--color-lume)',
+      hoverText: 'var(--color-lume-text)',
+      hoverBorder: 'transparent',
+      shadow: '0 10px 20px -5px rgba(0, 0, 0, 0.3)'
+    },
+    input: {
+      radius: '1rem',
+      borderWidth: '0px',
+      borderColor: 'rgba(255, 255, 255, 0.03)',
+      bg: 'var(--color-surface)',
+      text: 'var(--color-main)',
+      hoverBg: 'rgba(255, 255, 255, 0.04)',
+      hoverText: 'var(--color-main)',
+      hoverBorder: 'rgba(0, 209, 255, 0.1)',
+      shadow: 'none'
+    },
+    container: {
+      radius: '2.5rem',
+      borderWidth: '0px',
+      borderColor: 'rgba(255, 255, 255, 0.02)',
+      bg: 'var(--glass-bg)',
+      text: 'var(--color-main)',
+      hoverBg: 'var(--glass-bg)',
+      hoverText: 'var(--color-main)',
+      hoverBorder: 'rgba(255, 255, 255, 0.05)',
+      shadow: 'var(--glass-shadow)'
+    },
+    modal: {
+      radius: '3rem',
+      borderWidth: '0px',
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+      bg: 'var(--color-surface)',
+      text: 'var(--color-main)',
+      hoverBg: 'var(--color-surface)',
+      hoverText: 'var(--color-main)',
+      hoverBorder: 'rgba(255, 255, 255, 0.05)',
+      shadow: '0 50px 100px -20px rgba(0, 0, 0, 0.8)'
+    },
+    toast: {
+      radius: '1.25rem',
+      borderWidth: '0px',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      bg: 'rgba(18, 20, 24, 0.9)',
+      text: 'var(--color-main)',
+      hoverBg: 'rgba(18, 20, 24, 0.95)',
+      hoverText: 'var(--color-main)',
+      hoverBorder: 'rgba(255, 255, 255, 0.2)',
+      shadow: '0 20px 40px rgba(0, 0, 0, 0.4)'
+    },
+    icon: {
+      color: 'var(--color-muted)',
+      hoverColor: 'var(--color-primary)'
+    }
+  }
 };
 
 // --- HELPERS ---
@@ -139,8 +233,18 @@ export const mockDb = {
       webhookUrl: data.webhook_url,
       whatsappApiKey: data.whatsapp_api_key,
       whatsappInstance: data.whatsapp_instance,
-      themeLight: data.theme_light,
-      themeDark: data.theme_dark
+      theme: data.theme,
+      effects: data.effects || {
+        glassBlur: 40,
+        glassSaturate: 180,
+        glassOpacity: 0.4,
+        grainOpacity: 0.04,
+        mouseGlowIntensity: 0.05,
+        hoverLift: 8,
+        revealDuration: 0.8,
+        glowIntensity: 20
+      },
+      elements: data.elements || localSystemConfig.elements
     };
   },
 
@@ -156,8 +260,9 @@ export const mockDb = {
       webhook_url: config.webhookUrl,
       whatsapp_api_key: config.whatsappApiKey,
       whatsapp_instance: config.whatsappInstance,
-      theme_light: config.themeLight,
-      theme_dark: config.themeDark,
+      theme: config.theme,
+      effects: config.effects,
+      elements: config.elements,
       updated_at: new Date().toISOString()
     });
     if (error) throw error;

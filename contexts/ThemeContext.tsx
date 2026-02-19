@@ -10,57 +10,17 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme] = useState<Theme>('dark');
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-  }, [theme]);
+    root.classList.remove('light');
+    root.classList.add('dark');
+  }, []);
 
-  const toggleTheme = useCallback((e?: React.MouseEvent<HTMLElement> | MouseEvent) => {
-    const isAppearanceTransition =
-      // @ts-ignore
-      document.startViewTransition &&
-      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (!isAppearanceTransition || !e) {
-      setTheme(prev => prev === 'light' ? 'dark' : 'light');
-      return;
-    }
-
-    // Get click coordinates or default to center
-    const x = e.clientX;
-    const y = e.clientY;
-
-    const endRadius = Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
-    );
-
-    // @ts-ignore
-    const transition = document.startViewTransition(() => {
-      setTheme(prev => prev === 'light' ? 'dark' : 'light');
-    });
-
-    transition.ready.then(() => {
-      const clipPath = [
-        `circle(0px at ${x}px ${y}px)`,
-        `circle(${endRadius}px at ${x}px ${y}px)`,
-      ];
-
-      document.documentElement.animate(
-        {
-          clipPath: theme === 'dark' ? [...clipPath].reverse() : clipPath,
-        },
-        {
-          duration: 500,
-          easing: 'ease-in',
-          pseudoElement: theme === 'dark' ? '::view-transition-old(root)' : '::view-transition-new(root)',
-        }
-      );
-    });
-  }, [theme]);
+  const toggleTheme = useCallback(() => {
+    // Sistema unificado em Dark Mode Aura
+  }, []);
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 

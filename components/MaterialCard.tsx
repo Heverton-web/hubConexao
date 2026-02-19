@@ -41,7 +41,7 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ material, onView }) 
   const languages: Language[] = ['pt-br', 'en-us', 'es-es'];
 
   return (
-    <div className="group aura-glass rounded-[2rem] p-6 transition-all duration-500 hover:-translate-y-2 border-white/[0.03]">
+    <div className="group aura-glass rounded-[2rem] p-6 transition-all duration-500 hover:-translate-y-2">
 
       {/* Type Specific Glow */}
       <div
@@ -52,10 +52,10 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ material, onView }) 
       <div className="relative z-10 flex flex-col h-full">
         {/* Header Icon */}
         <div className="flex justify-between items-start mb-6">
-          <div className="p-3 bg-white/[0.03] border border-white/[0.05] rounded-xl group-hover:bg-white/[0.05] group-hover:border-accent/30 transition-all duration-500">
+          <div className="p-3 bg-white/[0.01] rounded-xl group-hover:bg-accent/[0.03] transition-all duration-500">
             {getIcon()}
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-white/[0.03] border border-white/[0.05] rounded-lg text-white/40 group-hover:text-white transition-all">
+          <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-white/[0.01] rounded-lg text-white/40 group-hover:text-white transition-all">
             {getLabel()}
           </span>
         </div>
@@ -65,7 +65,7 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ material, onView }) 
           {displayTitle}
         </h3>
 
-        <div className="mt-auto pt-6 border-t border-white/[0.03]">
+        <div className="mt-auto pt-6">
           <div className="flex items-center justify-between mb-4">
             <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-bold">Distribuição</p>
             <ChevronRight size={14} className="text-white/20 group-hover:text-accent group-hover:translate-x-1 transition-all" />
@@ -85,8 +85,8 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ material, onView }) 
                   className={`
                     px-4 py-2 text-[10px] rounded-xl transition-all duration-300 flex items-center gap-2 font-bold uppercase tracking-widest
                     ${hasAsset
-                      ? 'bg-white/[0.03] border border-white/[0.05] text-white/60 hover:text-white hover:bg-accent/10 hover:border-accent/30'
-                      : 'bg-transparent text-white/10 cursor-not-allowed border border-white/[0.02]'}
+                      ? 'bg-white/[0.01] text-white/60 hover:text-white hover:bg-accent/[0.03]'
+                      : 'bg-transparent text-white/10 cursor-not-allowed'}
                   `}
                 >
                   <span>{lang.toUpperCase().split('-')[0]}</span>

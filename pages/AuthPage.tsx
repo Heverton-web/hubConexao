@@ -48,7 +48,7 @@ export const AuthPage: React.FC = () => {
 
   useEffect(() => {
     const roleParam = searchParams.get('role');
-    if (roleParam && ['client', 'distributor', 'consultant'].includes(roleParam)) {
+    if (roleParam && ['client', 'distributor', 'consultant', 'super_admin'].includes(roleParam)) {
       setIsLogin(false);
       setInvitedRole(roleParam);
       setRole(roleParam);
@@ -118,7 +118,7 @@ export const AuthPage: React.FC = () => {
       {config.logoUrl ? (
         <img src={config.logoUrl} alt="Logo" className={`${size === "large" ? "h-24" : "h-14"} drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500`} />
       ) : (
-        <div className={`${size === "large" ? "w-20 h-20 text-4xl" : "w-12 h-12 text-2xl"} bg-neutral-900 border border-white/10 rounded-xl flex items-center justify-center text-white font-bold shadow-2xl backdrop-blur-xl`}>
+        <div className={`${size === "large" ? "w-20 h-20 text-4xl" : "w-12 h-12 text-2xl"} bg-neutral-900 rounded-xl flex items-center justify-center text-white font-bold shadow-2xl backdrop-blur-xl`}>
           {config.appName.substring(0, 2).toUpperCase()}
         </div>
       )}
@@ -126,7 +126,7 @@ export const AuthPage: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 relative overflow-hidden bg-[#08090B]">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 relative overflow-hidden bg-page transition-colors duration-500">
 
       {/* 2026 Aura Mesh Background */}
       <div className="noise-overlay"></div>
@@ -155,7 +155,7 @@ export const AuthPage: React.FC = () => {
           {isDbMissing && (
             <button
               onClick={() => setShowSqlSetup(true)}
-              className="w-full bg-error/10 border border-error/20 rounded-2xl p-4 flex items-center gap-3 text-left transition-all hover:bg-error/15"
+              className="w-full bg-error/10 rounded-2xl p-4 flex items-center gap-3 text-left transition-all hover:bg-error/15"
             >
               <div className="p-2 bg-error/20 rounded-xl text-error shrink-0">
                 <Database size={16} />
@@ -168,7 +168,7 @@ export const AuthPage: React.FC = () => {
           )}
 
           {error && (
-            <div className="p-4 bg-error/10 border border-error/20 text-error rounded-2xl text-[12px] flex items-start gap-3 animate-reveal">
+            <div className="p-4 bg-error/10 text-error rounded-2xl text-[12px] flex items-start gap-3 animate-reveal">
               <AlertTriangle className="shrink-0 mt-0.5" size={14} />
               <span className="leading-snug font-medium">{error}</span>
             </div>
@@ -179,14 +179,44 @@ export const AuthPage: React.FC = () => {
           {!isLogin && (
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.name')}</label>
-              <input type="text" required className="w-full aura-input" value={name} onChange={e => setName(e.target.value)} />
+              <input type="text" required placeholder="Seu nome completo" className="w-full aura-input border border-white/[0.06]" value={name} onChange={e => setName(e.target.value)} />
             </div>
           )}
 
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.email')}</label>
-            <input type="email" placeholder="seu@email.com" required className="w-full aura-input" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="email" placeholder="seu@email.com" required className="w-full aura-input border border-white/[0.06]" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
+
+          {!isLogin && (
+            <>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.whatsapp')}</label>
+                <input type="tel" required placeholder="(00) 00000-0000" className="w-full aura-input border border-white/[0.06]" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
+              </div>
+
+              {!invitedRole && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.role')}</label>
+                  <div className="relative">
+                    <select className="w-full aura-input appearance-none border border-white/[0.06]" value={role} onChange={e => setRole(e.target.value)}>
+                      {(config.registrationRoles || ['client', 'distributor', 'consultant']).map(r => (
+                        <option key={r} value={r} className="bg-surface">{t(`role.${r}`)}</option>
+                      ))}
+                    </select>
+                    <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-white/20 pointer-events-none" size={14} />
+                  </div>
+                </div>
+              )}
+
+              {role === 'client' && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.cro')}</label>
+                  <input type="text" placeholder="CRO-00000" className="w-full aura-input border border-white/[0.06]" value={cro} onChange={e => setCro(e.target.value)} />
+                </div>
+              )}
+            </>
+          )}
 
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.password')}</label>
@@ -194,7 +224,8 @@ export const AuthPage: React.FC = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 required
-                className="w-full aura-input pr-12"
+                placeholder="••••••••"
+                className="w-full aura-input pr-12 border border-white/[0.06]"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
               />
@@ -209,35 +240,6 @@ export const AuthPage: React.FC = () => {
             </div>
           </div>
 
-          {!isLogin && (
-            <>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.whatsapp')}</label>
-                <input type="tel" required className="w-full aura-input" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                {!invitedRole && (
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.role')}</label>
-                    <div className="relative">
-                      <select className="w-full aura-input appearance-none" value={role} onChange={e => setRole(e.target.value)}>
-                        <option value="client" className="bg-[#08090B]">{t('role.client')}</option>
-                        <option value="distributor" className="bg-[#08090B]">{t('role.distributor')}</option>
-                        <option value="consultant" className="bg-[#08090B]">{t('role.consultant')}</option>
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-white/20 pointer-events-none" size={14} />
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-white/40 ml-1">{t('auth.label.cro')}</label>
-                  <input type="text" className="w-full aura-input" value={cro} onChange={e => setCro(e.target.value)} />
-                </div>
-              </div>
-            </>
-          )}
-
           <button type="submit" className="w-full btn-aura-lume py-4 mt-6">
             <span className="flex items-center justify-center gap-2">
               {!isLogin && invitedRole && <UserPlus size={16} />}
@@ -246,36 +248,38 @@ export const AuthPage: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-white/5 space-y-6 relative z-10 w-full">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-[11px] font-bold text-white/30 hover:text-white uppercase tracking-widest block w-full transition-all"
-          >
-            {isLogin ? t('auth.link.register') : t('auth.link.login')}
-          </button>
+        <div className="mt-8 pt-6 space-y-6 relative z-10 w-full">
+          {isLogin && (
+            <button
+              onClick={() => setIsLogin(false)}
+              className="text-[11px] font-bold text-white/30 hover:text-white uppercase tracking-widest block w-full transition-all"
+            >
+              {t('auth.link.register')}
+            </button>
+          )}
 
           {!invitedRole && (
             <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleMockLogin('super_admin')}
-                className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
-              >
-                <Shield size={14} className="text-accent" /> Admin
-              </button>
-              <button
-                onClick={() => handleMockLogin('client')}
-                className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
-              >
-                <User size={14} className="text-aura-lume" /> Cliente
-              </button>
+              {(config.registrationRoles || ['client', 'distributor', 'consultant', 'super_admin']).includes('super_admin') && (
+                <button
+                  onClick={() => handleMockLogin('super_admin')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] text-[10px] text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
+                >
+                  <Shield size={14} className="text-accent" /> Admin
+                </button>
+              )}
+              {(config.registrationRoles || ['client', 'distributor', 'consultant', 'super_admin']).includes('client') && (
+                <button
+                  onClick={() => handleMockLogin('client')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] text-[10px] text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
+                >
+                  <User size={14} className="text-aura-lume" /> Cliente
+                </button>
+              )}
             </div>
           )}
 
-          {invitedRole && (
-            <button onClick={clearInvite} className="text-white/20 hover:text-white flex items-center justify-center gap-2 mx-auto transition-all text-[10px] uppercase tracking-widest font-bold">
-              <ArrowLeft size={14} /> {t('auth.btn.back_login')}
-            </button>
-          )}
+
         </div>
 
         {showSqlSetup && <SqlSetupModal onClose={() => setShowSqlSetup(false)} />}

@@ -116,7 +116,7 @@ export const CollectionDetail: React.FC = () => {
             <div className="animate-reveal pb-20 max-w-7xl mx-auto">
                 <div className="px-6 md:px-0">
                     {/* Hero Header Aura */}
-                    <div className="relative h-96 md:h-[450px] w-full overflow-hidden rounded-[2.5rem] mt-6 border-white/[0.03] aura-glass">
+                    <div className="relative h-96 md:h-[450px] w-full overflow-hidden rounded-[2.5rem] mt-6 aura-glass">
                         {collection.coverImage ? (
                             <img src={collection.coverImage} className="w-full h-full object-cover transition-transform duration-[2000ms] hover:scale-110 opacity-70" />
                         ) : (
@@ -130,7 +130,7 @@ export const CollectionDetail: React.FC = () => {
                             <div className="flex-1">
                                 <button
                                     onClick={() => navigate('/dashboard')}
-                                    className="flex items-center gap-3 text-white/40 hover:text-white mb-8 transition-all text-[10px] font-black uppercase tracking-[0.3em] bg-white/[0.03] backdrop-blur-md px-4 py-2 rounded-xl w-fit border border-white/[0.05]"
+                                    className="flex items-center gap-3 text-white/40 hover:text-white mb-8 transition-all text-[10px] font-black uppercase tracking-[0.3em] bg-white/[0.01] backdrop-blur-md px-4 py-2 rounded-xl w-fit"
                                 >
                                     <ChevronLeft size={16} /> Voltar para HUB
                                 </button>
@@ -157,12 +157,12 @@ export const CollectionDetail: React.FC = () => {
                                 <div className="flex items-center gap-4 mb-10">
                                     <div className="h-10 w-1.5 bg-accent rounded-full shadow-[0_0_20px_rgba(0,209,255,0.6)]"></div>
                                     <h2 className="text-2xl heading-aura text-white">Roteiro de Consumo</h2>
-                                    <span className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
+                                    <span className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] bg-white/[0.01] px-4 py-1.5 rounded-full">
                                         {items.length} Módulos Disponíveis
                                     </span>
                                 </div>
 
-                                <div className="space-y-6 relative ml-5 border-l-2 border-white/[0.03] pl-10 py-2">
+                                <div className="space-y-6 relative ml-5 pl-10 py-2">
                                     {items.map((itemObj, index) => {
                                         if (!itemObj.material) return null;
                                         const mat = itemObj.material;
@@ -171,19 +171,19 @@ export const CollectionDetail: React.FC = () => {
                                         return (
                                             <div key={itemObj.item.id} className="relative group">
                                                 {/* Step Aura Marker */}
-                                                <div className={`absolute -left-[58px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700 z-10 
-                                                ${isDone ? 'bg-success border-success text-white shadow-[0_0_20px_rgba(0,245,160,0.3)]' : 'bg-[#08090B] border-white/[0.05] text-white/20 group-hover:border-accent group-hover:text-accent'}
+                                                <div className={`absolute -left-[58px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-700 z-10 
+                                                ${isDone ? 'bg-success border border-success text-white shadow-[0_0_20px_rgba(0,245,160,0.3)]' : 'bg-[#08090B] border border-white/[0.08] text-accent group-hover:border-accent/30'}
                                             `}>
                                                     {isDone ? <CheckCircle size={18} /> : <span className="font-black text-xs">{index + 1}</span>}
                                                 </div>
 
                                                 <div
-                                                    className="aura-glass p-6 rounded-[1.5rem] flex items-center justify-between transition-all duration-500 hover:-translate-x-2 border-white/[0.03] cursor-pointer"
+                                                    className="aura-glass p-6 rounded-[1.5rem] flex items-center justify-between transition-all duration-500 hover:-translate-x-2 cursor-pointer"
                                                     onClick={() => { setCurrentIndex(index); setViewMode(true); }}
                                                 >
                                                     <div className="flex items-center gap-6">
                                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500
-                                                        ${isDone ? 'bg-success/5 text-success' : 'bg-white/[0.03] text-white/20 group-hover:text-accent group-hover:bg-accent/5'}
+                                                        ${isDone ? 'bg-success/5 text-success' : 'bg-white/[0.01] text-white/20 group-hover:text-accent group-hover:bg-accent/5'}
                                                     `}>
                                                             {mat.type === 'video' ? <PlayCircle size={28} /> : mat.type === 'pdf' ? <FileText size={28} /> : <ImageIcon size={28} />}
                                                         </div>
@@ -199,7 +199,7 @@ export const CollectionDetail: React.FC = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button className="w-10 h-10 rounded-xl bg-white/[0.03] text-white/20 group-hover:bg-accent/10 group-hover:text-accent transition-all flex items-center justify-center border border-white/[0.05] group-hover:border-accent/30">
+                                                    <button className="w-10 h-10 rounded-xl bg-white/[0.01] text-white/40 group-hover:bg-accent/10 group-hover:text-accent transition-all flex items-center justify-center">
                                                         <ChevronRight size={18} />
                                                     </button>
                                                 </div>
@@ -212,7 +212,7 @@ export const CollectionDetail: React.FC = () => {
 
                         <div className="lg:col-span-4 space-y-8">
                             {/* Progress Aura Card */}
-                            <div className="aura-glass p-10 rounded-[2.5rem] border-white/[0.03] relative overflow-hidden group border-accent/10">
+                            <div className="aura-glass p-10 rounded-[2.5rem] relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-[2000ms]">
                                     <Trophy size={160} className="text-white" />
                                 </div>
@@ -245,7 +245,7 @@ export const CollectionDetail: React.FC = () => {
                             </div>
 
                             {/* Pro Tip Aura */}
-                            <div className="bg-accent/[0.05] border border-accent/20 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+                            <div className="bg-accent/[0.01] rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-3 mb-4">
                                         <Sparkles size={20} className="text-accent animate-pulse" />
@@ -267,12 +267,12 @@ export const CollectionDetail: React.FC = () => {
     return (
         <div className="fixed inset-0 z-[100] bg-[#08090B] flex flex-col md:flex-row animate-reveal overflow-hidden">
             {/* Sidebar Aura (Sequence) */}
-            <aside className={`aura-glass border-r border-white/[0.03] transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] z-50 flex flex-col relative ${sidebarOpen ? 'w-full md:w-80' : 'w-0 overflow-hidden md:w-0'}`}>
-                <div className="p-8 border-b border-white/[0.03] flex justify-between items-center shrink-0">
+            <aside className={`aura-glass transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] z-50 flex flex-col relative ${sidebarOpen ? 'w-full md:w-80' : 'w-0 overflow-hidden md:w-0'}`}>
+                <div className="p-8 flex justify-between items-center shrink-0">
                     <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-white heading-aura truncate text-lg pr-4">{title}</h4>
                         <div className="flex items-center gap-3 mt-4">
-                            <div className="h-1.5 flex-1 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                            <div className="h-1.5 flex-1 bg-white/[0.03] rounded-full overflow-hidden">
                                 <div className="h-full bg-accent transition-all duration-1000 shadow-[0_0_10px_rgba(0,209,255,0.4)]" style={{ width: `${progress}%` }}></div>
                             </div>
                             <span className="text-[10px] font-black text-white/20 whitespace-nowrap">{progress}%</span>
@@ -283,7 +283,7 @@ export const CollectionDetail: React.FC = () => {
                     </button>
                     <button
                         onClick={() => { setViewMode(false); }}
-                        className="p-2.5 bg-white/[0.03] hover:bg-error rounded-xl text-white/30 hover:text-white transition-all ml-2 border border-white/[0.05]"
+                        className="p-2.5 bg-white/[0.03] hover:bg-error rounded-xl text-white/30 hover:text-white transition-all ml-2"
                         title="Sair do modo tela cheia"
                     >
                         <X size={18} />
@@ -303,8 +303,8 @@ export const CollectionDetail: React.FC = () => {
                                 onClick={() => setCurrentIndex(index)}
                                 className={`w-full text-left p-4 rounded-2xl flex items-center gap-4 transition-all duration-500 group relative overflow-hidden
                                     ${isActive
-                                        ? 'bg-accent/10 border-accent/20 border'
-                                        : 'hover:bg-white/[0.03] text-white/30 hover:text-white/80 border border-transparent'}
+                                        ? 'bg-accent/5'
+                                        : 'hover:bg-white/[0.01] text-white/30 hover:text-white/80'}
                                 `}
                             >
                                 {isActive && (
@@ -313,8 +313,8 @@ export const CollectionDetail: React.FC = () => {
 
                                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-500
                                     ${isActive
-                                        ? 'bg-accent/20 border-accent/30 text-accent'
-                                        : isDone ? 'bg-success/5 border-success/20 text-success' : 'bg-white/[0.02] border-white/[0.05]'}
+                                        ? 'bg-accent/20 text-accent'
+                                        : isDone ? 'bg-success/5 text-success' : 'bg-white/[0.02]'}
                                 `}>
                                     {isDone ? <CheckCircle size={16} /> : <span className="text-[10px] font-black">{index + 1}</span>}
                                 </div>
@@ -339,28 +339,28 @@ export const CollectionDetail: React.FC = () => {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setSidebarOpen(true)}
-                            className={`pointer-events-auto w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 border-white/[0.05] hover:text-white hover:bg-white/[0.08] transition-all ${sidebarOpen ? 'hidden md:hidden' : 'flex'}`}
+                            className={`pointer-events-auto w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 hover:text-white hover:bg-white/[0.08] transition-all ${sidebarOpen ? 'hidden md:hidden' : 'flex'}`}
                         >
                             <Menu size={20} />
                         </button>
-                        <div className="aura-glass px-6 py-3 rounded-2xl border-white/[0.05] pointer-events-auto hidden sm:block">
+                        <div className="aura-glass px-6 py-3 rounded-2xl pointer-events-auto hidden sm:block">
                             <div className="flex items-center gap-5">
-                                <span className="text-[10px] font-black uppercase text-accent tracking-[0.2em] bg-accent/10 px-3 py-1 rounded-lg border border-accent/20">Módulo {currentIndex + 1}</span>
+                                <span className="text-[10px] font-black uppercase text-accent tracking-[0.2em] bg-accent/10 px-3 py-1 rounded-lg">Módulo {currentIndex + 1}</span>
                                 <span className="text-white/80 text-sm font-bold truncate max-w-[300px] heading-aura">{activeItem?.material?.title[language] || activeItem?.material?.title['pt-br']}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3 pointer-events-auto">
-                        <div className="aura-glass px-6 py-3 rounded-2xl border-white/[0.05] flex items-center gap-4 mr-2">
+                        <div className="aura-glass px-6 py-3 rounded-2xl flex items-center gap-4 mr-2">
                             <span className="text-white text-[10px] font-black tracking-widest">{progress}%</span>
-                            <div className="w-24 h-1 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                            <div className="w-24 h-1 bg-white/[0.03] rounded-full overflow-hidden">
                                 <div className="h-full bg-accent transition-all duration-1000 shadow-[0_0_10px_rgba(0,209,255,0.4)]" style={{ width: `${progress}%` }}></div>
                             </div>
                         </div>
                         <button
                             onClick={() => setViewMode(false)}
-                            className="w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 border-white/[0.05] hover:text-white hover:bg-error transition-all"
+                            className="w-12 h-12 flex items-center justify-center rounded-xl aura-glass text-white/40 hover:text-white hover:bg-error transition-all"
                         >
                             <X size={20} />
                         </button>
@@ -384,11 +384,11 @@ export const CollectionDetail: React.FC = () => {
                 </div>
 
                 {/* Bottom Navigation Aura */}
-                <div className="h-24 border-t border-white/[0.03] aura-glass flex items-center justify-between px-10 transition-all duration-500 shrink-0 z-40">
+                <div className="h-24 aura-glass flex items-center justify-between px-10 transition-all duration-500 shrink-0 z-40">
                     <button
                         onClick={handlePrev}
                         disabled={currentIndex === 0}
-                        className="flex items-center gap-3 px-8 py-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-white/40 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white disabled:opacity-5 transition-all outline-none"
+                        className="flex items-center gap-3 px-8 py-3.5 rounded-xl bg-white/[0.02] text-white/40 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white disabled:opacity-5 transition-all outline-none"
                     >
                         <ChevronLeft size={18} /> Anterior
                     </button>

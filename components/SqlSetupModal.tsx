@@ -122,9 +122,9 @@ insert into public.system_config (id) values (1) on conflict do nothing;
   // Render directly without Portal for robust nesting in App.tsx
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-fade-in" style={{ zIndex: 99999 }}>
-      <div className="bg-surface rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up border border-yellow-500/30">
+      <div className="bg-surface rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
 
-        <div className="p-6 border-b border-border bg-surface flex justify-between items-start">
+        <div className="p-6 bg-surface flex justify-between items-start">
           <div className="flex gap-4">
             <div className="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 animate-pulse">
               <Database size={24} />
@@ -161,7 +161,7 @@ insert into public.system_config (id) values (1) on conflict do nothing;
           </pre>
         </div>
 
-        <div className="p-4 bg-surface border-t border-border flex justify-between items-center">
+        <div className="p-4 bg-surface flex justify-between items-center">
           <p className="text-xs text-muted">Após rodar o script, recarregue esta página.</p>
           <div className="flex gap-3">
             <button onClick={() => window.open('https://supabase.com/dashboard/project/_/sql', '_blank')} className="px-4 py-2.5 rounded-lg bg-page hover:bg-muted/10 text-muted hover:text-main font-bold transition-colors text-xs uppercase tracking-wide">

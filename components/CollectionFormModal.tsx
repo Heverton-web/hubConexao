@@ -143,7 +143,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
             <div className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden animate-slide-up">
 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface shrink-0">
+                <div className="px-6 py-4 flex justify-between items-center bg-surface shrink-0">
                     <div>
                         <h2 className="font-bold text-xl text-main">{initialData ? 'Editar Trilha' : 'Nova Trilha'}</h2>
                         <p className="text-xs text-muted">A trilha organiza materiais em uma sequência de aprendizado.</p>
@@ -154,7 +154,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                 </div>
 
                 {/* Tabs Toggle */}
-                <div className="flex border-b border-border px-6 bg-page/30 shrink-0">
+                <div className="flex px-6 bg-page/30 shrink-0">
                     <button
                         onClick={() => setActiveTab('info')}
                         className={`px-4 py-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'info' ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-main'}`}
@@ -183,7 +183,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                             type="button"
                                             onClick={() => setActiveLang(lang)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all
-                                                ${activeLang === lang ? 'bg-surface text-accent shadow-sm ring-1 ring-border' : 'text-muted hover:text-main'}
+                                                ${activeLang === lang ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:text-main'}
                                             `}
                                         >
                                             {lang}
@@ -197,7 +197,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                             <label className="block text-xs font-bold text-muted uppercase mb-1.5">Título ({activeLang})</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-page border border-border rounded-xl p-3 text-main text-sm focus:ring-2 focus:ring-accent outline-none transition-all"
+                                                className="w-full bg-page rounded-xl p-3 text-main text-sm focus:border-accent/20 outline-none transition-all"
                                                 placeholder="Ex: Formação em Vendas"
                                                 value={title[activeLang]}
                                                 onChange={e => setTitle({ ...title, [activeLang]: e.target.value })}
@@ -206,7 +206,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                         <div>
                                             <label className="block text-xs font-bold text-muted uppercase mb-1.5">Descrição ({activeLang})</label>
                                             <textarea
-                                                className="w-full bg-page border border-border rounded-xl p-3 text-main text-sm focus:ring-2 focus:ring-accent outline-none transition-all resize-none h-32"
+                                                className="w-full bg-page rounded-xl p-3 text-main text-sm focus:border-accent/20 outline-none transition-all resize-none h-32"
                                                 placeholder="Explique o objetivo desta trilha..."
                                                 value={description[activeLang]}
                                                 onChange={e => setDescription({ ...description, [activeLang]: e.target.value })}
@@ -221,7 +221,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                             </label>
                                             <input
                                                 type="url"
-                                                className="w-full bg-page border border-border rounded-xl p-3 text-main text-sm focus:ring-2 focus:ring-accent outline-none transition-all"
+                                                className="w-full bg-page rounded-xl p-3 text-main text-sm focus:border-accent/20 outline-none transition-all"
                                                 placeholder="https://..."
                                                 value={coverImage}
                                                 onChange={e => setCoverImage(e.target.value)}
@@ -246,10 +246,10 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                                     key={role}
                                                     type="button"
                                                     onClick={() => toggleRole(role)}
-                                                    className={`px-4 py-2 rounded-xl text-xs font-bold capitalize border transition-all
+                                                    className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all
                                                         ${allowedRoles.includes(role)
-                                                            ? 'bg-accent text-white border-accent shadow-md shadow-accent/20'
-                                                            : 'bg-page text-muted border-border hover:border-accent/50'}
+                                                            ? 'bg-accent/10 text-accent'
+                                                            : 'bg-page text-muted hover:text-main'}
                                                     `}
                                                 >
                                                     {role}
@@ -260,7 +260,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                     <div>
                                         <label className="block text-xs font-bold text-muted uppercase mb-3">Status da Trilha</label>
                                         <div
-                                            className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${active ? 'bg-success/10 border-success/30' : 'bg-page border-border'}`}
+                                            className={`flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${active ? 'bg-success/10' : 'bg-page'}`}
                                             onClick={() => setActive(!active)}
                                         >
                                             <div className={`w-10 h-6 rounded-full p-1 transition-colors ${active ? 'bg-success' : 'bg-gray-400'}`}>
@@ -282,7 +282,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                         <input
                                             type="text"
                                             placeholder="Buscar materiais para adicionar..."
-                                            className="w-full bg-page border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none"
+                                            className="w-full bg-page rounded-xl pl-10 pr-4 py-3 text-sm focus:border-accent/20 outline-none"
                                             value={searchTerm}
                                             onChange={e => setSearchTerm(e.target.value)}
                                         />
@@ -296,8 +296,8 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                             <div
                                                 key={mat.id}
                                                 onClick={() => toggleMaterial(mat.id)}
-                                                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center gap-3 group
-                                                    ${isSelected ? 'bg-accent/10 border-accent' : 'bg-page border-border hover:border-accent/40'}
+                                                className={`p-3 rounded-xl transition-all cursor-pointer flex items-center gap-3 group
+                                                    ${isSelected ? 'bg-accent/5' : 'bg-page hover:bg-page/80'}
                                                 `}
                                             >
                                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-accent text-white' : 'bg-surface text-muted group-hover:text-accent'}`}>
@@ -318,7 +318,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                     </div>
 
                     {/* Right Flow (Sidebar Summary / Reordering) */}
-                    <div className="w-full md:w-80 bg-page/50 border-l border-border p-6 flex flex-col shrink-0">
+                    <div className="w-full md:w-80 bg-page/50 p-6 flex flex-col shrink-0">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xs font-bold text-muted uppercase tracking-widest flex items-center gap-2">
                                 <Layers size={14} className="text-accent" /> Ordem dos Materiais
@@ -336,7 +336,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                                     const mat = allMaterials.find(m => m.id === id);
                                     if (!mat) return null;
                                     return (
-                                        <div key={id} className="bg-surface border border-border p-2.5 rounded-xl flex items-center gap-3 shadow-sm group animate-fade-in">
+                                        <div key={id} className="bg-surface p-2.5 rounded-xl flex items-center gap-3 shadow-sm group animate-fade-in">
                                             <div className="w-6 h-6 bg-page rounded font-mono text-[10px] flex items-center justify-center text-muted shrink-0">
                                                 {index + 1}
                                             </div>
@@ -367,7 +367,7 @@ export const CollectionFormModal: React.FC<CollectionFormProps> = ({ isOpen, onC
                             </div>
                         )}
 
-                        <div className="pt-4 border-t border-border mt-4">
+                        <div className="pt-4 mt-4">
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading || selectedMaterialIds.length === 0}

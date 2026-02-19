@@ -10,28 +10,24 @@ const iconMap: Record<ToastType, React.ReactNode> = {
     info: <Info size={20} />,
 };
 
-const colorMap: Record<ToastType, { bg: string; border: string; text: string; progress: string }> = {
+const colorMap: Record<ToastType, { bg: string; text: string; progress: string }> = {
     success: {
         bg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
-        border: 'border-emerald-500/30',
         text: 'text-emerald-500',
         progress: 'bg-emerald-500',
     },
     error: {
         bg: 'bg-red-500/10 dark:bg-red-500/15',
-        border: 'border-red-500/30',
         text: 'text-red-500',
         progress: 'bg-red-500',
     },
     warning: {
         bg: 'bg-amber-500/10 dark:bg-amber-500/15',
-        border: 'border-amber-500/30',
         text: 'text-amber-500',
         progress: 'bg-amber-500',
     },
     info: {
         bg: 'bg-blue-500/10 dark:bg-blue-500/15',
-        border: 'border-blue-500/30',
         text: 'text-blue-500',
         progress: 'bg-blue-500',
     },
@@ -65,9 +61,9 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
     return (
         <div
             className={`
-        relative overflow-hidden flex items-start gap-3 px-4 py-3.5 rounded-2xl border backdrop-blur-xl shadow-2xl shadow-black/10
+        relative overflow-hidden flex items-start gap-3 px-4 py-3.5 rounded-2xl backdrop-blur-xl shadow-2xl shadow-black/10
         transition-all duration-300 ease-out min-w-[320px] max-w-[420px]
-        ${colors.bg} ${colors.border}
+        ${colors.bg}
         ${isVisible && !isExiting ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-8 opacity-0 scale-95'}
       `}
         >

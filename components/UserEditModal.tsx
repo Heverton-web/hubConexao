@@ -12,7 +12,7 @@ interface UserEditModalProps {
 
 export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onSave }) => {
   const { t } = useLanguage();
-  
+
   // Form States
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
@@ -38,7 +38,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
   };
 
   const toggleType = (type: MaterialType) => {
-    setAllowedTypes(prev => 
+    setAllowedTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
@@ -46,13 +46,13 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" style={{ zIndex: 9999 }}>
       <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up">
-        
+
         {/* Header */}
         <div className="px-6 py-4 flex justify-between items-center bg-surface">
           <div>
             <h3 className="font-bold text-lg text-main flex items-center gap-2">
-                <User className="text-accent" size={20} />
-                {t('user.edit')}
+              <User className="text-accent" size={20} />
+              {t('user.edit')}
             </h3>
             <p className="text-xs text-muted">Gerencie dados pessoais, status e permissões.</p>
           </div>
@@ -63,90 +63,90 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose, onS
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-            
-            {/* Status & Role Row */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-xs font-semibold text-main mb-1.5 uppercase">Status</label>
-                    <select 
-                        value={status} 
-                        onChange={e => setStatus(e.target.value as UserStatus)}
-                        className={`w-full p-2.5 rounded-lg outline-none font-medium
-                            ${status === 'active' ? 'bg-green-500/10 text-green-600' : 
-                              status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
-                              status === 'rejected' ? 'bg-red-500/10 text-red-600' : 'bg-gray-50 dark:bg-black/20 text-muted'}
+
+          {/* Status & Role Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-main mb-1.5 uppercase">Status</label>
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value as UserStatus)}
+                className={`w-full p-2.5 rounded-lg outline-none font-medium
+                            ${status === 'active' ? 'bg-green-500/10 text-green-600' :
+                    status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
+                      status === 'rejected' ? 'bg-red-500/10 text-red-600' : 'bg-gray-50 dark:bg-black/20 text-muted'}
                         `}
-                    >
-                        <option value="active">{t('user.status.active')}</option>
-                        <option value="pending">{t('user.status.pending')}</option>
-                        <option value="inactive">{t('user.status.inactive')}</option>
-                        <option value="rejected">{t('user.status.rejected')}</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-xs font-semibold text-main mb-1.5 uppercase">Perfil</label>
-                    <select 
-                        value={role} 
-                        onChange={e => setRole(e.target.value as Role)}
-                        className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none"
-                    >
-                        <option value="client">{t('role.client')}</option>
-                        <option value="distributor">{t('role.distributor')}</option>
-                        <option value="consultant">{t('role.consultant')}</option>
-                        <option value="super_admin">{t('role.super_admin')}</option>
-                    </select>
-                </div>
+              >
+                <option value="active">{t('user.status.active')}</option>
+                <option value="pending">{t('user.status.pending')}</option>
+                <option value="inactive">{t('user.status.inactive')}</option>
+                <option value="rejected">{t('user.status.rejected')}</option>
+              </select>
             </div>
-
-            {/* Personal Info */}
-            <div className="space-y-4 pt-4 border-t border-border/20">
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-medium text-muted mb-1">Nome Completo</label>
-                        <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-muted mb-1">CRO (Opcional)</label>
-                        <input type="text" value={cro} onChange={e => setCro(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
-                    </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-medium text-muted mb-1">E-mail</label>
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-muted mb-1">WhatsApp</label>
-                        <input type="tel" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:ring-2 focus:ring-accent" />
-                    </div>
-                </div>
+            <div>
+              <label className="block text-xs font-semibold text-main mb-1.5 uppercase">Perfil</label>
+              <select
+                value={role}
+                onChange={e => setRole(e.target.value as Role)}
+                className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none"
+              >
+                <option value="client">{t('role.client')}</option>
+                <option value="distributor">{t('role.distributor')}</option>
+                <option value="consultant">{t('role.consultant')}</option>
+                <option value="super_admin">{t('role.super_admin')}</option>
+              </select>
             </div>
+          </div>
 
-            {/* Granular Permissions */}
-            <div className="pt-4 border-t border-border/20">
-                <label className="block text-xs font-bold text-main mb-2 uppercase tracking-wide">{t('user.access.types')}</label>
-                <p className="text-xs text-muted mb-3">{t('user.access.hint')}</p>
-                
-                <div className="flex gap-4">
-                    {(['pdf', 'image', 'video'] as MaterialType[]).map(type => (
-                        <button
-                            key={type}
-                            type="button"
-                            onClick={() => toggleType(type)}
-                            className={`flex-1 p-3 rounded-lg flex flex-col items-center gap-2 transition-all
-                                ${allowedTypes.includes(type) 
-                                    ? 'bg-accent/10 text-accent' 
-                                    : 'bg-page text-muted opacity-60 hover:opacity-100'}
+          {/* Personal Info */}
+          <div className="space-y-4 pt-4 border-t border-border/20">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1">Nome Completo</label>
+                <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:border-accent/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1">CRO (Opcional)</label>
+                <input type="text" value={cro} onChange={e => setCro(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:border-accent/20" />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1">E-mail</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:border-accent/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1">WhatsApp</label>
+                <input type="tel" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-black/20 text-main outline-none focus:border-accent/20" />
+              </div>
+            </div>
+          </div>
+
+          {/* Granular Permissions */}
+          <div className="pt-4 border-t border-border/20">
+            <label className="block text-xs font-bold text-main mb-2 uppercase tracking-wide">{t('user.access.types')}</label>
+            <p className="text-xs text-muted mb-3">{t('user.access.hint')}</p>
+
+            <div className="flex gap-4">
+              {(['pdf', 'image', 'video'] as MaterialType[]).map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => toggleType(type)}
+                  className={`flex-1 p-3 rounded-lg flex flex-col items-center gap-2 transition-all
+                                ${allowedTypes.includes(type)
+                      ? 'bg-accent/10 text-accent'
+                      : 'bg-page text-muted opacity-60 hover:opacity-100'}
                             `}
-                        >
-                            {type === 'pdf' && <FileText size={20} />}
-                            {type === 'image' && <ImageIcon size={20} />}
-                            {type === 'video' && <Video size={20} />}
-                            <span className="text-xs font-bold uppercase">{t(`material.type.${type}`)}</span>
-                        </button>
-                    ))}
-                </div>
+                >
+                  {type === 'pdf' && <FileText size={20} />}
+                  {type === 'image' && <ImageIcon size={20} />}
+                  {type === 'video' && <Video size={20} />}
+                  <span className="text-xs font-bold uppercase">{t(`material.type.${type}`)}</span>
+                </button>
+              ))}
             </div>
+          </div>
 
         </form>
 

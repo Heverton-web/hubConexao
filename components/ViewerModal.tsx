@@ -82,24 +82,24 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
         >
 
             {/* Aura Floating Header */}
-            <div className="absolute top-6 left-6 right-6 p-4 aura-glass rounded-[1.5rem] flex justify-between items-center z-50 pointer-events-none border-white/[0.03]">
+            <div className="absolute top-6 left-6 right-6 p-4 aura-glass rounded-[1.5rem] flex justify-between items-center z-50 pointer-events-none">
                 <div className="pointer-events-auto flex flex-col gap-2 max-w-[80%] pl-2">
                     <h3 className="font-bold text-xl text-white heading-aura leading-tight line-clamp-1">{displayTitle}</h3>
 
                     <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-white/40 bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/[0.05] uppercase tracking-widest">{language}</span>
+                        <span className="text-[10px] font-black text-white/40 bg-white/[0.03] px-2.5 py-1 rounded-lg uppercase tracking-widest">{language}</span>
 
                         {/* Provider Badges */}
                         {embedConfig.provider === 'YouTube' && (
-                            <span className="text-[10px] bg-error/10 text-error px-2.5 py-1 rounded-lg uppercase font-black border border-error/20 flex items-center gap-2 tracking-widest">
+                            <span className="text-[10px] bg-error/10 text-error px-2.5 py-1 rounded-lg uppercase font-black flex items-center gap-2 tracking-widest">
                                 <Youtube size={12} fill="currentColor" /> Youtube Premium
                             </span>
                         )}
 
                         {embedConfig.provider === 'Google Drive' && (
                             <div className="flex items-center gap-2">
-                                <div className="flex bg-accent/10 rounded-lg border border-accent/20 overflow-hidden">
-                                    <span className="text-[10px] text-accent font-black px-3 py-1 border-r border-accent/20 flex items-center gap-2 tracking-widest">
+                                <div className="flex bg-accent/10 rounded-lg overflow-hidden">
+                                    <span className="text-[10px] text-accent font-black px-3 py-1 flex items-center gap-2 tracking-widest">
                                         RECURSO DRIVE
                                     </span>
                                     <button
@@ -115,7 +115,7 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
                                     href={asset.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 text-[10px] bg-white/[0.03] hover:bg-white/[0.08] text-white/60 hover:text-white border border-white/[0.05] px-3 py-1 rounded-lg transition-all font-bold uppercase tracking-widest"
+                                    className="flex items-center gap-2 text-[10px] bg-white/[0.03] hover:bg-white/[0.08] text-white/60 hover:text-white px-3 py-1 rounded-lg transition-all font-bold uppercase tracking-widest"
                                 >
                                     <ExternalLink size={10} /> Link Direto
                                 </a>
@@ -126,7 +126,7 @@ export const ViewerModal: React.FC<ViewerModalProps> = ({ material, language, on
 
                 <button
                     onClick={onClose}
-                    className="pointer-events-auto w-12 h-12 flex items-center justify-center bg-white/[0.03] hover:bg-error hover:text-white rounded-xl text-white/40 border border-white/[0.05] transition-all"
+                    className="pointer-events-auto w-12 h-12 flex items-center justify-center bg-white/[0.03] hover:bg-error hover:text-white rounded-xl text-white/40 transition-all"
                 >
                     <X size={20} />
                 </button>

@@ -19,7 +19,7 @@ const MenuCategory = ({ type, icon: Icon, label, count, active, onClick }: { typ
     className={`
       group relative w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all duration-500 ease-out
       ${active
-        ? 'bg-accent/10 border border-accent/30 text-white'
+        ? 'bg-accent/5 text-white'
         : 'bg-transparent text-white/40 hover:text-white hover:bg-white/[0.02]'}
     `}
   >
@@ -99,14 +99,11 @@ export const Dashboard: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
 
   useEffect(() => {
-    if (user && showTrails) {
-      setLoading(true);
-      setTimeout(() => {
-        mockDb.getCollections(user.role).then(data => {
-          setCollections(data);
-          setLoading(false);
-        });
-      }, 600);
+    if (user) {
+      mockDb.getCollections(user.role).then(data => {
+        setCollections(data);
+        if (showTrails) setLoading(false);
+      });
     }
   }, [user, showTrails]);
 
@@ -163,7 +160,7 @@ export const Dashboard: React.FC = () => {
       <aside className="w-full md:w-64 shrink-0 z-30">
         <div className="sticky top-32 space-y-8">
 
-          <div className="aura-glass rounded-[1.5rem] p-4 space-y-2 border-white/[0.03]">
+          <div className="aura-glass rounded-[1.5rem] p-4 space-y-2">
             <div className="px-4 py-2 mb-2">
               <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] flex items-center gap-2">
                 <Layers size={12} /> {t('library')}
@@ -177,7 +174,7 @@ export const Dashboard: React.FC = () => {
               className={`
                 group relative w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all duration-500 ease-out
                 ${showTrails
-                  ? 'bg-accent/10 border border-accent/20 text-white'
+                  ? 'bg-accent/5 text-white'
                   : 'bg-transparent text-white/40 hover:text-white hover:bg-white/[0.02]'}
               `}
             >
@@ -187,6 +184,15 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <span className="text-[11px] font-bold uppercase tracking-wider">{t('tab.collections')}</span>
               </div>
+              <div className="relative z-10">
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-all duration-300
+                    ${showTrails
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-white/[0.05] text-white/20 group-hover:text-white/40'}
+                `}>
+                  {collections.length}
+                </span>
+              </div>
             </button>
 
             <MenuCategory type="pdf" icon={FileText} label={t('filter.pdf')} count={counts.pdf} active={!showTrails && filterType === 'pdf'} onClick={(t) => { setShowTrails(false); setFilterType(t); }} />
@@ -195,7 +201,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Tips Card */}
-          <div className="aura-glass p-6 rounded-[1.5rem] bg-accent/[0.02] border-accent/10">
+          <div className="aura-glass p-6 rounded-[1.5rem] bg-accent/[0.01]">
             <div className="flex items-center gap-2 text-accent mb-3">
               <Sparkles size={14} className="animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-widest">{t('tips.pro.title')}</span>
@@ -209,7 +215,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex-1 min-w-0">
 
         {/* Hero Header */}
-        <div className="mb-12 aura-glass p-10 rounded-[2.5rem] relative overflow-hidden group border-white/[0.03]">
+        <div className="mb-12 aura-glass p-10 rounded-[2.5rem] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 blur-[80px] group-hover:bg-accent/10 transition-all duration-1000"></div>
 
           <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10">
@@ -223,7 +229,7 @@ export const Dashboard: React.FC = () => {
             {/* Search Bar */}
             <div className="relative w-full xl:w-96 group/search">
               <div className="absolute inset-0 bg-accent/20 rounded-2xl blur-xl opacity-0 group-focus-within/search:opacity-20 transition-all duration-500"></div>
-              <div className="relative bg-white/[0.02] border border-white/[0.05] rounded-2xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:border-accent/40 group-focus-within/search:bg-white/[0.04]">
+              <div className="relative bg-white/[0.01] rounded-2xl flex items-center shadow-inner transition-all duration-300 group-focus-within/search:bg-white/[0.02]">
                 <div className="pl-5 text-white/20 group-focus-within/search:text-accent transition-colors">
                   <Search size={18} />
                 </div>
@@ -236,7 +242,7 @@ export const Dashboard: React.FC = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <div className="pr-5 hidden sm:block">
-                  <div className="w-6 h-6 rounded flex items-center justify-center border border-white/5 text-[10px] text-white/10 font-black">
+                  <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] text-white/10 font-black">
                     /
                   </div>
                 </div>
@@ -251,7 +257,7 @@ export const Dashboard: React.FC = () => {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="py-24 aura-glass rounded-[2.5rem] text-center border-dashed border-white/10">
+          <div className="py-24 aura-glass rounded-[2.5rem] text-center">
             <Filter size={32} className="mx-auto text-white/5 mb-4" />
             <h3 className="text-lg font-bold text-white/40 mb-2">{t('no.results.title')}</h3>
             <p className="text-[12px] text-white/20">{t('no.materials')}</p>
@@ -272,7 +278,7 @@ export const Dashboard: React.FC = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between p-6 aura-glass rounded-[1.5rem] border-white/[0.03]">
+              <div className="flex items-center justify-between p-6 aura-glass rounded-[1.5rem]">
                 <span className="text-[11px] text-white/20 font-bold uppercase tracking-widest">
                   {startIndex + 1}-{endIndex} <span className="mx-2">/</span> {filteredData.length}
                 </span>
@@ -286,7 +292,7 @@ export const Dashboard: React.FC = () => {
                       <button
                         key={i}
                         onClick={() => jumpToPage(i + 1)}
-                        className={`w-8 h-8 rounded-lg text-[11px] font-black transition-all ${currentPage === i + 1 ? 'bg-accent/10 text-accent border border-accent/30' : 'text-white/20 hover:text-white'}`}
+                        className={`w-8 h-8 rounded-lg text-[11px] font-black transition-all ${currentPage === i + 1 ? 'bg-accent/5 text-accent shadow-sm' : 'text-white/20 hover:text-white'}`}
                       >
                         {i + 1}
                       </button>

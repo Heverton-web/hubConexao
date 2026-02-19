@@ -31,7 +31,7 @@ export const KeyboardHelpModal: React.FC<ShortcutHelpProps> = ({ isOpen, onClose
             <div className={`relative bg-surface rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}>
 
                 {/* Header */}
-                <div className="bg-page px-6 py-4 flex justify-between items-center border-b border-border">
+                <div className="bg-page px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                             <Keyboard size={20} />
@@ -58,14 +58,14 @@ export const KeyboardHelpModal: React.FC<ShortcutHelpProps> = ({ isOpen, onClose
                             }, {} as Record<string, ShortcutHelpProps['shortcuts']>)
                         ).map(([category, items]) => (
                             <div key={category} className="space-y-4">
-                                <h4 className="text-xs font-bold uppercase text-muted tracking-wider border-b border-border pb-2">{category}</h4>
+                                <h4 className="text-xs font-bold uppercase text-muted tracking-wider pb-2">{category}</h4>
                                 <div className="space-y-3">
                                     {items.map((item, idx) => (
                                         <div key={idx} className="flex justify-between items-center group">
                                             <span className="text-sm font-medium text-main group-hover:text-accent transition-colors">{item.description}</span>
                                             <div className="flex gap-1">
                                                 {item.keys.map((k, kIdx) => (
-                                                    <kbd key={kIdx} className="min-w-[1.5rem] h-6 px-1.5 flex items-center justify-center bg-page border border-border rounded text-[10px] font-bold text-muted font-mono shadow-sm">
+                                                    <kbd key={kIdx} className="min-w-[1.5rem] h-6 px-1.5 flex items-center justify-center bg-page rounded text-[10px] font-bold text-muted font-mono shadow-sm">
                                                         {k}
                                                     </kbd>
                                                 ))}
@@ -79,7 +79,7 @@ export const KeyboardHelpModal: React.FC<ShortcutHelpProps> = ({ isOpen, onClose
                 </div>
 
                 {/* Footer */}
-                <div className="bg-page/50 px-6 py-3 flex justify-between items-center text-xs text-muted border-t border-border">
+                <div className="bg-page/50 px-6 py-3 flex justify-between items-center text-xs text-muted">
                     <div className="flex items-center gap-2">
                         <Command size={12} />
                         <span>Pressione <kbd className="font-bold bg-white/10 px-1 rounded">?</kbd> a qualquer momento para ver esta tela</span>
